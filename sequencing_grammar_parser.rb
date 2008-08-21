@@ -17,7 +17,7 @@ class Treetop::Runtime::SyntaxNode
     end  
   end
 
-  attr :value   
+  attr_reader :value
   def evaluate
     @value = text_value
   end
@@ -27,7 +27,7 @@ class Treetop::Runtime::SyntaxNode
   end
   
   def inspect
-    value.inspect
+    @value.inspect
   end
 end
 
@@ -57,23 +57,23 @@ class ContainerNode < GeneratorNode
     return elements
   end
 
-  def to_s
-    @value.join(' ')
-  end
-
   def evaluate
     @value = []
     children.each do |c|
       c.visit(proc do |node|
         if node.is_a? GeneratorNode then
-          @value << node
           node.evaluate
+          @value << node
           false
         else # keep descending
           true
         end
       end)
     end
+  end
+  
+  def to_s
+    @value.join(' ')
   end
 end
 
@@ -127,6 +127,11 @@ end
 
 
 class ChordNode < ContainerNode 
+  def evaluate
+    super
+    @value.map!{|v| v.value}
+  end
+  
   def to_s
     "[#{super}]"
   end
