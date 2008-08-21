@@ -1,0 +1,43 @@
+grammar SequencingGrammar
+	rule seq
+		subseq space? <SeqNode> / space / '' 
+	end
+
+	rule subseq
+		space? (repetition/value) (space (repetition/value))* space?
+	end
+
+	rule repetition
+		'(' subseq ')' space? '*' space? repetitions:float <RepetitionNode>
+		/ 
+		value space? '*' space? repetitions:float <RepetitionNode>
+	end
+	
+	rule value
+		chord / primitive_value
+	end
+	
+  rule chord
+		'[' space? primitive_value (space primitive_value)* space? ']' <ChordNode>
+  end
+
+	rule primitive_value
+		note / float
+	end
+	
+	rule note
+		note_name:[A-Ga-g]  accidentals:('#' / 'b' / '+' / '_')* octave:int <NoteNode>
+	end
+	
+	rule float
+		'-'? [0-9]+ '.' [0-9]+ <FloatNode> / int
+	end
+	
+	rule int
+		'-'? [0-9]+ <IntNode>
+	end
+	
+	rule space
+		[\s]+
+	end
+end
