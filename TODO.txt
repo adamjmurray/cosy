@@ -1,0 +1,41 @@
+infinite loops: 
+   (c4 g4)*INF
+  or maybe 
+   (c4 g4)**
+
+velocities, support:
+  ppp, pp, p, mp, mf, f, ff, fff
+
+durations, support note values
+  w, h, q, e, s, t, x (whole to sixty-fourth)
+with modifiers
+  h., q.. (dot(s))
+  ht, qt  (triplets)
+  2w, 3w, 4w
+
+
+	Patterns for rhythm:
+	X...X...
+	....X.X.
+	
+	
+
+	*** support negative duration for rests
+	otherwise I can't do things like C4:(4 -1 3)
+
+	reuse last octave c4 d e f g e c
+
+	reuse last pitch: C4:5 :3 :4 :4
+		
+
+if sequences to not loop by default, and we do (c4 e g)
+
+	-----
+	NOTES:
+	() a sequence, can be implicit
+	
+	[] a single event parameter, usually implicit. useful when the parameter is a list such as a list of pitches for a chord
+	
+	: connects parameter sequences for a multi-parameter event generator
+	
+  <> a command (specify base duration value, default octave, scale, sequence types (pitch,vel,dur) to enable special parsing rules, and ...???)
