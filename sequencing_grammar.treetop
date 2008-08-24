@@ -1,17 +1,39 @@
 grammar SequencingGrammar
 	
 	rule root
-		subseq space? <SeqNode> / space / '' 
-	end
-
-	rule subseq
-		space? (repetition/value) (space (repetition/value))* space?
+		sequence / space / '' 
 	end
 	
+	rule sequence
+		non_parenthesized_sequence / parenthesized_sequence
+		
+		# Must try to consume non_parenthesized_sequence first, otherwise
+		# repetitions would be eaten by the parenthesized_sequence rule
+	end
+	
+	rule non_parenthesized_sequence
+		space? sequenced_element (space sequenced_element)* space? <SequenceNode>
+		
+		# Must try to consume repetitions first, otherwise value repetitions
+		# will be eaten by the value rule
+	end
+
+	rule parenthesized_sequence
+		space? '(' non_parenthesized_sequence ')' space?
+	end
+	
+	rule sequenced_element
+		repetition / value
+	end
+
 	rule repetition
-		'(' subseq ')' space? '*' space? repetitions:number <RepetitionNode>
+		'(' sequence ')' repeat_operator repetitions:number <RepetitionNode>
 		/ 
-		value space? '*' space? repetitions:number <RepetitionNode>
+		value repeat_operator repetitions:number <RepetitionNode>
+	end
+	
+	rule repeat_operator
+		space? '*' space?
 	end
 	
 	rule value
@@ -43,13 +65,13 @@ grammar SequencingGrammar
 	end
 	
 	rule string
-	  "'" ("\\'" / !"'" .)* "'"
+	  "'" ("\\'" / !"'" .)* "'" <StringNode>
 		/
-	  '"' ('\"' / !'"' .)* '"'
+	  '"' ('\"' / !'"' .)* '"' <StringNode>
 	end
 	
 	rule ruby
-		'{' (string / !('}'/'"'/"'") .)* '}'
+		'{' script:(string / !('}'/'"'/"'") .)* '}' <RubyNode>
 	end
 
 	rule space

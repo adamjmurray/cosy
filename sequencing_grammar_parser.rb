@@ -78,7 +78,7 @@ class ContainerNode < GeneratorNode
 end
 
 
-class SeqNode < ContainerNode
+class SequenceNode < ContainerNode
   def start
     @index = 0
     @subseq = @value[0]
@@ -100,7 +100,7 @@ class SeqNode < ContainerNode
 end
 
 
-class RepetitionNode < SeqNode
+class RepetitionNode < SequenceNode
   attr :repetitions  # supports fractional repetitions!
 
   def next?
@@ -108,8 +108,8 @@ class RepetitionNode < SeqNode
   end
 
   def children
-    if defined? subseq then
-      subseq.elements 
+    if defined? sequence then
+      sequence.elements 
     else
       [value]
     end
@@ -169,6 +169,26 @@ class IntNode < GeneratorNode
   def evaluate
     @value = text_value.to_i
   end
+end
+
+
+class StringNode < GeneratorNode
+end
+
+
+class RubyNode < GeneratorNode
+  def evaluate
+    @value = script.text_value
+  end
+  
+  def next
+    if next? then 
+      @start = false
+      eval @value
+    else 
+      nil 
+    end
+  end  
 end
 
 

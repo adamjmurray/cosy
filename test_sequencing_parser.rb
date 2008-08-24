@@ -63,13 +63,73 @@ class TestEvent < Test::Unit::TestCase
     
   end
   
-  def test_misc
-    parse '[2 c4] 3 (4.0 (6)*3)*2'
-    parse '[2 c#+4] 3 (4.0 6*3)*2'
+  def test_parenthesized_sequence
+    parse '(1 2 3)'
+  end
+  
+  def test_chord
+    parse '[1]'
+    parse '[1 2 3]'
+    parse '[1.1]'
+    parse '[1.1 2.2 3.3]'
+    parse '[-1]'
+    parse '[-1 -2 -3]'
+    parse '[-1.1]'
+    parse '[-1.1 -2.2 -3.3]'
+    parse '[1.1 -2.2 3.33333]'
+    parse '[C4]'
+    parse '[C4 D4 E4]'
+    parse '[C#4]'
+    parse '[Cb7 D#+-1 Eb_5]'
+    parse "['asdf' 'foo']"
+  end
+  
+  def test_repeated_sequence
+    parse '1*2'
+    parse '(1)*2'
+    parse '(1 2)*2'
+  end
+  
+  def test_fractional_repeated_sequence
+    parse '1*2.2'
+    parse '(1)*2.20'
+    parse '(1 2)*2.210'  
+  end
+  
+  def test_sequence_of_repeated_sequences
+    
+  end
+  
+  def test_chord_sequence
+    parse '[1] [2] [3]'
+    parse '[1 2 3] [4 5 6] [7 8 9]'
+  end
+  
+  def test_repeated_chord
+    parse '[1]*2'
+    parse '[1 2]*2'
+  end
+  
+  def test_repeated_chord_sequence
+    parse '[1]*2 [3]'
+    parse '[1 2]*2 [3] [4 5 6]*3.2'
+  end
+  
+  def test_heterogonous_sequence
+     parse '(c4 5)*1.5'
+     parse '[3 4]*3'
+     parse '(c4 5)*1.5 [3 4]*3'
+   end
+  
+  def test_stuff
     parse '[fb3 c#+4]*3 (4.0*5 6*3)*2'
     parse '[fb3 c#+4]*3 ((4.0 5*5)*5 6*3)*2'
-    parse '(c4 5)*1.5 [3 4]*3'
   end
+  
+  def test_misc
+     parse '[2 c4] 3 (4.0 (6)*3)*2'
+     parse '[2 c#+4] 3 (4.0 6*3)*2'
+   end
 
   def test_invalid_syntax
     assert_parse_failure 'x'
