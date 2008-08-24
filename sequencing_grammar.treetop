@@ -8,9 +8,9 @@ grammar SequencingGrammar
 	end
 
 	rule repetition
-		'(' subseq ')' space? '*' space? repetitions:float <RepetitionNode>
+		'(' subseq ')' space? '*' space? repetitions:number <RepetitionNode>
 		/ 
-		value space? '*' space? repetitions:float <RepetitionNode>
+		value space? '*' space? repetitions:number <RepetitionNode>
 	end
 	
 	rule value
@@ -22,15 +22,19 @@ grammar SequencingGrammar
   end
 
 	rule primitive_value
-		note / float
+		note / number
 	end
 	
 	rule note
-		note_name:[A-Ga-g]  accidentals:('#' / 'b' / '+' / '_')* octave:int <NoteNode>
+		note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <NoteNode>
+	end
+	
+	rule number
+		float / int
 	end
 	
 	rule float
-		'-'? [0-9]+ '.' [0-9]+ <FloatNode> / int
+		'-'? [0-9]+ '.' [0-9]+ <FloatNode>
 	end
 	
 	rule int
