@@ -13,7 +13,7 @@ class Treetop::Runtime::SyntaxNode
   def visit(enter,exit=nil)
     if enter.call(self) then
       elements.each{ |child| child.visit(enter,exit) } if nonterminal?
-      exit.call self if exit
+      exit.call(self) if exit
     end  
   end
 

@@ -1,12 +1,13 @@
 grammar SequencingGrammar
-	rule seq
+	
+	rule root
 		subseq space? <SeqNode> / space / '' 
 	end
 
 	rule subseq
 		space? (repetition/value) (space (repetition/value))* space?
 	end
-
+	
 	rule repetition
 		'(' subseq ')' space? '*' space? repetitions:number <RepetitionNode>
 		/ 
@@ -14,15 +15,15 @@ grammar SequencingGrammar
 	end
 	
 	rule value
-		chord / primitive_value
+		chord / primitive
 	end
 	
   rule chord
-		'[' space? primitive_value (space primitive_value)* space? ']' <ChordNode>
+		'[' space? primitive (space primitive)* space? ']' <ChordNode>
   end
 
-	rule primitive_value
-		note / number
+	rule primitive
+		note / number / string / ruby
 	end
 	
 	rule note
@@ -41,7 +42,18 @@ grammar SequencingGrammar
 		'-'? [0-9]+ <IntNode>
 	end
 	
+	rule string
+	  "'" ("\\'" / !"'" .)* "'"
+		/
+	  '"' ('\"' / !'"' .)* '"'
+	end
+	
+	rule ruby
+		'{' (string / !('}'/'"'/"'") .)* '}'
+	end
+
 	rule space
 		[\s]+
-	end
+	end	
+
 end
