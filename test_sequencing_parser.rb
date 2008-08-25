@@ -7,7 +7,9 @@ class TestEvent < Test::Unit::TestCase
 
   def parse input
     output = PARSER.parse(input)
-    assert_not_nil(output, "Failed to parse: #{input}")
+    assert_not_nil(output, 
+      "Failed to parse: #{input}\n" + 
+      "(#{PARSER.failure_line},#{PARSER.failure_column}): #{PARSER.failure_reason}")
     return output
   end
   
@@ -16,36 +18,37 @@ class TestEvent < Test::Unit::TestCase
     assert_nil(output, "Successfully parsed invalid syntax: #{invalid_syntax}")
     return nil
   end
-
-  def test_parse_int
-    # todo: a better way to check the value
-    out = parse '0'
-    assert_equal(0, out.value[0].value)
-    out = parse '2'
-    assert_equal(2, out.value[0].value)
-    out = parse '789'
-    assert_equal(789, out.value[0].value)
-    out = parse '-1'
-    assert_equal(-1, out.value[0].value)
+  
+  def assert_generator_done(gen)
+      assert(!gen.next?, "Was not expected more values")
+  end
+  
+  def parse_numbers(numbers, &block)
+    numbers.each do |n|
+      gen = parse(n.to_s)
+      block.call(gen, n) if(block)
+    end
+  end
+  
+  def test_parse_ints
+    parse_numbers [0, 2, 789, -1] do |gen, int|
+      assert_equal(int, gen.next)
+      assert_generator_done(gen)
+    end
   end
   
   def test_parse_float
-    out = parse '0.0'
-    assert_equal(0.0, out.value[0].value)
-    out = parse '2.5'
-    assert_equal(2.5, out.value[0].value)
-    out = parse '789.654321'
-    assert_equal(789.654321, out.value[0].value)
-    out = parse '-1.204'
-    assert_equal(-1.204, out.value[0].value) 
+    parse_numbers [0.0, 2.5, 789.654321, -1.0001] do |gen, float|
+      assert_equal(float, gen.next)
+      assert_generator_done(gen)
+    end
   end
   
   def test_parse_whitespace
-    parse ''
-    parse ' '
-    parse '   '
-    parse "\t"
-    parse "\n"
+    ['', ' ', '   ', "\t", "\n"].each do |str|
+      gen = parse(str)
+      assert_generator_done(gen)
+    end
   end
   
   def test_parse_string
@@ -63,11 +66,23 @@ class TestEvent < Test::Unit::TestCase
     
   end
   
-  def test_parenthesized_sequence
+  def test_parse_parenthesized_sequence
     parse '(1 2 3)'
   end
+
+  def test_parse_parenthesized_sequence_then_unparen
+    parse '(1 2) 3'
+  end
   
-  def test_chord
+  def test_non_parenthesized_sequence_then_paren
+    parse '1 (2 3)'
+  end
+      
+  def test_parse_seqeunce_of_parenthesized_sequences
+    parse '(1 2 3) (4 5 6)'
+  end
+  
+  def test_parse_chord
     parse '[1]'
     parse '[1 2 3]'
     parse '[1.1]'
@@ -84,38 +99,42 @@ class TestEvent < Test::Unit::TestCase
     parse "['asdf' 'foo']"
   end
   
-  def test_repeated_sequence
+  def test_parse_repeated_sequence
     parse '1*2'
     parse '(1)*2'
     parse '(1 2)*2'
   end
   
-  def test_fractional_repeated_sequence
+  def test_parse_fractional_repeated_sequence
     parse '1*2.2'
     parse '(1)*2.20'
     parse '(1 2)*2.210'  
   end
   
-  def test_sequence_of_repeated_sequences
-    
+  def test_parse_sequence_of_repeated_sequences
+    parse '(1 2)*2 (3 4)*2.5 (6 7 8)*20'
   end
   
-  def test_chord_sequence
+  def test_parse_sequence_of_parenthesized_and_repeated_sequences
+    parse '(1 2)*2 (3 4) (6 7 8)*20'  
+  end
+  
+  def test_parse_chord_sequence
     parse '[1] [2] [3]'
     parse '[1 2 3] [4 5 6] [7 8 9]'
   end
   
-  def test_repeated_chord
+  def test_parse_repeated_chord
     parse '[1]*2'
     parse '[1 2]*2'
   end
   
-  def test_repeated_chord_sequence
+  def test_parse_repeated_chord_sequence
     parse '[1]*2 [3]'
     parse '[1 2]*2 [3] [4 5 6]*3.2'
   end
   
-  def test_heterogonous_sequence
+  def test_parse_heterogonous_sequence
      parse '(c4 5)*1.5'
      parse '[3 4]*3'
      parse '(c4 5)*1.5 [3 4]*3'
@@ -124,14 +143,11 @@ class TestEvent < Test::Unit::TestCase
   def test_stuff
     parse '[fb3 c#+4]*3 (4.0*5 6*3)*2'
     parse '[fb3 c#+4]*3 ((4.0 5*5)*5 6*3)*2'
+    parse '[2 c4] 3 (4.0 (6)*3)*2'
+    parse '[2 c#+4] 3 (4.0 6*3)*2'
   end
-  
-  def test_misc
-     parse '[2 c4] 3 (4.0 (6)*3)*2'
-     parse '[2 c#+4] 3 (4.0 6*3)*2'
-   end
 
-  def test_invalid_syntax
+  def test_parse_invalid_syntax
     assert_parse_failure 'x'
     assert_parse_failure '1.'
     assert_parse_failure '1 2)*3'

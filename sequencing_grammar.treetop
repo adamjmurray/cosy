@@ -3,33 +3,28 @@ grammar SequencingGrammar
 	rule root
 		sequence / space / '' 
 	end
-	
+
 	rule sequence
-		non_parenthesized_sequence / parenthesized_sequence
-		
-		# Must try to consume non_parenthesized_sequence first, otherwise
-		# repetitions would be eaten by the parenthesized_sequence rule
-	end
-	
-	rule non_parenthesized_sequence
 		space? sequenced_element (space sequenced_element)* space? <SequenceNode>
 		
 		# Must try to consume repetitions first, otherwise value repetitions
 		# will be eaten by the value rule
 	end
-
-	rule parenthesized_sequence
-		space? '(' non_parenthesized_sequence ')' space?
-	end
 	
 	rule sequenced_element
-		repetition / value
+		repetition / parenthesized_sequence / value
 	end
-
+	
 	rule repetition
 		'(' sequence ')' repeat_operator repetitions:number <RepetitionNode>
 		/ 
 		value repeat_operator repetitions:number <RepetitionNode>
+	end
+	
+	rule parenthesized_sequence
+		# TODO: instead of splitting out this rule and repetitions we should
+		# just do parenthesized_sequence with modifiers
+		space? '(' sequence ')' !'*'
 	end
 	
 	rule repeat_operator

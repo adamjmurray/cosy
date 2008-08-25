@@ -20,6 +20,19 @@ class Treetop::Runtime::SyntaxNode
   attr_reader :value
   def evaluate
     @value = text_value
+    start
+  end
+  
+  def start
+    @start = true
+  end
+
+  def next?
+    false
+  end
+
+  def next
+    nil
   end
 
   def to_s
@@ -33,11 +46,9 @@ end
 
 
 class GeneratorNode < Treetop::Runtime::SyntaxNode
-  def start
-    @start = true
-  end
-
   def next?
+    # The basic generator holds exactly one value
+    # so there is a value to output if and only if we're at the start
     @start
   end
 
@@ -54,7 +65,7 @@ end
 
 class ContainerNode < GeneratorNode  
   def children
-    return elements
+    elements
   end
 
   def evaluate
@@ -70,6 +81,7 @@ class ContainerNode < GeneratorNode
         end
       end)
     end
+    start
   end
   
   def to_s
