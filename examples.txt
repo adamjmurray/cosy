@@ -73,7 +73,7 @@ or
 [3] 60:p 62:mp 60:f 62:p 60:mp 62:f
 
 it depends on the rule for the multigenerator
-default is [1], stop as soon as one subseq runs out
+default is [2], go until all subseqs run out
 (60 62):(p mp f)! would [2], loop other sequences until the important! seq runs out
 ((60 62):(p mp f))&4 would loop until four events are output
 ((60 62):(p mp f))&? will loop until all parameters line up on the last value together [3]

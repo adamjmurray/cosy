@@ -1,13 +1,11 @@
 infinite loops: 
-   (c4 g4)*INF
-  or maybe 
-   (c4 g4)**
+   (c4 g4)*@
 
 velocities, support:
   ppp, pp, p, mp, mf, f, ff, fff
 
 durations, support note values
-  w, h, q, e, s, t, x (whole to sixty-fourth)
+  w, h, q, e, s, r, x (whole to sixty-fourth)
 with modifiers
   h., q.. (dot(s))
   ht, qt  (triplets)
@@ -28,7 +26,6 @@ with modifiers
 	reuse last pitch: C4:5 :3 :4 :4
 		
 
-if sequences to not loop by default, and we do (c4 e g)
 
 	-----
 	NOTES:

@@ -1,0 +1,8 @@
+grammar VelocityGrammar
+	
+	rule velocity
+		'mp' / 'ppp' / 'pp' / 'p'
+		/ 'mf' / 'fff' / 'ff' / 'f'
+	end
+
+end

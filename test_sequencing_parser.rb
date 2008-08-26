@@ -1,7 +1,7 @@
 require "test/unit"
 require 'sequencing_grammar_parser'
 
-class TestEvent < Test::Unit::TestCase
+class TestSequencingParser < Test::Unit::TestCase
   
   PARSER = SequencingGrammarParser.new
 
