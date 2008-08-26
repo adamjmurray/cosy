@@ -16,9 +16,9 @@ grammar SequencingGrammar
 	end
 	
 	rule repetition
-		'(' sequence ')' repeat_operator repetitions:number <RepetitionNode>
+		'(' sequence ')' operator:repeat_operator repetitions:(number/ruby) <RepetitionNode>
 		/ 
-		value repeat_operator repetitions:number <RepetitionNode>
+		value operator:repeat_operator repetitions:(number/ruby) <RepetitionNode>
 	end
 	
 	rule parenthesized_sequence
@@ -28,7 +28,7 @@ grammar SequencingGrammar
 	end
 	
 	rule repeat_operator
-		space? '*' space?
+		space? ('*' / '&') space?
 	end
 	
 	rule value

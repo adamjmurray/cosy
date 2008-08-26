@@ -116,7 +116,11 @@ class RepetitionNode < SequenceNode
   attr :repetitions  # supports fractional repetitions!
 
   def next?
-    return (@subseq.next? or @value.length*@repetitions > @index+1)
+    if @limited then
+      return (@subseq.next? or @repetitions > @index+1)
+    else
+      return (@subseq.next? or @value.length*@repetitions > @index+1)
+    end
   end
 
   def children
@@ -129,7 +133,17 @@ class RepetitionNode < SequenceNode
 
   def evaluate
     super
-    @repetitions = repetitions.evaluate
+    if operator.text_value == '*' then
+      @limited = false
+    else
+      @limited = true
+    end
+    
+    #@repetitions = repetitions.evaluate
+    # To support Ruby (I don't like this, how can I clean it up?)
+    repetitions.evaluate
+    repetitions.start
+    @repetitions = repetitions.next
   end
 
   def to_s

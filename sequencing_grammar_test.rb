@@ -40,11 +40,21 @@ while output.next? do
   puts output.next.inspect
 end
 
-output = parse '{1 + 2} {2**8}'
+output = parse '{1 + 2} "a"'
 output.start
 puts "VALS="
 while output.next? do
   puts output.next.inspect
 end
+
+
+output = parse '(1 2 3)&4'
+output.start
+puts "VALS="
+while output.next? do
+  puts output.next.inspect
+end
+
+
 
 

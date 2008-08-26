@@ -100,9 +100,56 @@ class TestSequencingParser < Test::Unit::TestCase
   end
   
   def test_parse_repeated_sequence
-    parse '1*2'
-    parse '(1)*2'
-    parse '(1 2)*2'
+    gen = parse '1*2'
+    2.times do
+      assert_equal(1, gen.next)
+    end
+    assert_generator_done(gen)
+    
+    gen = parse '(1)*2'
+    2.times do
+      assert_equal(1, gen.next)
+    end
+    assert_generator_done(gen)
+    
+    gen = parse '(1 2)*2'
+    2.times do
+      assert_equal(1, gen.next)
+      assert_equal(2, gen.next)
+    end
+    assert_generator_done(gen)
+  end
+  
+  def test_parse_repeated_sequence_with_eval_repetitions
+    gen = parse '(1 2)*{8/4}'
+    2.times do
+      assert_equal(1, gen.next)
+      assert_equal(2, gen.next)
+    end
+    assert_generator_done(gen)
+  end
+  
+  
+
+  def test_parse_limited_repeat_sequence
+    gen = parse '1&4'
+    4.times do
+      assert_equal(1, gen.next)
+    end
+    assert_generator_done(gen)
+    
+    gen = parse '(1)&4'
+    4.times do
+      assert_equal(1, gen.next)
+    end
+    assert_generator_done(gen)
+    
+    gen = parse '(1 2)&4'
+    2.times do
+      assert_equal(1, gen.next)
+      assert_equal(2, gen.next)
+    end
+    assert_generator_done(gen)
   end
   
   def test_parse_fractional_repeated_sequence
