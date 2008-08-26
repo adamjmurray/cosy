@@ -116,6 +116,7 @@ class RepetitionNode < SequenceNode
   attr :repetitions  # supports fractional repetitions!
 
   def next?
+    return false if @repetitions <= 0
     if @limited then
       return (@subseq.next? or @repetitions > @index+1)
     else

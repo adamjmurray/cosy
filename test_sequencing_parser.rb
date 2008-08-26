@@ -118,6 +118,12 @@ class TestSequencingParser < Test::Unit::TestCase
       assert_equal(2, gen.next)
     end
     assert_generator_done(gen)
+    
+    gen = parse '(1 2)*0'
+    assert_generator_done(gen)
+    
+    gen = parse '(1 2)*-1'
+    assert_generator_done(gen)
   end
   
   def test_parse_repeated_sequence_with_eval_repetitions

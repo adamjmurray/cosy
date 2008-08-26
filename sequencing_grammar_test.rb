@@ -56,5 +56,12 @@ while output.next? do
 end
 
 
+    
+    output = parse '(1 2)*0'
+    while output.next? do
+      puts output.next.inspect
+    end
+    
+
 
 
