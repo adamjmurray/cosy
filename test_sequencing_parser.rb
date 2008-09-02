@@ -68,18 +68,26 @@ class TestSequencingParser < Test::Unit::TestCase
   
   def test_parse_parenthesized_sequence
     parse '(1 2 3)'
+    parse '(1 2 3) '
+    parse ' (1 2 3)'
+    parse '(1 2 3 ) '
+    parse '( 1 2 3)'
+    parse ' ( 1   2  3 )    '
   end
 
   def test_parse_parenthesized_sequence_then_unparen
     parse '(1 2) 3'
+    parse ' ( 1  2 )   3 '
   end
   
   def test_non_parenthesized_sequence_then_paren
     parse '1 (2 3)'
+    parse ' 1   ( 2  3 )  '
   end
       
   def test_parse_seqeunce_of_parenthesized_sequences
     parse '(1 2 3) (4 5 6)'
+    parse '  ( 1 2  3 )   ( 4  5  6 ) '
   end
   
   def test_parse_chord

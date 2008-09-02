@@ -24,7 +24,7 @@ grammar SequencingGrammar
 	rule parenthesized_sequence
 		# TODO: instead of splitting out this rule and repetitions we should
 		# just do parenthesized_sequence with modifiers
-		space? '(' sequence ')' !'*'
+		'(' sequence ')' !repeat_operator
 	end
 	
 	rule repeat_operator
