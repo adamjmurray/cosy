@@ -112,7 +112,7 @@ class SequenceNode < ContainerNode
 end
 
 
-class RepetitionNode < SequenceNode
+class SubsequenceNode < SequenceNode
   attr :repetitions  # supports fractional repetitions!
 
   def next?
@@ -125,31 +125,43 @@ class RepetitionNode < SequenceNode
   end
 
   def children
-    if defined? sequence then
-      sequence.elements 
+    if defined? element.sequence then
+      element.sequence.children 
+    # elsif defined? element.chord then
+    #      [element.chord]
     else
-      [value]
+      [element]
     end
   end
 
   def evaluate
     super
-    if operator.text_value == '*' then
-      @limited = false
-    else
-      @limited = true
+    if defined? element.sequence then
+      @parenthesized = true
     end
+    if modifier.elements then
+      @operator = modifier.operator.text_value
+      @limited = (@operator == '&')
     
-    #@repetitions = repetitions.evaluate
-    # To support Ruby (I don't like this, how can I clean it up?)
-    repetitions.evaluate
-    repetitions.start
-    @repetitions = repetitions.next
+      repetitions = modifier.repetitions
+      #@repetitions = repetitions.evaluate
+      # To support Ruby (I don't like this, how can I clean it up?)
+      repetitions.evaluate
+      repetitions.start
+      @repetitions = repetitions.next
+    else
+      @operator = nil
+      @repetitions = 1
+      @limited = false
+    end
   end
 
   def to_s
-    "(#{super})*#@repetitions"
-  end  
+    s = super
+    s = "(#{s})" if @parenthesized
+    s += "#@operator #@repetitions" if @operator
+    s
+  end    
 end
 
 

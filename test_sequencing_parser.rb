@@ -164,6 +164,13 @@ class TestSequencingParser < Test::Unit::TestCase
       assert_equal(2, gen.next)
     end
     assert_generator_done(gen)
+    
+    gen = parse '(1 2 3)&4'
+    assert_equal(1, gen.next)
+    assert_equal(2, gen.next)
+    assert_equal(3, gen.next)
+    assert_equal(1, gen.next)
+    assert_generator_done(gen)    
   end
   
   def test_parse_fractional_repeated_sequence

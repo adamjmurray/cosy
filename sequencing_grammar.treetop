@@ -5,34 +5,19 @@ grammar SequencingGrammar
 	end
 
 	rule sequence
-		space? sequenced_element (space sequenced_element)* space? <SequenceNode>
+		space? subsequence (space subsequence)* space? <SequenceNode>
+	end
+	
+	rule subsequence
+		element modifier:modifier? <SubsequenceNode>
+	end
+		 
+	rule element
+ 	 '(' sequence:sequence ')' / chord / primitive
+	end
 		
-		# Must try to consume repetitions first, otherwise value repetitions
-		# will be eaten by the value rule
-	end
-	
-	rule sequenced_element
-		repetition / parenthesized_sequence / value
-	end
-	
-	rule repetition
-		'(' sequence ')' operator:repeat_operator repetitions:(number/ruby) <RepetitionNode>
-		/ 
-		value operator:repeat_operator repetitions:(number/ruby) <RepetitionNode>
-	end
-	
-	rule parenthesized_sequence
-		# TODO: instead of splitting out this rule and repetitions we should
-		# just do parenthesized_sequence with modifiers
-		'(' sequence ')' !repeat_operator
-	end
-	
-	rule repeat_operator
-		space? ('*' / '&') space?
-	end
-	
-	rule value
-		chord / primitive
+	rule modifier
+		space? operator:('*'/'&') space? repetitions:(number/ruby)
 	end
 	
   rule chord
