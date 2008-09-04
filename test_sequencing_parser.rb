@@ -214,11 +214,62 @@ class TestSequencingParser < Test::Unit::TestCase
     parse '[2 c4] 3 (4.0 (6)*3)*2'
     parse '[2 c#+4] 3 (4.0 6*3)*2'
   end
+  
+  ALL_VELOCITIES = %w{ppp pp p mp mf f ff fff}
+  
+  def test_parse_velocities
+    ALL_VELOCITIES.each do |vel| 
+      parse vel
+    end
+  end
 
   def test_parse_invalid_syntax
-    assert_parse_failure 'x'
     assert_parse_failure '1.'
     assert_parse_failure '1 2)*3'
   end 
   
+  ALL_DURATIONS = %w{W w H h Q q E e S s R r X x}
+
+  def test_parse_base_durations
+    ALL_DURATIONS.each do |dur|
+      parse dur
+    end
+  end
+
+  def test_parse_triplet_durations
+    ALL_DURATIONS.each do |dur|
+      parse dur + 't'
+    end
+  end
+
+  def test_parse_dotted_durations
+    %w{ .  ..  ...  .... }.each do |dots|
+      ALL_DURATIONS.each do |dur|
+        parse dur + dots
+      end
+    end
+  end
+
+  def test_parse_triplet_dotted_durations
+    %w{ .  ..  ...  .... }.each do |dots|
+      ALL_DURATIONS.each do |dur|
+        parse dur + 't' + dots
+      end
+    end
+  end
+
+  def test_parse_duration_multiplier
+    ALL_DURATIONS.each_with_index do |dur,index|
+      parse index.to_s + dur
+    end
+  end
+
+  def test_parse_multiplier_triplet_dotted_durations
+    %w{ .  ..  ...  .... }.each_with_index do |dots,index|
+      ALL_DURATIONS.each do |dur|
+        parse index.to_s + dur + 't' + dots
+      end
+    end    
+  end
+
 end

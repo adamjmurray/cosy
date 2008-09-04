@@ -4,45 +4,86 @@ grammar SequencingGrammar
 		sequence / space / '' 
 	end
 
+
 	rule sequence
 		space? subsequence (space subsequence)* space? <SequenceNode>
 	end
+
 	
 	rule subsequence
 		element modifier:modifier? <SubsequenceNode>
 	end
+
 		 
 	rule element
  	 '(' sequence:sequence ')' / chord / primitive
 	end
+
 		
 	rule modifier
 		space? operator:('*'/'&') space? repetitions:(number/ruby)
 	end
+
 	
   rule chord
 		'[' space? primitive (space primitive)* space? ']' <ChordNode>
   end
 
+
 	rule primitive
-		note / number / string / ruby
+		note / velocity / duration / number / string / ruby
 	end
+
 	
 	rule note
 		note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <NoteNode>
 	end
+
+	
+	rule velocity
+		('mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'f') '' <VelocityNode>
+	end
+
+	
+	rule duration
+		'-'? multiplier:positive_int? metrical_duration:[WwHhQqEeSsRrXx] duration_modifier <DurationNode>
+	end
+
+
+	rule duration_modifier
+		't'? '.'*
+	end
+
 	
 	rule number
 		float / int
 	end
+
 	
 	rule float
-		'-'? [0-9]+ '.' [0-9]+ <FloatNode>
+		'-'? positive_float <FloatNode>
 	end
+
 	
 	rule int
-		'-'? [0-9]+ <IntNode>
+		'-'? positive_int <IntNode>
 	end
+
+	
+	rule positive_number
+		positive_float / positive_int
+	end
+	
+	
+	rule positive_float
+		[0-9]+ '.' [0-9]+
+	end
+	
+	
+	rule positive_int
+		[0-9]+
+	end
+	
 	
 	rule string
 	  "'" ("\\'" / !"'" .)* "'" <StringNode>
@@ -50,9 +91,11 @@ grammar SequencingGrammar
 	  '"' ('\"' / !'"' .)* '"' <StringNode>
 	end
 	
+	
 	rule ruby
 		'{' script:(string / !('}'/'"'/"'") .)* '}' <RubyNode>
 	end
+
 
 	rule space
 		[\s]+

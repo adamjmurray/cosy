@@ -196,6 +196,13 @@ class NoteNode < GeneratorNode
   end
 end
 
+class DurationNode < GeneratorNode
+    
+end
+
+class VelocityNode < GeneratorNode
+    
+end
 
 class FloatNode < GeneratorNode
   def evaluate

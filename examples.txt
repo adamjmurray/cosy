@@ -74,7 +74,7 @@ or
 
 it depends on the rule for the multigenerator
 default is [2], go until all subseqs run out
-(60 62):(p mp f)! would [2], loop other sequences until the important! seq runs out
+(60 62)!:(p mp f) would do [1], loop other sequences until the important! seq runs out
 ((60 62):(p mp f))&4 would loop until four events are output
 ((60 62):(p mp f))&? will loop until all parameters line up on the last value together [3]
 
@@ -107,4 +107,4 @@ NOT NOW? apply to all values in the sequence:
 
 
 advanced constructs
-(1 2 3)^:('a' 'b' 'c' 'd' 'e' 'f')!:('.' '\'')  --> 1:a:. 2:b:' 3:c:. 2:d:' 1:e:. 2:f:'
+(1 2 3)^:('a' 'b' 'c' 'd' 'e' 'f'):('.' '\'')  --> 1:a:. 2:b:' 3:c:. 2:d:' 1:e:. 2:f:'
