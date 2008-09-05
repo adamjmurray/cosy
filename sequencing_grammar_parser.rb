@@ -16,7 +16,7 @@ class Treetop::Runtime::SyntaxNode
       exit.call(self) if exit
     end  
   end
-
+    
   attr_reader :value
   def evaluate
     @value = text_value
@@ -60,6 +60,7 @@ class GeneratorNode < Treetop::Runtime::SyntaxNode
       nil 
     end
   end
+
 end
 
 
@@ -71,7 +72,7 @@ class ContainerNode < GeneratorNode
   def evaluate
     @value = []
     children.each do |c|
-      c.visit(proc do |node|
+      c.visit(lambda do |node|
         if node.is_a? GeneratorNode then
           node.evaluate
           @value << node
@@ -127,9 +128,7 @@ class SubsequenceNode < SequenceNode
   def children
     if defined? element.sequence then
       element.sequence.children 
-    # elsif defined? element.chord then
-    #      [element.chord]
-    else
+     else
       [element]
     end
   end
@@ -162,6 +161,14 @@ class SubsequenceNode < SequenceNode
     s += "#@operator #@repetitions" if @operator
     s
   end    
+end
+
+class ConnectorNode < GeneratorNode
+  
+end
+
+class ModifierNode < GeneratorNode
+  
 end
 
 

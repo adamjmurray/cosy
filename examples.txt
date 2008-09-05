@@ -108,3 +108,9 @@ NOT NOW? apply to all values in the sequence:
 
 advanced constructs
 (1 2 3)^:('a' 'b' 'c' 'd' 'e' 'f'):('.' '\'')  --> 1:a:. 2:b:' 3:c:. 2:d:' 1:e:. 2:f:'
+
+
+precedence rules:
+| higher than /
+so C4|C5:mf:q means play C4 or C5 at mf for a quarter note
+this is invalid C4:p|C5:mf, need this: (C4:p)|(C5:mf)

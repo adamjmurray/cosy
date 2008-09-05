@@ -18,8 +18,47 @@ def parse input
   return output
 end
 
-parse '(1)'
-parse '(1)*5'
+
+def important? node
+  node.class != Treetop::Runtime::SyntaxNode and 
+    (node.class != SubsequenceNode or node.children.size > 1)
+end
+def leaf? node
+  node.terminal? or node.is_a? ChordNode
+end
+def visit_important_nodes node, enter, exit=nil
+  node.visit(
+  lambda do |node| # enter
+    if important? node then
+      enter.call node
+    end
+    not leaf? node
+  end,
+  lambda do |node| # exit
+    exit.call node if important? node
+  end
+  )  
+end
+
+def print_tree node
+  depth=0
+  visit_important_nodes(node,
+  lambda do |node| # enter
+    depth.times {print "    "}
+    print node.class, ' ' 
+    puts node.text_value
+    depth += 1 if not leaf? node
+  end,
+  lambda do |node| # exit
+    depth -= 1
+  end
+  )  
+end
+
+
+
+# parse '(1)'
+# parse '(1)*5'
 
 # parse '"a b c" "a b\\" c"'
 # parse "'a b c' 'a b\\' c'"
@@ -51,12 +90,16 @@ parse '(1)*5'
 # end
 # 
 # 
-output = parse '(1 2 3)&4'
+output = parse '(1 2 3)&4 ([C4 G4]:mf:q 60|70)*2.5'
 output.start
-puts "VALS="
-while output.next? do
-  puts output.next
-end
+# puts "VALS="
+# while output.next? do
+#   puts output.next
+# end
+
+
+print_tree output
+
 
 # 
 #     

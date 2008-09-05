@@ -26,22 +26,17 @@ class TestSequencingParser < Test::Unit::TestCase
   def parse_numbers(numbers, &block)
     numbers.each do |n|
       gen = parse(n.to_s)
-      block.call(gen, n) if(block)
+      assert_equal(n, gen.next)
+      assert_generator_done(gen)
     end
   end
   
   def test_parse_ints
-    parse_numbers [0, 2, 789, -1] do |gen, int|
-      assert_equal(int, gen.next)
-      assert_generator_done(gen)
-    end
+    parse_numbers [0, 2, 789, -1]
   end
   
   def test_parse_float
-    parse_numbers [0.0, 2.5, 789.654321, -1.0001] do |gen, float|
-      assert_equal(float, gen.next)
-      assert_generator_done(gen)
-    end
+    parse_numbers [0.0, 2.5, 789.654321, -1.0001]
   end
   
   def test_parse_whitespace
@@ -201,14 +196,11 @@ class TestSequencingParser < Test::Unit::TestCase
     parse '[1]*2 [3]'
     parse '[1 2]*2 [3] [4 5 6]*3.2'
   end
-  
+
   def test_parse_heterogonous_sequence
-     parse '(c4 5)*1.5'
-     parse '[3 4]*3'
-     parse '(c4 5)*1.5 [3 4]*3'
-   end
-  
-  def test_stuff
+    parse '(c4 5)*1.5'
+    parse '[3 4]*3'
+    parse '(c4 5)*1.5 [3 4]*3'
     parse '[fb3 c#+4]*3 (4.0*5 6*3)*2'
     parse '[fb3 c#+4]*3 ((4.0 5*5)*5 6*3)*2'
     parse '[2 c4] 3 (4.0 (6)*3)*2'
@@ -223,11 +215,6 @@ class TestSequencingParser < Test::Unit::TestCase
     end
   end
 
-  def test_parse_invalid_syntax
-    assert_parse_failure '1.'
-    assert_parse_failure '1 2)*3'
-  end 
-  
   ALL_DURATIONS = %w{W w H h Q q E e S s R r X x}
 
   def test_parse_base_durations
@@ -272,4 +259,22 @@ class TestSequencingParser < Test::Unit::TestCase
     end    
   end
 
+  def test_parse_element_chain
+    parse '4:5 : C4'
+    parse 'C4:mf:q.'
+    parse '[C4 E4]:fff'
+    parse '(4 5):(6 7)'
+  end
+  
+  def test_parse_element_choice
+    parse '4|5 | C4'
+    parse 'C4|mf|q.'
+    parse '[C4 E4]|fff'
+    parse '(4 5)|(6 7)'
+  end
+
+  def test_parse_invalid_syntax
+    assert_parse_failure '1.'
+    assert_parse_failure '1 2)*3'
+  end   
 end
