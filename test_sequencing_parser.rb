@@ -260,7 +260,7 @@ class TestSequencingParser < Test::Unit::TestCase
   end
 
   def test_parse_element_chain
-    parse '4:5 : C4'
+    parse '4:5:C4'
     parse 'C4:mf:q.'
     parse '[C4 E4]:fff'
     parse '(4 5):(6 7)'
