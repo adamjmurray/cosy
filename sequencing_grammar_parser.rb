@@ -27,6 +27,8 @@ class SyntaxNode
     @children = [] if not @children
     @children
   end
+  
+  alias syntax_parent parent # the post parsing step will "compress" the tree and redefine parent
     
   def visit_parse_tree(enter,exit=nil)
     if enter.call(self) then
@@ -316,16 +318,13 @@ end
 
 
 class SequencingGrammarParser
-  # force an evaluation step after parsing:
-  alias orig_parse parse
+  
+  # define a post-parsing step:
+  alias parse_sequence parse
   def parse(*args)
-    parse_tree = orig_parse(*args)
+    parse_tree = parse_sequence(*args)
     if parse_tree then
-      # strip off unnecessary container nodes
-      if parse_tree.nonterminal? and parse_tree.children.size == 1 then
-        parse_tree = parse_tree.children[0]
-      end
-      # print_tree parse_tree
+      parse_tree = compress_tree(parse_tree)
     end
     return parse_tree
   end
@@ -343,21 +342,34 @@ class SequencingGrammarParser
     return output
   end
   
-  def remove_empty_nodes tree
-    tree.visit_parse_tree(lambda do |node|
-      if node.class == ChoiceNode
-        puts 'CHOICE' + node.text_value
-        puts node.first.text_value
-        puts "'" + node.rest.text_value + "'"
-                puts node.children.inspect
-      end
-
-      children = node.elements
-      if children then
-        children.each_with_index do |elem,idx|
-          children.delete_at(idx) if elem.empty? 
-        end
-      end
+  def compress_tree tree
+    # strip off unnecessary container nodes
+    if tree.nonterminal? and tree.children.size == 1 then
+      tree = tree.children[0]
+    end
+    
+    parents = []
+    tree.visit(lambda do |node|
+      node.parent = parents.last
+      parents.push node
+      true
+    end,
+    lambda do |node|
+      parents.pop
+    end)
+    
+    tree
+  end
+  
+  def print_tree tree
+    depth = 0
+    tree.visit(lambda do |node|
+      depth.times{print '    '}
+      puts node.inspect # + " parent:" + node.parent.inspect
+      depth += 1
+    end,
+    lambda do |node| # exit
+      depth -= 1
     end)
   end
   
@@ -372,31 +384,13 @@ class SequencingGrammarParser
       depth -= 1
     end)
   end
-
-  def print_tree tree
-    depth = 0
-    tree.visit(lambda do |node|
-      depth.times{print '    '}
-      puts node.inspect
-      depth += 1
-    end,
-    lambda do |node| # exit
-      depth -= 1
-    end)
-  end
-  
-  def single_item_container? node
-    (node.class == ChoiceNode and empty? node.rest) 
-    (node.class == ChainNode and node.rest.text_value.strip.size == 0) 
-  end
      
-  
 end
 
 # SequencingGrammarParser.new.parse_verbose '(1 2 3)&4 ([C4 G4]:mf:q (C4:f:e | G4:f:s*2)) * 2.5  (1 2 3):(4 5 6)'
 
 
-SequencingGrammarParser.new.parse_verbose '(1 2):(3 4)*2 ((1 2)*2):(3 4)'
+SequencingGrammarParser.new.parse_verbose '(1 2):(3 4)*2 ((1|2)*2):(3 4)'
 
 
 
