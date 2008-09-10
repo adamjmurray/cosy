@@ -1,16 +1,6 @@
 infinite loops: 
    (c4 g4)*@
 
-velocities, support:
-  ppp, pp, p, mp, mf, f, ff, fff
-
-durations, support note values
-  w, h, q, e, s, r, x (whole to sixty-fourth)
-with modifiers
-  h., q.. (dot(s))
-  ht, qt  (triplets)
-  2w, 3w, 4w
-
 
 	Patterns for rhythm:
 	X...X...
@@ -22,9 +12,10 @@ with modifiers
 	otherwise I can't do things like C4:(4 -1 3)
 
 	reuse last octave c4 d e f g e c
+  I don't think this is possible because f is loud velocity!
 
 	reuse last pitch: C4:5 :3 :4 :4
-		
+	
 
 
 	-----

@@ -44,6 +44,24 @@ prev one doesn't play at all
 prev repeats infinitely. it's like "stay at" this sequence, and it kind of looks like a loop. requires some external input to stop/advance, only works for realtime stuff. TODO: figure out input interface
 
 
+Parallel Playback
+c4 e4 g4 || e4 g4 c5
+might want to use newlines:
+c4 e4 g4
+||
+e4 g4 c5
+
+Nested Parallel Playback
+a4 b4 (c4 e4 g4 || e4 g4 c5 || g4 c5 e5)
+
+Picks two
+(c4 e4 g4 || e4 g4 c5 || g4 c5 e5)
+
+plays back all three 
+(c4 e4 g4 ||| e4 g4 c5 ||| g4 c5 e5)
+
+
+
 Sequence Output Limit (sort of like repetition but indicates the maximum number of values that will be output):
 (60 62 64)&4
 will output 60 62 64 60
@@ -111,6 +129,9 @@ advanced constructs
 
 
 precedence rules:
-| higher than /
+: has highest precedence
+' ' (whitespace separated sequence list)
+| 
+
 so C4|C5:mf:q means play C4 or C5 at mf for a quarter note
 this is invalid C4:p|C5:mf, need this: (C4:p)|(C5:mf)

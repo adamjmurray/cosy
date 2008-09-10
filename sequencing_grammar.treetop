@@ -54,12 +54,7 @@ grammar SequencingGrammar
 
 	
 	rule duration
-		multiplier:number? metrical_duration:[WwHhQqEeSsRrXx] modifier:duration_modifier <DurationNode>
-	end
-
-
-	rule duration_modifier
-		't'? '.'*
+		multiplier:number? metrical_duration:[WwHhQqEeSsRrXx] modifier:('t'? '.'*)? <DurationNode>
 	end
 
 	
@@ -75,21 +70,6 @@ grammar SequencingGrammar
 	
 	rule int
 		'-'? [0-9]+ <IntNode>
-	end
-
-	
-	rule positive_number
-		positive_float / positive_int
-	end
-	
-	
-	rule positive_float
-		[0-9]+ '.' [0-9]+ <FloatNode>
-	end
-	
-	
-	rule positive_int
-		[0-9]+
 	end
 	
 	
