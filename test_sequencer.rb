@@ -49,11 +49,12 @@ class TestSequencer < Test::Unit::TestCase
   def test_repeated_sequence
     assert_seq_equals   [1,1],      '1*2'
     assert_seq_equals   [1,1,1],    '(1)*3'
-    assert_seq_equals   [],         '(1)*0'
-    assert_seq_equals   [],         '(1)*-1'
+    assert_seq_equals   [],         '1*0'
+    assert_seq_equals   [],         '1*-1'
     assert_seq_equals   [1,2],      '(1 2)*1'
     assert_seq_equals   [1,2,1,2],  '(1 2)*2'
     assert_seq_equals   [],         '(1 2)*0'
+    assert_seq_equals   [],         '(1 2)*-1'
   end
   
   def test_repeated_sequence_with_eval_repetitions
@@ -65,11 +66,22 @@ class TestSequencer < Test::Unit::TestCase
   end
 
   def test_limited_repeat_sequence
-    assert_seq_equals   [1,1,1,1],  '1&4'
-    assert_seq_equals   [1,1,1,1],  '1&4'
-    assert_seq_equals   [1,2,1,2],  '(1 2)&4'
-    assert_seq_equals   [1,2,3,1],  '(1 2 3)&4'
+    assert_seq_equals   [1,1,1,1],    '1&4'
+    assert_seq_equals   [1,1,1,1],    '(1)&4'
+    assert_seq_equals   [],           '1&0'
+    assert_seq_equals   [],           '1&-1'
+    assert_seq_equals   [1,2,1,2],    '(1 2)&4'
+    assert_seq_equals   [1,2,1,2,1],  '(1 2)&5'
+    assert_seq_equals   [1,2,3,1],    '(1 2 3)&4'
+    assert_seq_equals   [],           '(1 2)&0'
+    assert_seq_equals   [],           '(1 2)&-1'    
   end
+  
+  def test_notes
+    assert_seq_equals [60, 65, 67, 68], 'C4 F4 G4 Ab4'      
+  end
+  
+  # fractional repetitions
   
   # repeated chord
   

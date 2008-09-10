@@ -202,15 +202,22 @@ class ChainNode < ContainerNode
 #       @limited = false
 #     end
 #   end
+  def operator
+    eval_modifier if not @operator
+    return @operator
+  end
+
   def operand
-    eval_operand if not @operand
+    eval_modifier if not @operand
     return @operand
   end
   
-  def eval_operand
+  def eval_modifier
     if not modifier.empty?
+      @operator = modifier.operator.value
       @operand = modifier.operand.value
     else
+      @operator = ''
       @operand = 1
     end
   end
@@ -286,7 +293,7 @@ class NoteNode < TerminalNode
         when '_'; @value -= 0.5 
         end
       end
-      @value += 12*(octave.evaluate+OCTAVE_OFFSET)
+      @value += 12*(octave.value+OCTAVE_OFFSET)
     end
     return @value
   end

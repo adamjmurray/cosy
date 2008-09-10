@@ -20,6 +20,10 @@ class Sequencer
     @index = 0
     @iteration = 0
     @count = 0
+    @max_count = nil
+    if @current.is_a? ChainNode and @current.operator == '&'
+      @max_count = @current.operand
+    end
     @stack = []
   end
   
@@ -32,35 +36,35 @@ class Sequencer
       end
     end
     node = @current
-#    puts "#{@current.inspect}  [#{@index} #{@iteration} #{@count}]"
+   #puts "#{@current.inspect}  [#{@index} #{@iteration} #{@count} #{@max_count}]"
 
     if node.is_a? SequenceNode  
       child = node.value[@index] # % node.length]
       if child
-        @index += 1
-        if child.single_value?
-          return child.value
-        else
-          return enter_scope(child)
+        
+        if not @max_count or @count < @max_count
+          @index += 1
+          @count += 1
+          if child.single_value?
+            return child.value
+          else
+            return enter_scope(child)
+          end
         end
       else
         return exit_scope
       end 
 
     elsif node.is_a? ChainNode
+      op = node.operator
       if node.single_value? then
-        value = node.value[@index]
-        if value and @iteration < node.operand
-          @index += 1 
-          return value 
-        else
+        value = node.value[0]
+        if not chain_node_done?
           @iteration += 1
-          if @iteration < node.operand
-            @index = 0
-            return self.next
-          end
+          @count += 1
+          return value 
         end
-      elsif node.value.length == 1 and @iteration < node.operand
+      elsif node.value.length == 1 and not chain_node_done?
         @iteration += 1
         return enter_scope(node.value[0])        
       else
@@ -75,13 +79,28 @@ class Sequencer
 
     return nil
   end
+  
+  def chain_node_done?
+    node = @current
+    operator,operand = node.operator,node.operand
+    case operator
+    when '*'
+      return @iteration >= operand
+    when '&'
+      return @count >= operand
+    end
+  end
 
   def enter_scope node
-   # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
-    @stack.push [@current,@index,@iteration,@count]
+  # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
+    @stack.push [@current,@index,@iteration]
     @current = node
     @index = 0
     @iteration = 0
+  #  @count = 0
+    if node.is_a? ChainNode and node.operator == '&'
+      @max_count = node.operand.value
+    end
     self.next
   end
   
@@ -90,14 +109,16 @@ class Sequencer
       nil
     else
      # puts 'EXIT'
-      @current,@index,@iteration,@count = @stack.pop
+      lower_count = @count
+      @current,@index,@iteration = @stack.pop
+     # @count += lower_count
       self.next
     end
   end
 end
 
 
-# s = Sequencer.new '(1 (2 3)*2)*2'
+# s = Sequencer.new '(1 2)*2'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
