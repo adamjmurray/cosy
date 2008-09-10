@@ -357,7 +357,6 @@ class RubyNode < TerminalNode
   end
   
   def eval
-    puts 'here text val = ' + script.text_value
     @value = Kernel.eval script.text_value
   end
     # 

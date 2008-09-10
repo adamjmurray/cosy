@@ -36,7 +36,7 @@ class Sequencer
       end
     end
     node = @current
-   #puts "#{@current.inspect}  [#{@index} #{@iteration} #{@count} #{@max_count}]"
+   # puts "#{@current.inspect}  [#{@index} #{@iteration} #{@count} #{@max_count}]"
 
     if node.is_a? SequenceNode  
       child = node.value[@index] # % node.length]
@@ -45,7 +45,8 @@ class Sequencer
         if not @max_count or @count < @max_count
           @index += 1
           @count += 1
-          if child.single_value?
+         # puts child.inspect
+          if child.single_value? and not child.is_a? ChainNode
             return child.value
           else
             return enter_scope(child)
@@ -92,7 +93,7 @@ class Sequencer
   end
 
   def enter_scope node
-  # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
+   # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
     @stack.push [@current,@index,@iteration]
     @current = node
     @index = 0
@@ -108,7 +109,7 @@ class Sequencer
     if @stack.empty?
       nil
     else
-     # puts 'EXIT'
+    #  puts 'EXIT'
       lower_count = @count
       @current,@index,@iteration = @stack.pop
      # @count += lower_count
@@ -118,9 +119,9 @@ class Sequencer
 end
 
 
-# s = Sequencer.new '(1 2)*2'
+# s = Sequencer.new '1*2 3'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
-#   puts "==> #{v}"
+#   puts "==> #{v.inspect}"
 # end

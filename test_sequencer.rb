@@ -38,7 +38,7 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[1,2,3]], '[1 2 3]'
   end
   
-  def test_chord_sequence
+  def test_numeric_chord_sequence
     assert_seq_equals [[1,2],[3,4],[5,6,7]], '[1 2] [3 4] [5 6 7]'
   end
   
@@ -55,6 +55,10 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals   [1,2,1,2],  '(1 2)*2'
     assert_seq_equals   [],         '(1 2)*0'
     assert_seq_equals   [],         '(1 2)*-1'
+  end
+  
+  def test_heterogenous_repeated_sequence
+    assert_seq_equals [0,1,1,1,2,3,2,3], '0 1*3 (2 3)*2'
   end
   
   def test_repeated_sequence_with_eval_repetitions
@@ -78,10 +82,29 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_notes
-    assert_seq_equals [60, 65, 67, 68], 'C4 F4 G4 Ab4'      
+    assert_seq_equals [60,65,67,68], 'C4 F4 G4 Ab4'      
   end
   
+  def test_repeated_notes
+    assert_seq_equals [60,65,65,65,67,68,67,68], 'C4 F4*3 (G4 Ab4)*2'      
+  end
+  
+  def test_note_chord
+     assert_seq_equals [[60,65,67,68]], '[C4 F4 G4 Ab4]'      
+  end
+
+  def test_chord_sequence
+    assert_seq_equals [[60,65],[67,68]], '[C4 F4] [G4 Ab4]'
+  end
+  
+  def test_repeated_chord
+    assert_seq_equals [[60,65],[60,65]], '[C4 F4]*2'      
+  end
+  
+  
   # fractional repetitions
+  
+  
   
   # repeated chord
   
