@@ -101,6 +101,16 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[60,65],[60,65]], '[C4 F4]*2'      
   end
   
+  def test_basic_chain
+    assert_seq_equals [[1,2]], '1:2'
+    assert_seq_equals [[1,2,3]], '1:2:3'
+  end
+  
+  # TODO: fix this:
+  def test_chain_sequence
+    assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
+  end
+    
   
   # fractional repetitions
   

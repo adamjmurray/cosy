@@ -40,12 +40,10 @@ class Sequencer
 
     if node.is_a? SequenceNode  
       child = node.value[@index] # % node.length]
-      if child
-        
+      if child   
         if not @max_count or @count < @max_count
           @index += 1
           @count += 1
-         # puts child.inspect
           if child.single_value? and not child.is_a? ChainNode
             return child.value
           else
@@ -59,7 +57,8 @@ class Sequencer
     elsif node.is_a? ChainNode
       op = node.operator
       if node.single_value? then
-        value = node.value[0]
+        value = node.value
+        value = value[0] if value.length == 1
         if not chain_node_done?
           @iteration += 1
           @count += 1
@@ -89,16 +88,18 @@ class Sequencer
       return @iteration >= operand
     when '&'
       return @count >= operand
+    else
+      return @count > 0
     end
   end
 
   def enter_scope node
-   # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
+    # puts "ENTER   [#{@index} #{@iteration} #{@count}]"          
     @stack.push [@current,@index,@iteration]
     @current = node
     @index = 0
     @iteration = 0
-  #  @count = 0
+    # TODO: this is messy (see also restart method)
     if node.is_a? ChainNode and node.operator == '&'
       @max_count = node.operand.value
     end
@@ -109,17 +110,15 @@ class Sequencer
     if @stack.empty?
       nil
     else
-    #  puts 'EXIT'
-      lower_count = @count
+      # puts 'EXIT'
       @current,@index,@iteration = @stack.pop
-     # @count += lower_count
       self.next
     end
   end
 end
 
-
-# s = Sequencer.new '1*2 3'
+# the counting system does not work with this:
+# s = Sequencer.new '1:2 3:4'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
