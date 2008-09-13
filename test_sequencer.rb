@@ -111,7 +111,6 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[1,2,3]], '1:2:3'
   end
   
-  # TODO: fix this:
   def test_chain_sequence
     assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
   end
@@ -122,6 +121,8 @@ class TestSequencer < Test::Unit::TestCase
     assert_failure 'asdf'
   end
       
+  # choices
+        
   # fractional repetitions
   
   # repeated chord
@@ -130,6 +131,7 @@ class TestSequencer < Test::Unit::TestCase
   
   # complex chains (1 2):(3 4)
   
-  # nested chains?  (1:2  3:4):(5  6  7) should produce 1:2:5  3:4:6  1:2:7
+  # nested chains?  (1:2  3:4):(5  6  7) should produce 1:2:5  3:4:6  1:2:7  
+
   
 end

@@ -17,6 +17,10 @@ DURATION = {
   'x'=>1, 'r'=>2, 's'=>4, 'e'=>8, 'q'=>16, 'h'=>32, 'w'=>64
 }
 
+# Sequence Modifier Operators
+OP_COUNT_LIMIT = '&'
+OP_ITER_LIMIT  = '*'
+
 
 class Treetop::Runtime::SyntaxNode
   
@@ -47,7 +51,7 @@ class Treetop::Runtime::SyntaxNode
   end
   
   def empty?
-    value.length == 0 
+    text_value.strip.length == 0 
   end
 
   def length
@@ -433,7 +437,10 @@ class SequencingGrammarParser
   end   
 end
 
-# SequencingGrammarParser.new.parse_verbose '(1 2 3)&4 ([C4 G4]:mf:q (C4:f:e | G4:f:s*2)) * 2.5  (1 2 3):(4 5 6)'
+
+# x = SequencingGrammarParser.new.verbose_parse '1'
+
+# SequencingGrammarParser.new.verbose_parse '(1 2 3)&4 ([C4 G4]:mf:q (C4:f:e | G4:f:s*2)) * 2.5  (1 2 3):(4 5 6)'
 # SequencingGrammarParser.new.verbose_parse '(1 2):(3 4)*2 ((1|2 3)*2):(3 4)'
 
 # SequencingGrammarParser.new.verbose_parse '0:1:2:3*4'

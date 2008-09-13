@@ -65,6 +65,9 @@ plays back all three
 Sequence Output Limit (sort of like repetition but indicates the maximum number of values that will be output):
 (60 62 64)&4
 will output 60 62 64 60
+Nesting:
+(1 (2 3)&3 4)&7
+1 2 3 2 4 1 2
 
 
 Ruby Expression

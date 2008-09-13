@@ -13,6 +13,10 @@ class TestSequencingParser < Test::Unit::TestCase
     return output
   end
   
+  def assert_node_length expected_length, input
+    assert_equal(expected_length, parse(input).length)
+  end
+  
   def assert_failure invalid_syntax
     output = PARSER.parse(invalid_syntax)
     assert_nil(output, "Successfully parsed invalid syntax: #{invalid_syntax}")
@@ -237,6 +241,29 @@ class TestSequencingParser < Test::Unit::TestCase
     parse 'C4|mf|q.'
     parse '[C4 E4]|fff'
     parse '(4 5)|(6 7)'
+  end
+  
+  def test_node_length
+    assert_node_length(0, '')
+    assert_node_length(0, '  ')
+    assert_node_length(1, '1')
+    assert_node_length(2, '1 2')
+    assert_node_length(2, '(1 2)')
+    
+    assert_node_length(2, '1:2')
+    assert_node_length(3, '1:2:3')
+    assert_node_length(2, '1:2*2')
+    assert_node_length(3, '1:2:3&3')
+    
+    # the value of these is a single subsequence (in parentheses), hence the length is 1
+    assert_node_length(1, '(1 2)*2')
+    assert_node_length(1, '(1 2)&3')
+    assert_node_length(1, '(1:2)*2')
+    assert_node_length(1, '(1:2:3)&3')
+    
+    assert_node_length(2, '(1:2):(3 4)')
+    assert_node_length(2, '(1:2):(3 4)*2')
+    assert_node_length(3, '(1:2):6:(3 4)')
   end
 
   def test_invalid_syntax

@@ -1,3 +1,7 @@
+Introduce rake or something for running all unit tests, maybe generating the parser so I don't
+incur penality for that in Max
+
+
 infinite loops: 
    (c4 g4)*@
 
