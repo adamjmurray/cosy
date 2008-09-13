@@ -11,7 +11,6 @@ class TestSequencer < Test::Unit::TestCase
     return seq
   end
   
-  
   def assert_done seq
       assert_nil(seq.next)
   end
@@ -24,6 +23,12 @@ class TestSequencer < Test::Unit::TestCase
       assert_equal val, n # seq.next
     end
     assert_done seq        
+  end
+  
+  def assert_failure invalid_syntax
+    seq = Sequencer.new(invalid_syntax)
+    assert_nil(seq.tree, "Successfully parsed invalid syntax: #{invalid_syntax}")
+    return nil
   end
   
   def test_single_element
@@ -110,11 +115,14 @@ class TestSequencer < Test::Unit::TestCase
   def test_chain_sequence
     assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
   end
-    
   
+  def test_invalid_sequence
+    assert_failure '1.'
+    assert_failure '1 2)*3'
+    assert_failure 'asdf'
+  end
+      
   # fractional repetitions
-  
-  
   
   # repeated chord
   

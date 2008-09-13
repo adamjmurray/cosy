@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'treetop'
 require 'sequencing_grammar'
-include Treetop::Runtime
 
 PITCH_CLASS = {
   'C'=>0, 'C#'=>1, 'D'=>2, 'D#'=>3, 'E'=>4, 'F'=>5,'F#'=>6, 
@@ -19,7 +18,7 @@ DURATION = {
 }
 
 
-class SyntaxNode
+class Treetop::Runtime::SyntaxNode
   
   alias syntax_parent parent # the post parsing step will "compress" the tree and redefine parent
   
@@ -74,7 +73,7 @@ class SyntaxNode
   end
 end
 
-class SequencingNode < SyntaxNode
+class SequencingNode < Treetop::Runtime::SyntaxNode
 
   # def inspect
   #   super + "  (#{size})"

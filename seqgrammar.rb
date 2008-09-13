@@ -1,26 +1,45 @@
-require 'sequencing_grammar_parser'
+require 'sequencer'
 
-PARSER = SequencingGrammarParser.new
+$seq = Sequencer.new ''
 
 def seq input
-  $gen = nil
-  $gen = PARSER.parse input
-  if $gen then
-    restart
-    out2 true
-  else
-    out2 false
-  end
+  #puts "parsing input: #{input}"
+  $seq = Sequencer.new(input)
+  #puts "parsed #{$seq}"
+  out4 !$seq.tree.nil?
 end
 
 def restart
-  $gen.start if $gen
+  $seq.restart if $seq
 end
 
 def bang
-  if $gen and $gen.next?
-    out0 $gen.next
-  else
-    out1 'bang'
+  if $seq
+    val = $seq.next
+    if val
+      if val.is_a? Array
+        out2 val[2] if val[2]
+        out1 val[1] if val[1]
+        out0 val[0] if val[0]
+      else
+        out0 val
+      end
+      return
+    end
   end
+  out3'bang'
 end
+# 
+# def out0 args
+#   puts args
+# end
+# def out1 args
+#   puts args
+# end
+# def out2 args
+#   puts args
+# end
+# 
+# seq '1 2 3'
+# bang
+# bang

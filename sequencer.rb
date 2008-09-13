@@ -5,7 +5,7 @@ class Sequencer
   attr_accessor :tree, :parser
   
   def initialize sequence
-    if sequence.is_a? SyntaxNode
+    if sequence.is_a? Treetop::Runtime::SyntaxNode
       @parser = nil
       @tree = sequence
     else

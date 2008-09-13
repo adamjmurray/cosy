@@ -242,5 +242,6 @@ class TestSequencingParser < Test::Unit::TestCase
   def test_invalid_syntax
     assert_failure '1.'
     assert_failure '1 2)*3'
+    assert_failure 'asdf'
   end   
 end
