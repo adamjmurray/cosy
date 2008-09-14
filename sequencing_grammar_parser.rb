@@ -179,12 +179,6 @@ class ChainNode < ContainerNode
   end
 end
 
-class ParenthesizedNode < SequencingNode
-  def value
-    subsequence.value
-  end
-end
-
 class ModifierNode < ContainerNode
 end
 

@@ -21,7 +21,7 @@ grammar SequencingGrammar
 
 		 
 	rule element
- 	 '(' subsequence:choice ')' <ParenthesizedNode> / chord / primitive
+ 	 '(' subsequence:choice ')' / chord / primitive
 	end
 
 
