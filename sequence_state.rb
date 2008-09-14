@@ -22,6 +22,18 @@ class SequenceState
     end
   end
   
+  def reset
+    top = self
+    while top.parent do
+      top = top.parent 
+      top.child = nil
+    end
+    top.index = 0
+    top.count = 0
+    top.iteration = 0
+    return top
+  end
+  
   def enter subsequence
     @child = SequenceState.new(subsequence)
     @child.parent = self

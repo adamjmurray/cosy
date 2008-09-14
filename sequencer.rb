@@ -13,16 +13,15 @@ class Sequencer
       @parser = SequencingGrammarParser.new 
       @tree = @parser.parse sequence
     end
-    restart if @tree
+    @state = SequenceState.new(@tree) if @tree
   end
 
   def restart
-    # TODO: could reset an existing state object...
-    @state = SequenceState.new(@tree)
+    @state = @state.reset
   end
 
   def next
-    puts "STATE: #@state"
+    # puts "STATE: #@state"
     if within_limits?
       node = @state.sequence
       
@@ -97,9 +96,9 @@ end
 
 
 # the counting system does not work with this:
-s = Sequencer.new '(1 2)*2'
-max = 20
-while v=s.next and max > 0
-  max -= 1
-  puts "==> #{v.inspect}"
-end
+# s = Sequencer.new '(1 2)*2'
+# max = 20
+# while v=s.next and max > 0
+#   max -= 1
+#   puts "==> #{v.inspect}"
+# end
