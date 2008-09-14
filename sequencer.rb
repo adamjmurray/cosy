@@ -2,9 +2,9 @@ require 'sequencing_grammar_parser'
 require 'sequence_state'
 
 class Sequencer
-  
-  attr_accessor :tree, :parser
-  
+
+  attr_accessor :tree, :parser, :state
+
   def initialize sequence
     if sequence.is_a? Treetop::Runtime::SyntaxNode
       @parser = nil
@@ -15,117 +15,88 @@ class Sequencer
     end
     restart if @tree
   end
-  
+
   def restart
-    @stack = []
-    @state = nil
-    enter_scope @tree
+    # TODO: could reset an existing state object...
+    @state = SequenceState.new(@tree)
   end
-    
-  def node
-    @state.sequence
-  end
-  
+
   def next
-    return nil if not @state
-      
-    # puts "PRE-ADVANCE STATE: "
-    #     @stack.each do |state|
-    #       puts "\t#{state}"
-    #     end
-    #      puts "\t#@state"
-    
-    if not within_limits?
-      if @stack.empty?
-        return nil
-      else
-        exit_scope
-        return self.next
-      end
-    end
-    
     # puts "STATE: #@state"
-    node = @state.sequence
-    index = @state.index
-    iteration = @state.iteration
-    count = @state.count
-    
-    if node.is_a? SequenceNode  
-      child = node.value[index]
-      if child   
-        # Need to enter scope for ChainNodes to handle modifiers like repetition
-        if child.atom?
-          return output(child.value)
-        else
-          enter_scope child
-          return self.next
+    if within_limits?
+      node = @state.sequence
+      
+      if node.is_a? SequenceNode  
+        subseq = node.value[ @state.index]
+        if subseq
+          if subseq.atom?
+            return output(subseq.value)
+          else
+            return enter(subseq)
+          end
         end
-      end 
 
-    elsif node.is_a? ChainNode
-      if node.value.all?{|child| child.atom?} then
-        value = node.value.collect{|child| child.value}
-        value = value[0] if value.length == 1
-        return output(value)
-      elsif node.value.length == 1
-        # handle simple subsequence, like (1 2)*2
-        enter_scope node.value[0]
-        return self.next
-      else
-        puts "TODO: need to handle complex chains"
-        # I think we need to spawn multiple subsequencers?
+      elsif node.is_a? ChainNode
+        if node.value.all?{|child| child.atom?} then
+          value = node.value.collect{|child| child.value}
+          value = value[0] if value.length==1 # unwrap unnecessary arrays
+          return output(value)
+        elsif node.value.length == 1
+          # handle simple subsequence, like (1 2)*2
+          return enter(node.value[0])
+        else
+          puts "TODO: need to handle complex chains"
+          # I think we need to spawn multiple subsequencers?
+        end
+
+      elsif node.is_a? ChoiceNode
+        value = node.value
+        if value.atom?
+          return output(value.value)
+        else
+          return enter(value)
+        end
+
+      elsif node.terminal? or node.is_a? ChordNode
+        return output(node.value)
       end
-      return exit_scope
-      
-    elsif node.is_a? ChoiceNode
-      value = node.value
-      if value.atom?
-        return output(value.value)
-      else
-        enter_scope value
-        return self.next
-      end
-      
-    elsif node.terminal? or node.is_a? ChordNode
-      return output(node.value)
     end
-
-    return nil
+    return exit
   end
   
   ##############
   private
   
   def within_limits?
-    @state.within_limits? and @stack.all?{ |state| state.within_limits? }  
+    @state and @state.within_limits? 
   end
   
   def output(value)
-    @state.advance
     @state.increase_count
-    @stack.each{ |state| state.increase_count }
+    @state.advance
+    # @stack.each{ |state| state.increase_count }
     return value
   end
 
-  def enter_scope node
-    @stack.push(@state) if @state
-    @state = SequenceState.new(node)
-     # puts "ENTER #@state"   
+  def enter(node)
+    @state = @state.enter(node)
+    return self.next
   end
-  
-  def exit_scope
-    if @stack.empty?
-      nil
-    else
-      # puts "EXIT #@state"   
-      @state = @stack.pop
-      @state.advance
+
+  def exit
+    if @state
+      @state = @state.exit
+      if @state
+        @state.advance
+        return self.next
+      end
     end
+    return nil
   end
 end
 
 # the counting system does not work with this:
-# s = Sequencer.new '(1 2)*2.45'
+# s = Sequencer.new '(1 2)*0.51'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1

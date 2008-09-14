@@ -72,7 +72,7 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_fractional_repetitions
-    assert_seq_equals   [1,2,1,2,1],      '(1 2)*2.45'
+    assert_seq_equals   [1,2,1,2,1],      '(1 2)*2.5'
   end
   
   def test_nested_repetitions
