@@ -22,7 +22,7 @@ class Sequencer
   end
 
   def next
-    # puts "STATE: #@state"
+    puts "STATE: #@state"
     if within_limits?
       node = @state.sequence
       
@@ -95,10 +95,11 @@ class Sequencer
   end
 end
 
+
 # the counting system does not work with this:
-# s = Sequencer.new '(1 2)*0.51'
-# max = 20
-# while v=s.next and max > 0
-#   max -= 1
-#   puts "==> #{v.inspect}"
-# end
+s = Sequencer.new '(1 2)*2'
+max = 20
+while v=s.next and max > 0
+  max -= 1
+  puts "==> #{v.inspect}"
+end

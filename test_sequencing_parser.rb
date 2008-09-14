@@ -250,20 +250,19 @@ class TestSequencingParser < Test::Unit::TestCase
     assert_node_length(2, '1 2')
     assert_node_length(2, '(1 2)')
     
-    assert_node_length(2, '1:2')
-    assert_node_length(3, '1:2:3')
-    assert_node_length(2, '1:2*2')
-    assert_node_length(3, '1:2:3&3')
+    assert_node_length(1, '1:2')
+    assert_node_length(1, '1:2:3')
+    assert_node_length(1, '1:2*2')
+    assert_node_length(1, '1:2:3&3')
     
-    # the value of these is a single subsequence (in parentheses), hence the length is 1
+    # the length of a chain is always 1
     assert_node_length(1, '(1 2)*2')
     assert_node_length(1, '(1 2)&3')
     assert_node_length(1, '(1:2)*2')
-    assert_node_length(1, '(1:2:3)&3')
-    
-    assert_node_length(2, '(1:2):(3 4)')
-    assert_node_length(2, '(1:2):(3 4)*2')
-    assert_node_length(3, '(1:2):6:(3 4)')
+    assert_node_length(1, '(1:2:3)&3')    
+    assert_node_length(1, '(1:2):(3 4)')
+    assert_node_length(1, '(1:2):(3 4)*2')
+    assert_node_length(1, '(1:2):6:(3 4)')
   end
 
   def test_invalid_syntax

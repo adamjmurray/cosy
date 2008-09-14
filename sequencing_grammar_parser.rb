@@ -148,16 +148,22 @@ class ChainNode < ContainerNode
   end
 
   def value
-    if not @value then
+    if not @value
       @value = Array.new children
       @value.pop if @value.last.class == ModifierNode
     end
     return @value
   end
 
-  # def length 
-  #   return children.length - (children.last.class == ModifierNode ? 1 : 0)
-  # end    
+  def length
+    1
+    # this might need to be put into a different method?
+    # doesn't work with current sequencing logic
+    # if not @length 
+    #       @length = (value.max{|a,b| a.length<=>b.length}).length
+    #     end
+    #     return @length
+  end    
   
   ##########
   private
@@ -191,6 +197,10 @@ class ChordNode < ContainerNode
       @value = Chord.new(@children.collect{|child| child.value})
     end
     return @value
+  end
+  
+  def length
+    1 # even though there could be multiple children, this node is atomic
   end
   
   def atom?
@@ -341,7 +351,8 @@ class SequencingGrammarParser
 end
 
 
-# x = SequencingGrammarParser.new.verbose_parse '1'
+# x = SequencingGrammarParser.new.verbose_parse '(1 2)*1'
+# puts x.length
 
 # SequencingGrammarParser.new.verbose_parse '(1 2 3)&4 ([C4 G4]:mf:q (C4:f:e | G4:f:s*2)) * 2.5  (1 2 3):(4 5 6)'
 # SequencingGrammarParser.new.verbose_parse '(1 2):(3 4)*2 ((1|2 3)*2):(3 4)'

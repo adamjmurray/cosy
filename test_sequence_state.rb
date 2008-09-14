@@ -33,7 +33,7 @@ class TestSequencer < Test::Unit::TestCase
       assert_nil(state.iteration_limit)
     end
   end
-  
+
   # todo: test advancing and increasing count, and within_limits?
   # but first I want to flesh out the sequencing implementation so I
   # don't have to redo all of this
