@@ -8,21 +8,20 @@ $end = false
 def seq input
   #puts "parsing input: #{input}"
   $seq = Sequencer.new(input)
-  $end = false
-  $time_to_next = $prev_duration = 1
-  
+  restart
   #puts "parsed #{$seq}"
   out4 !$seq.tree.nil?
 end
 
 def restart
   $seq.restart if $seq
+  $time_to_next = $prev_duration = 1
   $end = false
 end
 
 def bang
   if $seq and not $end
-    puts "here #$time_to_next"
+    # puts "here #$time_to_next"
     $time_to_next -= 1
     if $time_to_next <= 0
       val = $seq.next
@@ -30,7 +29,7 @@ def bang
         $end = true
         out3 'bang'
       else
-        if val.is_a? Array
+        if val.is_a? Array and not val.is_a? Chord
           note = val[0]
           duration = val[1]
           velocity = val[2]

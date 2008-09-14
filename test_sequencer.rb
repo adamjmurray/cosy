@@ -1,5 +1,6 @@
 require "test/unit"
 require 'sequencer'
+require 'set'
 
 class TestSequencer < Test::Unit::TestCase
   
@@ -15,12 +16,12 @@ class TestSequencer < Test::Unit::TestCase
       assert_nil(seq.next)
   end
   
-  def assert_seq_equals expected, seq_str
+  def assert_seq_equals expected_values, seq_str
     seq = sequence seq_str
-    expected.each do |val|
+    expected_values.each do |expected|
       n = seq.next
       assert_not_nil(n)
-      assert_equal val, n # seq.next
+      assert_equal expected,n
     end
     assert_done seq        
   end
@@ -70,6 +71,10 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [1,2,1,2], '(1 2)*{8/4}'
   end
   
+  def test_fractional_repetitions
+    assert_seq_equals   [1,2,1,2,1],      '(1 2)*2.45'
+  end
+  
   def test_nested_repetitions
     assert_seq_equals [1,2,3,2,3,1,2,3,2,3], '(1 (2 3)*2)*2'
   end
@@ -106,7 +111,7 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[60,65],[60,65]], '[C4 F4]*2'      
   end
   
-  def test_basic_chain
+  def test_simple_chain
     assert_seq_equals [[1,2]], '1:2'
     assert_seq_equals [[1,2,3]], '1:2:3'
   end
@@ -115,13 +120,82 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
   end
   
+  
+  def test_simple_choice
+    seq = sequence '(1 | 2 | 3)'
+    expected = [1,2,3]
+    actual = Set.new
+    100.times do
+      seq.restart
+      n = seq.next
+      actual.add(n)
+    end
+    # may occasionally fail, since choices are random
+    assert_equal(expected.to_set, actual)
+    assert_done seq
+  end
+  
+  def test_note_choice
+    seq = sequence '(C4 | E4 | G4)'
+    expected = [60,64,67]
+    actual = Set.new
+    100.times do
+      seq.restart
+      n = seq.next
+      actual.add(n)
+    end
+    # may occasionally fail, since choices are random
+    assert_equal(expected.to_set, actual)
+    assert_done seq
+  end
+  
+  def test_chord_choice
+     seq = sequence '([C4 G4]| [D4 G4] | G4)'
+     expected = [[60,67],[62,67],67]
+     actual = Set.new
+     100.times do
+       seq.restart
+       n = seq.next
+       actual.add(n)
+     end
+     # may occasionally fail, since choices are random
+     assert_equal(expected.to_set, actual)
+     assert_done seq
+   end
+  
+  def test_sequence_of_choices
+    seq = sequence '(1 | 2 | 3) (C4|E4|G4)'
+    expected1 = [1,2,3]
+    expected2 = [60,64,67]
+    actual = Set.new
+    actual1 = Set.new
+    actual2 = Set.new
+    200.times do |n|
+      seq.restart
+      n = seq.next
+      actual1.add(n)
+      actual.add(n)
+      n = seq.next
+      actual2.add(n)
+      actual.add(n)
+    end
+    # may occasionally fail, since choices are random
+    assert_equal(expected1.to_set, actual1)
+    assert_equal(expected2.to_set, actual2)
+    assert_equal((expected1+expected2).to_set, actual)
+    assert_done seq
+  end
+  
   def test_invalid_sequence
     assert_failure '1.'
     assert_failure '1 2)*3'
     assert_failure 'asdf'
   end
+  
       
-  # choices
+  # complex choices
+  # 'c4 ([c4 g4]*2 | [b2 b3 b4]*2)'
+  # 'nested' choices
         
   # fractional repetitions
   

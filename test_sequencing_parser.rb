@@ -72,7 +72,7 @@ class TestSequencingParser < Test::Unit::TestCase
     assert_equal(ChainNode, seq.class)
     assert_equal(4, seq.value.length)
     seq.value.each_with_index do |item,index|
-      assert_equal(index, item)
+      assert_equal(index, item.value)
     end
     assert_equal(5, seq.children.length)
     assert_equal(ModifierNode, seq.children.last.class)

@@ -22,6 +22,9 @@ OP_COUNT_LIMIT = '&'
 OP_ITER_LIMIT  = '*'
 
 
+class Chord < Array
+end
+
 class Treetop::Runtime::SyntaxNode
   
   alias syntax_parent parent # the post parsing step will "compress" the tree and redefine parent
@@ -72,50 +75,27 @@ class Treetop::Runtime::SyntaxNode
     "#{self.class} '#{text_value.strip}'"
   end
   
-  def single_value?
+  def atom?
     false
   end
 end
 
 class SequencingNode < Treetop::Runtime::SyntaxNode
-
-  # def inspect
-  #   super + "  (#{size})"
-  # end
 end
 
-class GeneratorNode < SequencingNode
-  # def next?
-  #   # The basic generator holds exactly one value
-  #   # so there is a value to output if and only if we're at the start
-  #   @start
-  # end
-  # 
-  # def next
-  #   if next? then 
-  #     @start = false
-  #     @value 
-  #   else 
-  #     nil 
-  #   end
-  # end
-end
-
-
-class TerminalNode < GeneratorNode
+class TerminalNode < SequencingNode
   def nonterminal?
     false
   end
   def terminal?
     true
   end
-  def single_value?
+  def atom?
     true
   end
 end
 
-
-class ContainerNode < GeneratorNode   
+class ContainerNode < SequencingNode   
   def children
     if not @children
       @children = []
@@ -144,67 +124,19 @@ class ContainerNode < GeneratorNode
   end
 end
 
-
 class SequenceNode < ContainerNode
-
-  # def start
-  #   @index = 0
-  #   @subseq = @value[0]
-  #   @subseq.start
-  # end
-  # 
-  # def next?
-  #   return (@subseq.next? or @value.length > @index+1)
-  # end
-  # 
-  # def next
-  #   if not @subseq.next?
-  #     @index += 1
-  #     @subseq = @value[@index % @value.length]
-  #     @subseq.start
-  #   end
-  #   return @subseq.next
-  # end
 end
 
 class ChoiceNode < ContainerNode
-
+  def length
+    1
+  end
+  def value
+    children[rand(children.length)]
+  end
 end
 
 class ChainNode < ContainerNode
-  attr :repetitions  # supports fractional repetitions!
-# 
-#   def next?
-#     return false if @repetitions <= 0
-#     if @limited then
-#       return (@subseq.next? or @repetitions > @index+1)
-#     else
-#       return (@subseq.next? or @value.length*@repetitions > @index+1)
-#     end
-#   end
-# 
-#   def evaluate
-#     super
-#     if modifier.elements then
-#       modifier.evaluate
-#       @operator = modifier.operator.text_value.strip
-#       @limited = (@operator == '&')
-#     
-#       repetitions = modifier.operand
-#       #@repetitions = repetitions.evaluate
-#       # To support Ruby (I don't like this, how can I clean it up?)
-#       repetitions.evaluate
-#       repetitions.start
-#       @repetitions = repetitions.next
-# 
-# #      puts "OPERATOR is '#@operator', limited=#@limited, reps=#@repetitions"
-# 
-#     else
-#       @operator = nil
-#       @repetitions = 1
-#       @limited = false
-#     end
-#   end
   def operator
     eval_modifier if not @operator
     return @operator
@@ -214,7 +146,22 @@ class ChainNode < ContainerNode
     eval_modifier if not @operand
     return @operand
   end
+
+  def value
+    if not @value then
+      @value = Array.new children
+      @value.pop if @value.last.class == ModifierNode
+    end
+    return @value
+  end
+
+  # def length 
+  #   return children.length - (children.last.class == ModifierNode ? 1 : 0)
+  # end    
   
+  ##########
+  private
+   
   def eval_modifier
     if not modifier.empty?
       @operator = modifier.operator.value
@@ -224,63 +171,30 @@ class ChainNode < ContainerNode
       @operand = 1
     end
   end
-
-  def single_value?
-    value if not @value
-    return @single_value
-  end
-
-  def value
-    if not @value then
-      @value = Array.new children
-      @value.pop if @value.last.class == ModifierNode
-      if @value.all?{|child| child.single_value?} then
-        @single_value = true
-        @value = @value.collect{|child| child.value}
-      else
-        @single_value = false
-      end
-    end
-    return @value
-  end
-
-  # def length 
-  #   return children.length - (children.last.class == ModifierNode ? 1 : 0)
-  # end    
 end
 
-class ParenthesizedNode < GeneratorNode
+class ParenthesizedNode < SequencingNode
   def value
     subsequence.value
-  end
-  
-  def to_s
-    s = "(#{subsequence})"
   end
 end
 
 class ModifierNode < ContainerNode
-  
 end
 
 class OperatorNode < TerminalNode
-  
 end
 
 class ChordNode < ContainerNode 
   def value
     if not @value then
-      @value = @children.collect{|child| child.value} if not @value 
+      @value = Chord.new(@children.collect{|child| child.value})
     end
     return @value
   end
   
-  def single_value?
+  def atom?
     true
-  end
-
-  def to_s
-    "[#{super}]"
   end
 end
 
@@ -300,10 +214,6 @@ class NoteNode < TerminalNode
     end
     return @value
   end
-
-  # def to_s
-  #     "#{text_value}=#@value"
-  #   end
 end
 
 TWO_THIRDS = 2/3.0
@@ -317,8 +227,10 @@ class DurationNode < TerminalNode
       end
       modifier.text_value.each_byte do |bytes|
         case byte.chr
-        when 't'; @value *= TWO_THIRDS
-        when '.'; @value *= 1.5
+        when 't'
+          @value *= TWO_THIRDS
+        when '.'
+           @value *= 1.5
         end
       end
     end
@@ -362,16 +274,6 @@ class RubyNode < TerminalNode
   def eval
     @value = Kernel.eval script.text_value
   end
-    # 
-    # def next
-    #   if next? then 
-    #     @start = false
-    #     eval @value
-    #   else 
-    #     nil 
-    #   end
-    # end  
-    # 
 end
 
 
@@ -399,6 +301,7 @@ class SequencingGrammarParser
       tree = tree.children[0]
     end
     # construct parent-children relationships
+    # is this really necessary? might want it in the future...
     parents = []
     tree.visit(lambda do |node| # enter
       node.parent = parents.last
@@ -414,7 +317,7 @@ class SequencingGrammarParser
     depth = 0
     tree.visit(lambda do |node|
       depth.times{print '    '}
-      puts node.inspect # + " parent:" + node.parent.inspect
+      puts node.inspect
       depth += 1
     end,
     lambda do |node| # exit
@@ -427,7 +330,7 @@ class SequencingGrammarParser
     tree.visit_parse_tree(lambda do |node|
       if not node.empty? then
         depth.times{print '    '}
-        puts node.inspect # + "  parent:" + node.syntax_parent.inspect
+        puts node.inspect
       end
       depth += 1
     end,

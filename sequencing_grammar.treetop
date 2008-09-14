@@ -6,17 +6,17 @@ grammar SequencingGrammar
 
 
 	rule choice
-		space? first:sequence rest:(space? '|' space? sequence)* space? <ChoiceNode>
+		space? sequence (space? '|' space? sequence)* space? <ChoiceNode>
 	end
 
 
 	rule sequence
-		space? first:chain rest:(space chain)* space? <SequenceNode>
+		space? chain (space chain)* space? <SequenceNode>
 	end
 
 		
 	rule chain
-		first:element rest:(':' element)* modifier:modifier? <ChainNode>
+		element (':' element)* modifier:modifier? <ChainNode>
 	end
 
 		 

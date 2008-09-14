@@ -22,6 +22,7 @@ class SequenceState
   end
   
   def within_limits?
+    # puts "ITER=#{@iteration} LIM=#{@iteration_within_limits}"
     iteration_within_limits = (@iteration_limit.nil? or @iteration < @iteration_limit)
     count_within_limits = (@count_limit.nil? or @count < @count_limit)
     # The problem with ChainNodes and ChordNodes is their length is the length of the chain

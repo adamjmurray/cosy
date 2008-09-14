@@ -22,6 +22,9 @@ class Sequencer
     enter_scope @tree
   end
     
+  def node
+    @state.sequence
+  end
   
   def next
     return nil if not @state
@@ -51,7 +54,7 @@ class Sequencer
       child = node.value[index]
       if child   
         # Need to enter scope for ChainNodes to handle modifiers like repetition
-        if child.single_value? and not child.is_a? ChainNode
+        if child.atom?
           return output(child.value)
         else
           enter_scope child
@@ -60,9 +63,8 @@ class Sequencer
       end 
 
     elsif node.is_a? ChainNode
-      op = node.operator
-      if node.single_value? then
-        value = node.value
+      if node.value.all?{|child| child.atom?} then
+        value = node.value.collect{|child| child.value}
         value = value[0] if value.length == 1
         return output(value)
       elsif node.value.length == 1
@@ -70,11 +72,21 @@ class Sequencer
         enter_scope node.value[0]
         return self.next
       else
+        puts "TODO: need to handle complex chains"
         # I think we need to spawn multiple subsequencers?
       end
       return exit_scope
       
-    elsif node.single_value?
+    elsif node.is_a? ChoiceNode
+      value = node.value
+      if value.atom?
+        return output(value.value)
+      else
+        enter_scope value
+        return self.next
+      end
+      
+    elsif node.terminal? or node.is_a? ChordNode
       return output(node.value)
     end
 
@@ -113,7 +125,7 @@ class Sequencer
 end
 
 # the counting system does not work with this:
-# s = Sequencer.new '1:2 3:4:5'
+# s = Sequencer.new '(1 2)*2.45'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
