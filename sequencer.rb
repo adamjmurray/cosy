@@ -10,8 +10,13 @@ class Sequencer
       @parser = nil
       @tree = sequence
     else
+      # This seems inefficient but we need a local parser so we can retreive parse failure
+      # info. Maybe I am worrying too much, but using a class parser would not be thread safe...
       @parser = SequencingGrammarParser.new 
       @tree = @parser.parse sequence
+      if not @tree
+        
+      end
     end
     @state = SequenceState.new(@tree) if @tree
   end
@@ -22,24 +27,14 @@ class Sequencer
 
   def next
     # puts "STATE: #@state"
-    if within_limits?
+    if @state and @state.within_limits?
       node = @state.sequence
-      
-      if node.is_a? SequenceNode  
-        subseq = node.value[ @state.index]
-        if subseq
-          if subseq.atom?
-            return output(subseq.value)
-          else
-            return enter(subseq)
-          end
-        end
 
-      elsif node.is_a? ChainNode
+      if node.is_a? ChainNode
         if node.value.all?{|child| child.atom?} then
           value = node.value.collect{|child| child.value}
-          value = value[0] if value.length==1 # unwrap unnecessary arrays
-          return output(value)
+          value = value[0] if value.length == 1 # unwrap unnecessary arrays
+          return emit(value)
         elsif node.value.length == 1
           # handle simple subsequence, like (1 2)*2
           return enter(node.value[0])
@@ -48,16 +43,14 @@ class Sequencer
           # I think we need to spawn multiple subsequencers?
         end
 
-      elsif node.is_a? ChoiceNode
-        value = node.value
-        if value.atom?
-          return output(value.value)
-        else
-          return enter(value)
-        end
+      elsif node.is_a? SequenceNode  
+        return enter_or_emit(node.value[@state.index])
 
-      elsif node.terminal? or node.is_a? ChordNode
-        return output(node.value)
+      elsif node.is_a? ChoiceNode
+        return enter_or_emit(node.value) # node.value makes a choice
+
+      elsif node.atom?
+        return emit(node.value)
       end
     end
     return exit
@@ -66,14 +59,19 @@ class Sequencer
   ##############
   private
   
-  def within_limits?
-    @state and @state.within_limits? 
+  def enter_or_emit(node)
+    if node.nil?
+      exit
+    elsif node.atom?
+      emit(node.value)
+    else
+      enter(node)
+    end
   end
   
-  def output(value)
+  def emit(value)
     @state.increase_count
     @state.advance
-    # @stack.each{ |state| state.increase_count }
     return value
   end
 
@@ -95,8 +93,7 @@ class Sequencer
 end
 
 
-# the counting system does not work with this:
-# s = Sequencer.new '(1 2)*2'
+# s = Sequencer.new '1:(2 3)*2'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
