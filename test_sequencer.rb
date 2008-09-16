@@ -116,10 +116,9 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[1,2,3]], '1:2:3'
   end
   
-  def test_chain_sequence
+  def test_simple_chain_sequence
     assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
   end
-  
   
   def test_simple_choice
     seq = sequence '(1 | 2 | 3)'
@@ -186,6 +185,18 @@ class TestSequencer < Test::Unit::TestCase
     assert_done seq
   end
   
+  def test_complex_chain_same_length
+    assert_seq_equals [[1,3],[2,4]], '(1 2):(3 4)'
+  end
+
+  def test_complex_chain_same_length_in_sequence
+    assert_seq_equals [[1,3],[2,4],5], '(1 2):(3 4) 5'
+  end
+
+  def test_complex_chain_different_length
+    assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
+  end
+  
   def test_invalid_sequence
     assert_failure '1.'
     assert_failure '1 2)*3'
@@ -196,12 +207,8 @@ class TestSequencer < Test::Unit::TestCase
   # complex choices
   # 'c4 ([c4 g4]*2 | [b2 b3 b4]*2)'
   # 'nested' choices
-        
-  # fractional repetitions
-  
+          
   # repeated chord
-  
-  # "real" chains 1:2:3
   
   # complex chains (1 2):(3 4)
   

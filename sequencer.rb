@@ -5,7 +5,7 @@ class Sequencer
 
   attr_accessor :tree, :parser, :state
 
-  def initialize sequence
+  def initialize(sequence)
     if sequence.is_a? Treetop::Runtime::SyntaxNode
       @parser = nil
       @tree = sequence
@@ -15,16 +15,36 @@ class Sequencer
       @parser = SequencingGrammarParser.new 
       @tree = @parser.parse sequence
     end
-    @state = SequenceState.new(@tree) if @tree
+    restart
   end
 
   def restart
-    @state = @state.reset
+    if @state
+      @state = @state.reset
+    else
+      @state = SequenceState.new(@tree) if @tree
+    end
   end
 
   def next
     # puts "STATE: #@state"
-    if @state and @state.within_limits?
+    if @children
+      values = @children.collect{|child| child.next}
+      # this is only correct if we're in the mode where all chains must
+      # end at the same time
+      if values.all?{|value| value.nil?}
+        return exit
+      else
+        values.each_with_index do |value,index|
+          if value.nil?
+            @children[index].restart
+            values[index] = @children[index].next
+          end
+        end
+        return values
+      end
+    
+    elsif @state and @state.within_limits?
       node = @state.sequence
 
       if node.is_a? ChainNode
@@ -36,8 +56,15 @@ class Sequencer
           # handle simple subsequence, like (1 2)*2
           return enter(node.value[0])
         else
-          puts "TODO: need to handle complex chains"
-          # I think we need to spawn multiple subsequencers?
+          # spawn multiple subsequencers
+          # TODO: something is really funky here, because I am not
+          # attaching the new child states to the current state, so
+          # count limites, etc won't work right (although the current)
+          # code for within_limits? will not work for chains and partial iteration
+          # becuase the shortest child will make it fail early (we need to only
+          # consider the longest child in that scenario)
+          @children = node.value.collect{|child| Sequencer.new(child)}
+          return self.next
         end
 
       elsif node.is_a? SequenceNode  
@@ -90,7 +117,8 @@ class Sequencer
 end
 
 
-# s = Sequencer.new '1:(2 3)*2'
+# s = Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
+# s = Sequencer.new '(1 2):(3 4) 5' # not sure why this is broken...
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
