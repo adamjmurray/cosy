@@ -229,7 +229,7 @@ class DurationNode < TerminalNode
       if(multiplier.text_value != '') then
         @value *= multiplier.to_i # TODO use to_f if appropriate
       end
-      modifier.text_value.each_byte do |bytes|
+      modifier.text_value.each_byte do |byte|
         case byte.chr
         when 't'
           @value *= TWO_THIRDS
