@@ -2,7 +2,7 @@ require 'sequencing_grammar_parser'
 
 class SequenceState
  
-  attr_accessor :sequence, :index, :count, :iteration, :count_limit, :iteration_limit, :child, :parent
+  attr_accessor :sequence, :index, :count, :iteration, :count_limit, :iteration_limit, :children, :parent
   
   def initialize(sequence, parent=nil)
     @sequence = sequence
@@ -10,7 +10,7 @@ class SequenceState
     @count = 0
     @iteration = 0
     @sequence = sequence
-    @length = @sequence.length
+    @length = sequence.length
     @iteration_limit = 1 # the default
     @parent = parent
     if defined? sequence.operator
@@ -25,24 +25,26 @@ class SequenceState
   end
   
   def reset
+    # unwind state to the top
     top = self
-    while top.parent do
+    while top.parent
       top = top.parent 
-      top.child = nil
+      top.children = nil
     end
+    # and reset to default state
     top.index = 0
     top.count = 0
     top.iteration = 0
     return top
   end
   
-  def enter(subsequence)
-    @children = [ SequenceState.new(subsequence,self) ]
+  def enter(node)
+    @children = [ SequenceState.new(node,self) ]
     return @children[0]
   end
 
-  def enter_chain(subseqs)
-    @children = subseqs.map{|subseq| SequenceState.new(subseq,self)}
+  def enter_chain(nodes)
+    @children = nodes.map{|node| SequenceState.new(node,self)}
   end
   
   def exit
