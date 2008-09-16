@@ -36,26 +36,25 @@ class SequenceState
     return top
   end
   
-  def enter subsequence
+  def enter(subsequence)
     @children = [ SequenceState.new(subsequence,self) ]
     return @children[0]
   end
 
-  def chain subseqs
+  def enter_chain(subseqs)
     @children = subseqs.map{|subseq| SequenceState.new(subseq,self)}
   end
   
   def exit
-    @parent.remove_child self if @parent
+    @parent.remove_child(self) if @parent
     return @parent
   end
   
-  def add_child child
-    @children |= []
-    @children << child
+  def add_child(child)
+    (@children ||= []) << child
   end
   
-  def remove_child child
+  def remove_child(child)
     @children.delete child if @children
   end
   
