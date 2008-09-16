@@ -119,6 +119,10 @@ end
 
 # s = Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
 # s = Sequencer.new '(1 2):(3 4) 5' # not sure why this is broken...
+# s = Sequencer.new '((1 2):(3 4 5)):(q e. s)' 
+# 
+# s = Sequencer.new 'c4:r c4:-r d4:r'
+# s = Sequencer.new '((0 c4 0 bb3 0 ab3 0 g3)*4):(-s r)'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1

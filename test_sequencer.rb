@@ -214,5 +214,8 @@ class TestSequencer < Test::Unit::TestCase
   
   # nested chains?  (1:2  3:4):(5  6  7) should produce 1:2:5  3:4:6  1:2:7  
 
+# rhythm, especially dotted and triplet rhythm
+
+# full melodic (note, rhythm, velocity) sequence
   
 end

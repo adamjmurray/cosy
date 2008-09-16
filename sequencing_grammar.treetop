@@ -29,9 +29,11 @@ grammar SequencingGrammar
 		 operator:operator operand:(number/ruby) <ModifierNode>
 	end
 
+
 	rule operator
 		space? ('*'/'&') space? <OperatorNode>
 	end
+	
 	
   rule chord
 		'[' space? primitive (space primitive)* space? ']' <ChordNode>
@@ -54,7 +56,7 @@ grammar SequencingGrammar
 
 	
 	rule duration
-		multiplier:number? metrical_duration:[WwHhQqEeSsRrXx] modifier:('t'? '.'*)? <DurationNode>
+		multiplier:(number/'-')? metrical_duration:[WwHhQqEeSsRrXx] modifier:('t'? '.'*)? <DurationNode>
 	end
 
 	

@@ -221,6 +221,18 @@ class TestSequencingParser < Test::Unit::TestCase
     end
   end
 
+  def test_negative_duration_multiplier
+    ALL_DURATIONS.each_with_index do |dur,index|
+      parse "-#{index}#{dur}"
+    end
+  end
+  
+  def test_negative_duration
+    ALL_DURATIONS.each_with_index do |dur,index|
+      parse '-' + dur
+    end  
+  end
+
   def test_multiplier_triplet_dotted_durations
     %w{ .  ..  ...  .... }.each_with_index do |dots,index|
       ALL_DURATIONS.each do |dur|

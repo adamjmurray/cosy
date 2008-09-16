@@ -226,8 +226,12 @@ class DurationNode < TerminalNode
   def value
     if not @value
       @value = DURATION[metrical_duration.text_value.downcase]
-      if(multiplier.text_value != '') then
-        @value *= multiplier.to_i # TODO use to_f if appropriate
+      if multiplier.text_value != ''
+        if multiplier.text_value == '-'
+          @value *= -1
+        else
+          @value *= multiplier.value
+        end
       end
       modifier.text_value.each_byte do |byte|
         case byte.chr
@@ -344,6 +348,7 @@ class SequencingGrammarParser
   end   
 end
 
+# puts (SequencingGrammarParser.new.verbose_parse '-q').value
 
 # x = SequencingGrammarParser.new.verbose_parse '(1 2)*1'
 # puts x.length

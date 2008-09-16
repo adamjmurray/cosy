@@ -41,11 +41,19 @@ def bang
           duration = $prev_duration
         end
         $time_to_next = $prev_duration = duration
-          
-        # output in standard Max right-to-left order:
-        out2 duration
-        out1 velocity if velocity
-        out0 note
+        
+        if duration >= 0  
+          # output in standard Max right-to-left order:
+          out2 duration
+          out1 velocity if velocity
+          out0 note
+          if duration == 0
+            # TODO: prevent infinite loops
+            bang
+          end
+        else
+          $time_to_next = $time_to_next.abs
+        end
       end
     end
   end
