@@ -14,9 +14,6 @@ class Sequencer
       # info. Maybe I am worrying too much, but using a class parser would not be thread safe...
       @parser = SequencingGrammarParser.new 
       @tree = @parser.parse sequence
-      if not @tree
-        
-      end
     end
     @state = SequenceState.new(@tree) if @tree
   end
