@@ -1,9 +1,10 @@
-require "test/unit"
-require 'sequence_state'
+require 'test/unit'
+qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/'))
+require File.join(qesl_root, 'interpreter/qesl_sequence_state')
 
 class TestSequencer < Test::Unit::TestCase
-  
-  PARSER = SequencingGrammarParser.new
+  include Qesl
+  PARSER = SequenceParser.new
   
   def get_state input
     seq = PARSER.parse input

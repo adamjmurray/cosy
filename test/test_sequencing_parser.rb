@@ -1,9 +1,10 @@
-require "test/unit"
-require 'sequencing_grammar_parser'
+require 'test/unit'
+qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/'))
+require File.join(qesl_root, 'parser/qesl_parser')
 
 class TestSequencingParser < Test::Unit::TestCase
-  
-  PARSER = SequencingGrammarParser.new
+  include Qesl  
+  PARSER = SequenceParser.new
 
   def parse input
     output = PARSER.parse(input)
