@@ -27,7 +27,7 @@ module Cosy
 
 
 		rule modifier
-			 operator:operator operand:(number/ruby) <ModifierNode>
+			 operator:operator operand:(number/ruby) <BehaviorNode>
 		end
 
 

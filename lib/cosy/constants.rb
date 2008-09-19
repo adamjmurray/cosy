@@ -11,8 +11,10 @@ module Cosy
     'mf'=>79, 'f'=>95, 'ff'=>111, 'fff'=>127    
   }
 
-  DURATION = {
-    'x'=>1, 'r'=>2, 's'=>4, 'e'=>8, 'q'=>16, 'h'=>32, 'w'=>64
+  DURATION = { # standard number of MIDI ticks for these note durations:
+    'x'=>30, 'r'=>60, 's'=>120, 'e'=>240, 'q'=>480, 'h'=>960, 'w'=>1920,
+    'sixtyfourth'=>30, 'thirtysecond'=>60, 'sixteenth'=>120, 
+    'eighth'=>240, 'quarter'=>480, 'half'=>960, 'whole'=>1920
   }
 
   # Sequence Behavior Operators

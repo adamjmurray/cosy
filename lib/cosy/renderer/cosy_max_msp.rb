@@ -18,6 +18,8 @@ $time_to_next = 1
 $prev_duration = 1
 $end = false
 
+$ticks_per_bang = DURATION['sixtyfourth']
+
 def seq input
   $seq = Sequencer.new(input)
   restart
@@ -28,6 +30,10 @@ def restart
   $seq.restart if $seq
   $time_to_next = $prev_duration = 1
   $end = false
+end
+
+def ticks_to_bangs(ticks)
+  ticks / 30 if ticks # a 64th note is the smallest resolution I am supporting right now, that is 30 ticks
 end
 
 def bang
@@ -41,7 +47,7 @@ def bang
       else
         if val.is_a? Array and not val.is_a? Chord
           note = val[0]
-          duration = val[1]
+          duration = ticks_to_bangs(val[1])
           velocity = val[2]
         else
           note = val

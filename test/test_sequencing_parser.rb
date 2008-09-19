@@ -76,7 +76,7 @@ class TestSequencingParser < Test::Unit::TestCase
       assert_equal(index, item.value)
     end
     assert_equal(5, seq.children.length)
-    assert_equal(ModifierNode, seq.children.last.class)
+    assert_equal(BehaviorNode, seq.children.last.class)
   end
   
   def test_parenthesized_sequence

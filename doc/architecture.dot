@@ -12,8 +12,8 @@ digraph g {
 	Input -> Parser	
 	Grammar -> Treetop [label=" defines syntax for"]
 	Treetop -> Parser [label="generates"]
-	Parser -> Model [label=" transforms input into"]
+	Parser -> Model [label=" converts input into"]
 	Model -> Sequencer [label=" traversed by"]
-	Sequencer -> Renderer [label=" interpreted by"]
+	Sequencer -> Renderer [label=" transformed by"]
 	Renderer -> Output
 }

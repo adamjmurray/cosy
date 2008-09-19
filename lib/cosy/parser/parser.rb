@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'treetop'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 # Due to a bug? in polyglot/treetop, when requiring this file from a file in another
 # folder (like a rake task or test case) it can't find the grammar file unless I add
 # this folder to the path:
@@ -138,7 +138,7 @@ module Cosy
     def value
       if not @value
         @value = Array.new children
-        @value.pop if @value.last.class == ModifierNode
+        @value.pop if @value.last.class == BehaviorNode
       end
       return @value
     end
@@ -167,7 +167,7 @@ module Cosy
     end
   end
 
-  class ModifierNode < ContainerNode
+  class BehaviorNode < ContainerNode
   end
 
   class OperatorNode < TerminalNode
@@ -336,6 +336,8 @@ module Cosy
   end
 
 end
+
+# Cosy::SequenceParser.new.verbose_parse '(C4:mf:q D4:q E4:q F4:q)*3 G4:w'
 
 # puts (Cosy::SequenceParser.new.verbose_parse '-q').value
 
