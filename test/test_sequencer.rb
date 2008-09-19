@@ -1,10 +1,10 @@
 require 'test/unit'
 require 'set'
-qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/'))
-require File.join(qesl_root, 'interpreter/qesl_interpreter')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
+require File.join(cosy_root, 'sequencer/sequencer')
 
 class TestSequencer < Test::Unit::TestCase
-  include Qesl
+  include Cosy
   
   def sequence input
     seq = Sequencer.new(input)

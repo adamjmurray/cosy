@@ -1,9 +1,9 @@
 require 'test/unit'
-qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/'))
-require File.join(qesl_root, 'parser/qesl_parser')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
+require File.join(cosy_root, 'parser/parser')
 
 class TestSequencingParser < Test::Unit::TestCase
-  include Qesl  
+  include Cosy  
   PARSER = SequenceParser.new
 
   def parse input

@@ -1,4 +1,4 @@
-module Qesl
+module Cosy
 	grammar Sequence
 	
 		rule root

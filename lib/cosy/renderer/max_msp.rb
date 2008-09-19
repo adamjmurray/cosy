@@ -1,5 +1,5 @@
-require 'qesl_interpreter'
-include Qesl
+require 'cosy'
+include Cosy
 
 $seq = Sequencer.new ''
 $time_to_next = 1

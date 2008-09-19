@@ -1,7 +1,7 @@
-qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
-require File.join(qesl_root, 'parser/qesl_parser')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
+require File.join(cosy_root, 'parser/parser')
 
-module Qesl
+module Cosy
 
   class SequenceState
 

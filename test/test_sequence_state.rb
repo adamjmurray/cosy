@@ -1,9 +1,9 @@
 require 'test/unit'
-qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/'))
-require File.join(qesl_root, 'interpreter/qesl_sequence_state')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
+require File.join(cosy_root, 'sequencer/sequence_state')
 
 class TestSequencer < Test::Unit::TestCase
-  include Qesl
+  include Cosy
   PARSER = SequenceParser.new
   
   def get_state input

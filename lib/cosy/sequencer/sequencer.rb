@@ -1,8 +1,8 @@
-qesl_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
-require File.join(qesl_root, 'parser/qesl_parser')
-require File.join(qesl_root, 'interpreter/qesl_sequence_state')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
+require File.join(cosy_root, 'parser/parser')
+require File.join(cosy_root, 'sequencer/sequence_state')
 
-module Qesl
+module Cosy
 
   class Sequencer
 
@@ -126,7 +126,7 @@ end
 # s = Sequencer.new '((1 2):(3 4 5)):(q e. s)' 
 # 
 # s = Sequencer.new 'c4:r c4:-r d4:r'
-# s = Qesl::Sequencer.new '((0 c4 0 bb3 0 ab3 0 g3)*4):(-s r)'
+# s = Cosy::Sequencer.new '((0 c4 0 bb3 0 ab3 0 g3)*4):(-s r)'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1

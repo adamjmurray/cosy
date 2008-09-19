@@ -1,4 +1,4 @@
-module Qesl
+module Cosy
 
   PITCH_CLASS = {
     'C'=>0, 'C#'=>1, 'D'=>2, 'D#'=>3, 'E'=>4, 'F'=>5,'F#'=>6, 
