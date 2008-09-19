@@ -10,8 +10,9 @@ module Cosy
     
     def initialize
       @midi_sequence = MIDI::Sequence.new()
-       @prev_duration = DURATION['quarter']
+      @prev_duration = DURATION['quarter']
       @prev_velocity = INTENSITY['mf']
+      @delta_time = 0
       
       @meta_track = addTrack
       # TODO: Cosy needs to support setting BPM inside the syntax
@@ -28,8 +29,14 @@ module Cosy
       while event = @sequencer.next
         pitch, velocity, duration = getPitchVelocityDuration(event)
         
-        @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, 0)
-        @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)        
+        if duration < 0
+          @delta_time = -duration
+        else
+          # TODO: special case duration 0?
+          @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, @delta_time)
+          @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)        
+          @delta_time = 0
+        end
       end
       File.open(output_file, 'wb'){ |file| @midi_sequence.write(file) }
     end
@@ -58,23 +65,18 @@ module Cosy
       @prev_velocity = velocity
       @prev_duration = duration
       
-      if duration >= 0  
-        return pitch,velocity,duration
-      else
-        puts 'TODO: negative durations'
-      end
+      return pitch,velocity,duration
     end
     
     def method_missing(name, *args, &block) 
       @midi_sequence.send(name, *args, &block)
     end
-
   end
 
 end
 
 renderer = Cosy::MidiRenderer.new
-renderer.render('C4:q:mf (D4:e:p)*2 E4:q:mf', 'test.mid')
+renderer.render('C4:q:mf D4:-e:p D4:e:p E4:q:mf', 'test.mid')
 
 
 
