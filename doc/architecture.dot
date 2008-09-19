@@ -1,0 +1,19 @@
+digraph g {
+	
+	Input [shape=note]
+	Grammar [shape=rectangle]
+	Treetop [style=filled fillcolor="#f0f0f0"]
+	Parser
+	Model [shape=box3d]
+	Sequencer
+	Renderer
+	Output [shape=note]
+	
+	Input -> Parser	
+	Grammar -> Treetop [label=" defines syntax for"]
+	Treetop -> Parser [label="generates"]
+	Parser -> Model [label=" transforms input into"]
+	Model -> Sequencer [label=" traversed by"]
+	Sequencer -> Renderer [label=" interpreted by"]
+	Renderer -> Output
+}
