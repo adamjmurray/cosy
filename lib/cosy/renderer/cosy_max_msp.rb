@@ -1,3 +1,15 @@
+# Requires:
+# Max/MSP (http://cycling74.com)
+# and ajm objects (http://compusition.com/web/software/maxmsp/ajm-objects)
+
+# TODO
+#==> Loading this script in Max fails the first time, don't know why yet.
+#       Either caused by JRuby 1.4 or my recent changes to ajm.ruby
+#       Need to investigate!
+#       Workaround is to delete the object and undo, then it loads succesfully.
+#==> Need a Max help file for this.
+#==> Move ajm objects to github
+
 require 'cosy'
 include Cosy
 
@@ -7,10 +19,8 @@ $prev_duration = 1
 $end = false
 
 def seq input
-  #puts "parsing input: #{input}"
   $seq = Sequencer.new(input)
   restart
-  #puts "parsed #{$seq}"
   out4 !$seq.tree.nil?
 end
 
@@ -22,7 +32,6 @@ end
 
 def bang
   if $seq and not $end
-    # puts "here #$time_to_next"
     $time_to_next -= 1
     if $time_to_next <= 0
       val = $seq.next
@@ -59,17 +68,3 @@ def bang
     end
   end
 end
-# 
-# def out0 args
-#   puts args
-# end
-# def out1 args
-#   puts args
-# end
-# def out2 args
-#   puts args
-# end
-# 
-# seq '1 2 3'
-# bang
-# bang

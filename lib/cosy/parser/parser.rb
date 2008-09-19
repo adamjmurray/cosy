@@ -202,13 +202,11 @@ module Cosy
           when '_'; @value -= 0.5 
           end
         end
-        @value += 12*(octave.value+OCTAVE_OFFSET)
+        @value += 12*(octave.value+$OCTAVE_OFFSET)
       end
       return @value
     end
   end
-
-  TWO_THIRDS = 2/3.0
 
   class DurationNode < TerminalNode
     def value
