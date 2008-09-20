@@ -57,7 +57,7 @@ module Cosy
           
         elsif node.is_a? ChainNode
           if node.value.all?{|child| child.atom?} then
-            value = node.value.collect{|child| child.value}
+            value = Chain.new(node.value.collect{|child| child.value})
             value = value[0] if value.length == 1 # unwrap unnecessary arrays
             return emit(value)
           elsif node.value.length == 1

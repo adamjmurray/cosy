@@ -72,7 +72,7 @@ module Cosy
       # TODO: refactor this into non-renderer code
       if event.is_a? Chord # must check Chord first because a Chord is a type of Array
         pitches = event
-      elsif event.is_a? Array
+      elsif event.is_a? Chain
         pitches    = event[0]
         pitches = [pitches] if not pitches.is_a? Chord
         duration = event[1]

@@ -68,6 +68,9 @@ module Cosy
 
   class Chord < Array
   end
+  
+  class Chain < Array
+  end
 
   class SequencingNode < Treetop::Runtime::SyntaxNode
   end
@@ -163,6 +166,13 @@ module Cosy
   end
   
   class ChainNode < ContainerNode
+    def value
+      if not @value
+        @value = Chain.new(@children)
+      end
+      return @value
+    end
+    
     def length
       1
       # this might need to be put into a different method?
@@ -182,10 +192,14 @@ module Cosy
 
   class ChordNode < ContainerNode 
     def value
-      if not @value then
-        @value = Chord.new(@children.collect{|child| child.value})
-      end
-      return @value
+      # don't want to cache, so we can re-eval ruby
+      # if not @value then
+      #   @value = Chord.new(@children.collect{|child| child.value})
+      # end
+      #  return @value
+      # But maybe it would be better to do what chain node does, and require
+      # the sequencer to evaluate!
+      Chord.new(@children.collect{|child| child.value})
     end
 
     def length

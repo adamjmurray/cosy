@@ -45,7 +45,7 @@ def bang
         $end = true
         out3 'bang'
       else
-        if val.is_a? Array and not val.is_a? Chord
+        if val.is_a? Chain
           note = val[0]
           duration = ticks_to_bangs(val[1])
           velocity = val[2]
