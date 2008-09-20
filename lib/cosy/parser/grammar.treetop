@@ -12,17 +12,27 @@ module Cosy
 
 
 		rule sequence
-			space? chain (space chain)* space? <SequenceNode>
+			space? sequence_element (space sequence_element)* space? <SequenceNode>
+		end
+
+
+		rule sequence_element
+			chain modifier:modifier <ModifiedNode> / chain 
 		end
 
 		
 		rule chain
-			element (':' element)* modifier:modifier? <ChainNode>
+			chain_element (':' chain_element)* <ChainNode>
 		end
 
-		 
+
+		rule chain_element
+			element modifier:modifier <ModifiedNode> / element
+		end
+
+
 		rule element
-	 	 '(' subsequence:choice ')' / chord / primitive
+			'(' subsequence:choice ')' / chord / primitive
 		end
 
 

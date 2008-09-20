@@ -55,7 +55,8 @@ class Treetop::Runtime::SyntaxNode
   end
 
   def inspect
-    "#{self.class} '#{text_value.strip}'"
+    clazz = self.class.to_s.split('::').last
+    "#{clazz} '#{text_value.strip}'"
   end
 
   def atom?
@@ -114,7 +115,8 @@ module Cosy
 
   class SequenceNode < ContainerNode
   end
-
+  
+  
   class ChoiceNode < ContainerNode
     def length
       1
@@ -124,7 +126,7 @@ module Cosy
     end
   end
 
-  class ChainNode < ContainerNode
+  class ModifiedNode < ContainerNode
     def operator
       eval_modifier if not @operator
       return @operator
@@ -137,21 +139,14 @@ module Cosy
 
     def value
       if not @value
-        @value = Array.new children
-        @value.pop if @value.last.class == BehaviorNode
+        @value = children[0]
       end
       return @value
     end
-
+    
     def length
       1
-      # this might need to be put into a different method?
-      # doesn't work with current sequencing logic
-      # if not @length 
-      #       @length = (value.max{|a,b| a.length<=>b.length}).length
-      #     end
-      #     return @length
-    end    
+    end
 
     ##########
     private
@@ -164,6 +159,18 @@ module Cosy
         @operator = ''
         @operand = 1
       end
+    end
+  end
+  
+  class ChainNode < ContainerNode
+    def length
+      1
+      # this might need to be put into a different method?
+      # doesn't work with current sequencing logic
+      # if not @length 
+      #       @length = (value.max{|a,b| a.length<=>b.length}).length
+      #     end
+      #     return @length
     end
   end
 
@@ -283,9 +290,13 @@ module Cosy
     def verbose_parse input
       puts "PARSING: #{input}"
       output = parse input
-      puts (output ? 'success' : 'failure')
-      print_tree output
-      #puts "\n"; print_syntax_tree output
+      if output
+        puts 'success'
+        print_tree output
+      else
+        puts 'failure'
+        puts "#{failure_line}:#{failure_column}: #{failure_reason}"
+      end
       return output
     end
 
@@ -338,6 +349,102 @@ module Cosy
 end
 
 # Cosy::SequenceParser.new.verbose_parse '(C4:mf:q D4:q E4:q F4:q)*3 G4:w'
+
+
+# # TODO: these really need to go into unit tests
+# Cosy::SequenceParser.new.verbose_parse 'c4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4:mf'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4:mf*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:mf)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:mf)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4:(mf f)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4*2:(mf f)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4*2:(mf f)*3'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4*2:(mf f)*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4:(mf f)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 g4):(mf f)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 g4)*2:(mf f)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 g4):(mf f)*3'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 g4)*2:(mf f)*3'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '((c4 g4)*2:(mf f)*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:mf d4)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:mf d4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 d4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 d4*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 d4)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 d4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 d4*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 | d4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4)'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 | d4*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4:g3 | d4*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 | d4:a5*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:g3 | d4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4:g3 | d4*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4:a5)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4:a5*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 e3 | d4*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 | d4 f5*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse 'c4 | (d4 f5)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 e3 | d4)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 e3 | d4*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4 f5)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | (d4 f5))*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | d4 f5*3)*4'
+# puts
+# Cosy::SequenceParser.new.verbose_parse '(c4 | (d4 f5)*3)*4'
+# puts
+# # todo choides with chains and sequences (this is getting complicated!)
+
+
 
 # puts (Cosy::SequenceParser.new.verbose_parse '-q').value
 

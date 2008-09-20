@@ -69,14 +69,12 @@ class TestSequencingParser < Test::Unit::TestCase
   end
 
   def test_chain
-    seq = parse '0:1:2:3*4'
+    seq = parse '0:1:2:3'
     assert_equal(ChainNode, seq.class)
-    assert_equal(4, seq.value.length)
+    assert_equal(4, seq.value.length)    
     seq.value.each_with_index do |item,index|
       assert_equal(index, item.value)
     end
-    assert_equal(5, seq.children.length)
-    assert_equal(BehaviorNode, seq.children.last.class)
   end
   
   def test_parenthesized_sequence

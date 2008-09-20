@@ -50,7 +50,12 @@ module Cosy
       elsif @state and @state.within_limits?
         node = @state.sequence
 
-        if node.is_a? ChainNode
+        if node.is_a? ModifiedNode
+          # entering this node already captured the behavior in the state, so
+          # we can just go ahead and enter the value
+          return enter(node.value)
+          
+        elsif node.is_a? ChainNode
           if node.value.all?{|child| child.atom?} then
             value = node.value.collect{|child| child.value}
             value = value[0] if value.length == 1 # unwrap unnecessary arrays
@@ -78,6 +83,9 @@ module Cosy
 
         elsif node.atom?
           return emit(node.value)
+          
+        else
+          raise "Unexpected node type #{node.class} (#{node.inspect})"
         end
       end
       return exit
@@ -127,6 +135,8 @@ end
 # 
 # s = Sequencer.new 'c4:r c4:-r d4:r'
 # s = Cosy::Sequencer.new '((0 c4 0 bb3 0 ab3 0 g3)*4):(-s r)'
+
+# s = Cosy::Sequencer.new '(mf:q*2 (1:2 3:4) [e4 g4])*4'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
