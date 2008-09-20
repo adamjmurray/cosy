@@ -27,18 +27,36 @@ module Cosy
       @sequencer = Sequencer.new(input)
       channel = 0
       while event = @sequencer.next
-        pitch, velocity, duration = getPitchVelocityDuration(event)
-        
+        pitches, velocity, duration = getPitchesVelocityDuration(event)        
         if duration < 0
           @delta_time = -duration
         else
           # TODO: special case duration 0?
-          @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, @delta_time)
-          @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)        
-          @delta_time = 0
+          pitches.each do |pitch|
+            @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, @delta_time)
+            @delta_time = 0
+          end
+          pitches.each do |pitch|
+            @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)  
+            duration = 0      
+          end
         end
       end
+      #print_midi
       File.open(output_file, 'wb'){ |file| @midi_sequence.write(file) }
+    end
+    
+    def print_midi
+      @midi_sequence.each do |track|
+        puts "*** track name \"#{track.name}\""
+        puts "instrument name \"#{track.instrument}\""
+        puts "#{track.events.length} events"
+        track.each do |event|
+          event.print_decimal_numbers = true # default = false (print hex)
+          event.print_note_names = true # default = false (print note numbers)
+          puts event
+        end
+      end
     end
 
     ############
@@ -50,14 +68,17 @@ module Cosy
       return track
     end
 
-    def getPitchVelocityDuration(event) 
+    def getPitchesVelocityDuration(event) 
       # TODO: refactor this into non-renderer code
-      if event.is_a? Array and not event.is_a? Chord
-        pitch    = event[0]
+      if event.is_a? Chord # must check Chord first because a Chord is a type of Array
+        pitches = event
+      elsif event.is_a? Array
+        pitches    = event[0]
+        pitches = [pitches] if not pitches.is_a? Chord
         duration = event[1]
         velocity = event[2]
       else
-        pitch = event
+        raise "Unexpected event type #{event.class} (#{event.inspect})"
       end
 
       velocity ||= @prev_velocity
@@ -65,7 +86,7 @@ module Cosy
       @prev_velocity = velocity
       @prev_duration = duration
       
-      return pitch,velocity,duration
+      return pitches,velocity,duration
     end
     
     def method_missing(name, *args, &block) 
@@ -76,7 +97,7 @@ module Cosy
 end
 
 renderer = Cosy::MidiRenderer.new
-renderer.render('C4:q:mf D4:-e:p D4:e:p E4:q:mf', 'test.mid')
+renderer.render('C4:q:mf D4:-e:p D4:e:p [E4 G4 C5]:q:mf', 'test.mid')
 
 
 
