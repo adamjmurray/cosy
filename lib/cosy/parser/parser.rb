@@ -456,7 +456,7 @@ end
 # puts
 # Cosy::SequenceParser.new.verbose_parse '(c4 | (d4 f5)*3)*4'
 # puts
-# # todo choides with chains and sequences (this is getting complicated!)
+# # todo choices with chains and sequences (this is getting complicated!)
 
 
 

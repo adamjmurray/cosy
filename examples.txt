@@ -27,37 +27,26 @@ A multi parameter event (a 'chain')
 C4:mp
 C#4:mf:q
 
-These could be configurable via parsing mode/commands, like
-<pitch:velocity>
-<pitch:velocity:duration>
-<duration:pitch> w:c4 h:d4
-<pitch:?> c4:'arbitrary text'
-But I see no reason to support <modes> now. It will be up to the
-interpreter to decide what to do with a chain. 
-Luckily NoteNode, VelocityNode, DurationNode are different types
-
-
 Repetition
 60*2
 c4:mf*4
 (60 62)*3
-60*0
-prev one doesn't play at all
+60*0 (doesn't play at all)
 
-Stay @
-50@
-(1 2)@
+Stay **
+50**
+(1 2)**
 Repeats infinitely until forced to advance.
 
 
 Advance (other part of chain)
-(1@ 2):(1 1 1 > 2)
+(1** 2):(1 1 1 > 2)
 '>' will advance the first part of the chain
-(1@ 2):(mp mf@ fff):(1 1 > 1 2 >` 3)
-backtick indicates second chain (>`` would be third, etc)
+(1** 2):(mp mf** fff):(1 1 > > 1 2 -> 3)
+-> indicates second chain (--> would be third, etc)
 
 
-(@=> 1 2 3)
+(*3=> 1 2 3)
 MAYBE: apply operator to all elements of subsequence?
 
 
@@ -67,7 +56,7 @@ Choice of single value
 Choice of subsequence
 (c4 e4 | e4 g4 | g4 b4)
 
-Picks two (simultaenous playback)
+Picks two (simultneous playback)
 (c4 e4 g4 || e4 g4 c5 || g4 c5 e5)
 
 plays back all three 
@@ -131,6 +120,19 @@ default is [2], go until all subseqs run out
 ((60 62):(p mp f))&! will loop until all parameters line up on the last value together [3]
 
 
+{{$x = '1 2 3'}}  vs  {{$x = cosy '1 2 3'; x.transpose(12)}}
+will it be difficult to support $x for these two cases?
+it seems like making $x point to a real node will be easier for inline eval,
+for the first case we almost need some sort of preprocessor (which may be easier to implement initially)...
+
+
+'10:$x 15:$x'
+== 10:(1 2 3) 15:(1 2 3)
+
+
+'(10:$ 15:$)@(1 2 3)'  or (10:$ 15:$)@$x
+== (10:1 15:1) (10:2 15:2) (10:3 15:3)
+
 
 operators to affect sequence output
 (1 2 3) --> 1 2 3
@@ -165,13 +167,10 @@ NOT NOW? apply to all values in the sequence:
 
 
 advanced constructs
-(1 2 3)^:('a' 'b' 'c' 'd' 'e' 'f'):('.' '\'')  --> 1:a:. 2:b:' 3:c:. 2:d:' 1:e:. 2:f:'
+(1 2 3)~:('a' 'b' 'c' 'd' 'e' 'f'):('.' '\'')  --> 1:a:. 2:b:' 3:c:. 2:d:' 1:e:. 2:f:'
 
 
 precedence rules:
 : has highest precedence
 ' ' (whitespace separated sequence list)
 | 
-
-so C4|C5:mf:q means play C4 or C5 at mf for a quarter note
-this is invalid C4:p|C5:mf, need this: (C4:p)|(C5:mf)

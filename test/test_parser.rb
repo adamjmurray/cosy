@@ -266,7 +266,7 @@ class TestSequencingParser < Test::Unit::TestCase
     assert_node_length(1, '1:2*2')
     assert_node_length(1, '1:2:3&3')
     
-    # the length of a chain is always 1
+    # the length of a modified node is always 1
     assert_node_length(1, '(1 2)*2')
     assert_node_length(1, '(1 2)&3')
     assert_node_length(1, '(1:2)*2')
@@ -274,6 +274,22 @@ class TestSequencingParser < Test::Unit::TestCase
     assert_node_length(1, '(1:2):(3 4)')
     assert_node_length(1, '(1:2):(3 4)*2')
     assert_node_length(1, '(1:2):6:(3 4)')
+  end
+  
+  def test_at_loop
+    parse '(1 2)@(3 4)'
+    parse '(1 $ 2)@(3 4)'
+  end
+  
+  def test_nested_at_loop
+    parse '((1 2)@(3 4))@(5 6)'
+    # should produce
+    # 1 2 1 2   1 2 1 2
+    
+    parse '((1 $ 2 $$)@(3 4 $))@(5 6)'
+    # should produce
+    # 1 3 2 5   1 4 2 5   1 5 2 5
+    # 1 3 2 6   1 4 2 6   1 6 2 6 
   end
 
   def test_invalid_syntax

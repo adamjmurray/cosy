@@ -187,17 +187,23 @@ class TestSequencer < Test::Unit::TestCase
     assert_done seq
   end
   
+  def test_chain_secondary_list
+    assert_seq_equals [[60,120],[60,240],65], 'c4:(s e) f4'
+  end
+  
   def test_complex_chain_same_length
     assert_seq_equals [[1,3],[2,4]], '(1 2):(3 4)'
   end
 
+  
+
   def test_complex_chain_same_length_in_sequence
     assert_seq_equals [[1,3],[2,4],5], '(1 2):(3 4) 5'
   end
-
-  def test_complex_chain_different_length
-    assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
-  end
+    
+  # def test_complex_chain_different_length
+  #   assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
+  # end
   
   def test_invalid_sequence
     assert_failure '1.'

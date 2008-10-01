@@ -36,6 +36,7 @@ module Cosy
         # this is only correct if we're in the mode where all chains must
         # end at the same time
         if values.all?{|value| value.nil?}
+          @children = nil 
           return exit
         else
           values.each_with_index do |value,index|
@@ -130,13 +131,14 @@ module Cosy
 end
 
 # s = Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
-# s = Sequencer.new '(1 2):(3 4) 5' # not sure why this is broken...
 # s = Sequencer.new '((1 2):(3 4 5)):(q e. s)' 
 # 
 # s = Sequencer.new 'c4:r c4:-r d4:r'
 # s = Cosy::Sequencer.new '((0 c4 0 bb3 0 ab3 0 g3)*4):(-s r)'
 
 # s = Cosy::Sequencer.new '(mf:q*2 (1:2 3:4) [e4 g4])*4'
+# 
+# s = Cosy::Sequencer.new '(0 1):(2 3 4) 5' 
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1

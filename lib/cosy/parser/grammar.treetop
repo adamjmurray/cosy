@@ -16,6 +16,7 @@ module Cosy
 		end
 
 
+		# Todo: multiple modifiers
 		rule sequence_element
 			chain modifier:modifier <ModifiedNode> / chain 
 		end
@@ -37,12 +38,12 @@ module Cosy
 
 
 		rule modifier
-			 operator:operator operand:(number/ruby) <BehaviorNode>
+			 operator:operator operand:element <BehaviorNode>
 		end
 
 
 		rule operator
-			space? ('*'/'&') space? <OperatorNode>
+			space? ('*'/'&'/'@') space? <OperatorNode>
 		end
 	
 	
@@ -52,7 +53,7 @@ module Cosy
 
 
 		rule primitive
-			note / velocity / duration / number / string / ruby
+			note / velocity / duration / number/ string / var / ruby
 		end
 
 	
@@ -91,10 +92,21 @@ module Cosy
 			/
 		  '"' ('\"' / !'"' .)* '"' <StringNode>
 		end
+		
+		
+		rule var
+			'$'+ / '$' [A-Za-z] [\w]*
+		end
 	
 	
 		rule ruby
 			'{' script:( string / !('}'/'"'/"'") . )* '}' <RubyNode>
+		end
+		
+		
+		# TODO: use this somewhere!
+		rule command
+			'{' ruby '}'
 		end
 
 
