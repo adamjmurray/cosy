@@ -114,10 +114,20 @@ or
 [3] 60:p 62:mp 60:f 62:p 60:mp 62:f
 
 it depends on the rule for the multigenerator
-default is [2], go until all subseqs run out
+default is [2], go until longest subseqs run out
 (60 62)!:(p mp f) would do [1], loop other sequences until the important! seq runs out
-((60 62):(p mp f))&4 would loop until four events are output
-((60 62):(p mp f))&! will loop until all parameters line up on the last value together [3]
+(60 62):(p mp f)!&4 would loop until four events are output
+(60 62)!:(p mp f)! will loop until all parameters line up on the last value together (all important seq must run out at same time) [3]
+
+how about this idea, a "line":
+(c4 d4 e4 f4 g4)=(p f)
+this will do an (interpolated) crescendo from c4 to g4 over the length of the other sequence
+but hmm, what about:
+(c4 d4 e4 f4 g4)=(p f)=(q w)
+I guess its like a chain but interpolates the shorter sequences over the longer one
+if we want to "reverse interpolate" a longer sequence over a shorter one, maybe something like this:
+(c4 d4 e4 f4 g4)=(p f)!=(q w)
+now (p f) is the master subseq
 
 
 {{$x = '1 2 3'}}  vs  {{$x = cosy '1 2 3'; x.transpose(12)}}

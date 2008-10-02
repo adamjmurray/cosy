@@ -96,8 +96,8 @@ module Cosy
 
 end
 
-renderer = Cosy::MidiRenderer.new
-renderer.render('C4:q:mf D4:-e:p D4:e:p [E4 G4 C5]:q:mf', 'test.mid')
+# renderer = Cosy::MidiRenderer.new
+# renderer.render('C4:q:mf D4:-e:p D5:e:mf [E4 G4 C5]:q:mf', 'test.mid')
 
 
 

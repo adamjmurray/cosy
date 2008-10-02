@@ -195,15 +195,19 @@ class TestSequencer < Test::Unit::TestCase
     assert_seq_equals [[1,3],[2,4]], '(1 2):(3 4)'
   end
 
-  
-
   def test_complex_chain_same_length_in_sequence
     assert_seq_equals [[1,3],[2,4],5], '(1 2):(3 4) 5'
   end
     
-  # def test_complex_chain_different_length
-  #   assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
-  # end
+  def test_complex_chain_different_length
+    assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
+    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,9]], '(1 2):(3 4 5):(6 7 8 9)'     
+  end
+  
+  def test_complex_chain_with_repetition
+    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2)*2:(3 4 5):(6 7 8)'     
+    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2):(3 4 5)&4:(6 7 8)'     
+  end
   
   def test_invalid_sequence
     assert_failure '1.'
