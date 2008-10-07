@@ -5,13 +5,12 @@ require File.join(cosy_root, 'cosy')
 
 module Cosy
 
-  class MidiRenderer
+  class MidiRenderer < AbstractRenderer
     attr_reader :midi_sequence
     
     def initialize
+      init
       @midi_sequence = MIDI::Sequence.new()
-      @prev_duration = DURATION['quarter']
-      @prev_velocity = INTENSITY['mf']
       @delta_time = 0
       
       @meta_track = addTrack
@@ -27,7 +26,7 @@ module Cosy
       @sequencer = Sequencer.new(input)
       channel = 0
       while event = @sequencer.next
-        pitches, velocity, duration = getPitchesVelocityDuration(event)        
+        pitches, velocity, duration = getPitchesVelocityDuration(event)    
         if duration < 0
           @delta_time = -duration
         else
@@ -42,6 +41,7 @@ module Cosy
           end
         end
       end
+      @track.events << MIDI::NoteOffEvent.new(1, 0, 0, 960)  
       #print_midi
       File.open(output_file, 'wb'){ |file| @midi_sequence.write(file) }
     end
@@ -67,27 +67,6 @@ module Cosy
       @midi_sequence.tracks << track
       return track
     end
-
-    def getPitchesVelocityDuration(event) 
-      # TODO: refactor this into non-renderer code
-      if event.is_a? Chord # must check Chord first because a Chord is a type of Array
-        pitches = event
-      elsif event.is_a? Chain
-        pitches    = event[0]
-        pitches = [pitches] if not pitches.is_a? Chord
-        duration = event[1]
-        velocity = event[2]
-      else
-        raise "Unexpected event type #{event.class} (#{event.inspect})"
-      end
-
-      velocity ||= @prev_velocity
-      duration ||= @prev_duration
-      @prev_velocity = velocity
-      @prev_duration = duration
-      
-      return pitches,velocity,duration
-    end
     
     def method_missing(name, *args, &block) 
       @midi_sequence.send(name, *args, &block)
@@ -95,9 +74,6 @@ module Cosy
   end
 
 end
-
-# renderer = Cosy::MidiRenderer.new
-# renderer.render('C4:q:mf D4:-e:p D5:e:mf [E4 G4 C5]:q:mf', 'test.mid')
 
 
 

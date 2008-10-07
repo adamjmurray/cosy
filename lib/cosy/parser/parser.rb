@@ -115,10 +115,19 @@ module Cosy
       value[index]
     end
   end
-
+  
+  
   class SequenceNode < ContainerNode
   end
   
+  
+  class CosyNode < SequenceNode
+  end
+  
+  
+  class AssignmentNode < ContainerNode
+  end
+
   
   class ChoiceNode < ContainerNode
     def length
@@ -190,6 +199,9 @@ module Cosy
   class OperatorNode < TerminalNode
   end
 
+  class VariableNode < TerminalNode
+  end
+  
   class ChordNode < ContainerNode 
     def value
       # don't want to cache, so we can re-eval ruby
@@ -211,7 +223,7 @@ module Cosy
     end
   end
 
-  class NoteNode < TerminalNode
+  class PitchNode < TerminalNode
     def value
       if not @value then
         @value = PITCH_CLASS[note_name.text_value.upcase]
@@ -225,7 +237,7 @@ module Cosy
         end
         @value += 12*(octave.value+$OCTAVE_OFFSET)
       end
-      return @value
+      return Pitch.new(@value, text_value)
     end
   end
 
@@ -249,14 +261,14 @@ module Cosy
           end
         end
       end
-      return @value
+      return Duration.new(@value, text_value)
     end  
   end
 
   class VelocityNode < TerminalNode
     def value
       @value = INTENSITY[text_value.downcase] if not @value
-      return @value
+      return Velocity.new(@value, text_value)
     end
   end
 
@@ -273,6 +285,48 @@ module Cosy
       @value = text_value.to_i if not @value
       return @value
     end
+  end
+  
+  class Value
+    attr_accessor :value
+    
+    def initialize(value, text_value=nil)
+      @value = value
+      @text_value = text_value
+    end
+    
+    def inspect
+      "#@text_value (#{self.class}=#@value)"
+    end
+    
+    def eql?(other)
+      if other.respond_to? :value
+        return @value.eql?(other.value)
+      else
+        return @value.eql?(other)
+      end
+    end
+    
+    def ==(other) 
+      if other.is_a? Value
+        return @value == other.value
+      else
+        return @value == other
+      end
+    end
+    
+    def hash
+      @value.hash
+    end
+  end
+  
+  class Pitch < Value
+  end
+  
+  class Velocity < Value
+  end
+  
+  class Duration < Value
   end
 
 
@@ -360,9 +414,54 @@ module Cosy
     end   
   end
 
+
+  module ValueEquality
+    alias orig_ee ==
+    alias orig_eql? eql? 
+    def ==(other)
+      if other.is_a? Cosy::Value
+        return orig_ee(other.value)
+      else
+        return orig_ee(other)
+      end
+    end
+    def eql?(other)
+      if other.is_a? Cosy::Value
+        return orig_eql?(other.value)
+      else
+        return orig_eql?(other)
+      end
+    end
+  end
+
 end
 
-# Cosy::SequenceParser.new.verbose_parse '(C4:mf:q D4:q E4:q F4:q)*3 G4:w'
+
+class Fixnum
+  include Cosy::ValueEquality
+end
+
+# require 'set'
+# s = Set.new
+# #s.add(60)
+# s.add(Cosy::Pitch.new(60))
+# puts '.'
+# s.add(Cosy::Pitch.new(60))
+# puts '..'
+# s.add(60)
+# puts '...'
+# s.add(Cosy::Pitch.new(60))
+# puts '....'
+# s.add(60)
+# 
+# puts s.inspect
+
+#Cosy::SequenceParser.new.verbose_parse '(1 2)@(3 $ 4)'
+
+
+# Cosy::SequenceParser.new.verbose_parse '$x = C4 d4 e4; $x [e4 g5]'
+
+# Cosy::SequenceParser.new.verbose_parse '(C4:mf:q D4 E4 F4)*3 G4:w'
 
 
 # # TODO: these really need to go into unit tests

@@ -9,6 +9,7 @@ module Cosy
     attr_accessor :tree, :parser, :state
 
     def initialize(sequence)
+      @bindings = {}
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
         @tree = sequence
@@ -32,7 +33,7 @@ module Cosy
     def next
       # puts "STATE: #@state"
       if @children
-        values = @children.collect{|child| child.next}
+        values = Chain.new(@children.collect{|child| child.next})
         values.each_with_index do |value,index|
           if value.nil?
             @children[index].restart
@@ -51,7 +52,15 @@ module Cosy
       elsif @state and @state.within_limits?
         node = @state.sequence
 
-        if node.is_a? ModifiedNode
+        if node.is_a? AssignmentNode
+          name = node.value[0].value # extract the String form the nested VariableNode
+          value = node.value[1]
+          @bindings[name] = value
+          
+        elsif node.is_a? VariableNode
+          return enter_or_emit(node)
+          
+        elsif node.is_a? ModifiedNode
           # entering this node already captured the behavior in the state, so
           # we can just go ahead and enter the value
           return enter(node.value)
@@ -99,6 +108,10 @@ module Cosy
     def enter_or_emit(node)
       if node.nil?
         exit
+      elsif node.is_a? VariableNode
+        variable = @bindings[node.value]
+        raise "Undefined variable #{node.value}" if not variable
+        enter(variable)
       elsif node.atom?
         emit(node.value)
       else
@@ -131,6 +144,9 @@ module Cosy
 
 end
 
+# s = Cosy::Sequencer.new '$x = c4:q:mf (f2|g2); $x*2 6 7 8'
+
+
 # s = Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
 # s = Sequencer.new '((1 2):(3 4 5)):(q e. s)' 
 # 
@@ -146,5 +162,5 @@ end
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
-#   puts "==> #{v.inspect}"
+#   puts "==> #{v.inspect} (#{v.class})"
 # end

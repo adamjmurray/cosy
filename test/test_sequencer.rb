@@ -3,6 +3,7 @@ require 'set'
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
 require File.join(cosy_root, 'sequencer/sequencer')
 
+
 class TestSequencer < Test::Unit::TestCase
   include Cosy
   
@@ -37,7 +38,7 @@ class TestSequencer < Test::Unit::TestCase
   def test_single_element
     assert_seq_equals [1], '1'
   end
-
+  
   def test_simple_sequence
     assert_seq_equals [1, 2], '1 2'
   end
@@ -80,7 +81,7 @@ class TestSequencer < Test::Unit::TestCase
   def test_nested_repetitions
     assert_seq_equals [1,2,3,2,3,1,2,3,2,3], '(1 (2 3)*2)*2'
   end
-
+  
   def test_limited_repeat_sequence
     assert_seq_equals   [1,1,1,1],    '1&4'
     assert_seq_equals   [1,1,1,1],    '(1)&4'
@@ -104,7 +105,7 @@ class TestSequencer < Test::Unit::TestCase
   def test_note_chord
      assert_seq_equals [[60,65,67,68]], '[C4 F4 G4 Ab4]'      
   end
-
+  
   def test_chord_sequence
     assert_seq_equals [[60,65],[67,68]], '[C4 F4] [G4 Ab4]'
   end
@@ -194,7 +195,7 @@ class TestSequencer < Test::Unit::TestCase
   def test_complex_chain_same_length
     assert_seq_equals [[1,3],[2,4]], '(1 2):(3 4)'
   end
-
+  
   def test_complex_chain_same_length_in_sequence
     assert_seq_equals [[1,3],[2,4],5], '(1 2):(3 4) 5'
   end

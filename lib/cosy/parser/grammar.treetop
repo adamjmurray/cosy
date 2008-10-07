@@ -2,7 +2,22 @@ module Cosy
 	grammar Sequence
 	
 		rule root
-			choice / space / '' 
+			statement* sequence_root? <CosyNode>
+		end
+	
+		
+		rule statement
+			assignment ';'
+		end
+	
+		
+		rule assignment
+			var space? '=' sequence_root <AssignmentNode>
+		end
+	
+	
+		rule sequence_root
+			choice  / space / ''
 		end
 
 
@@ -53,12 +68,12 @@ module Cosy
 
 
 		rule primitive
-			note / velocity / duration / number/ string / var / ruby
+			pitch / velocity / duration / number/ string / var / ruby
 		end
 
 	
-		rule note
-			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <NoteNode>
+		rule pitch
+			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <PitchNode>
 		end
 
 	
@@ -95,7 +110,9 @@ module Cosy
 		
 		
 		rule var
-			'$'+ / '$' [A-Za-z] [\w]*
+			'$' [A-Za-z] [\w]*  <VariableNode>
+			/ 
+			'$'+ <VariableNode>
 		end
 	
 	
