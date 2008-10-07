@@ -145,7 +145,7 @@ module Cosy
     end
 
     def operand
-      eval_modifier if not @operand
+      eval_modifier # can't cache this in case it's Ruby code...
       return @operand
     end
 
@@ -336,14 +336,11 @@ module Cosy
 
   class RubyNode < TerminalNode
     def value
-      eval if not @value
-      return @value
-    end
-
-    def eval
-      @value = Kernel.eval script.text_value
+      Kernel.eval script.text_value
     end
   end
+  # NOTE: if I ever introduce other things that eval, make sure
+  # to override them and raise in error for the online version
 
 
   class Cosy::SequenceParser

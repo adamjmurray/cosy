@@ -1,7 +1,62 @@
 <html>
-<form action="http://compusition.com/ruby/testcosy.rb">
-	<textarea rows="20" cols="52" name="cosy"></textarea>
+
+Try Some Examples:
+<table><tr>
+<td style="vertical-align: top;"><ul>
+<script type="text/javascript">
+examples = {
+  pitches: {
+    cosy: 'C4 D4 Eb4 g#3 g3 c3 c2', 
+    description: 'a pitch is the note name <b>A-G</b> (or <b>a-g</b>), followed by an optional <b>#</b> (sharp) or <b>b</b> (flat), followed by a number 0-9 (the octave number, where C4 is middle C or MIDI value 60). List a series of pitches to play them in sequence. It is possible to use -1 for the octave. C-1 is the lowest note, G9 is the highest.'
+  },
+  notes: {
+    cosy: 'C4:e:pp D4 E4:q:f F4:e G4:w:p',
+    description: 'A single note has many parameters. Pitch, velocity (or intensity), and duration are some of the most important. Cosy supports a simple syntax for these 3 basic parameter types. Chain multiple parameters together with <b>:</b> (a colon) to form a note. When some parameters are not specified, the previous note\'s parameter value will be used. The initial defaults are pitch=C4, velocity=mf (medium loud), duration=q (quarter note). See the rhythms and velocities examples for more info on these parameters.'	
+  },
+  rhythm: {
+    cosy: 'C4:w h h q q q q e e e e e e e e s s s s s s s s s s s s s s s s r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x w',
+    description: 'Basic duration syntax is as follows:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>e</b> (eighth note)</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>q</b> (sixty-fourth note)</li></ul>Durations can be modified by following them with a single <b>t</b> (triplet) or a <b>.</b> (dot, which means multiply duration * 1.5).'
+  },
+  velocities: {
+    cosy: 'C4:ppp pp p mp mf f ff fff',
+    description: 'Velocity syntax uses the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>f</b> (forte, loud)</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
+  }
+}
+
+for(name in examples) {
+  document.write("<li><a href='javascript: load_example(\"" + name + "\")'>" + name + "</a></li>")
+}
+
+function load_example(name) {
+	example = examples[name]
+	if(example) {
+		document.forms.cosy.i.value = example.cosy
+		desc_div = document.getElementById("example_description")
+		desc_div.style.backgroundColor = "#eee"
+		desc_div.innerHTML = "<u><strong>" + name + "</strong> example</u><br/>" + example.description
+	}
+}
+
+function submit_cosy_form() {
+	i = document.forms.cosy.i.value
+	o = document.forms.cosy.o.value
+	frames.results.location.href = "http://compusition.com/ruby/cosy2midi.rb?i=" + encodeURIComponent(i) + "&o=" + encodeURIComponent(o)
+	return false
+}
+</script>
+</ul></td>
+<td style="vertical-align: top; padding-left: 30px;"><div style="padding: 10px;" id="example_description"></div><br/>
+</td></tr></table>
+
+<form name="cosy" action="http://compusition.com/ruby/cosy2midi.rb" onsubmit="return submit_cosy_form()">
+	<input type="hidden" name="o" value="download"/>
+	<textarea rows="10" cols="54" name="i"></textarea>
 	<br/>
-	<input type="submit"/>
+	<input type="submit" value="Play in Browser" onclick="document.forms.cosy.o.value='embed'"/>
+	<input type="submit" value="Download" onclick="document.forms.cosy.o.value='download'"></input>
 </form>
+
+<iframe name="results" src="http://compusition.com/blank.html" style="width:400px; height:100px;"></iframe>
+
 </html>
+

@@ -24,6 +24,11 @@ module Cosy
 
     def render(input, output_file)
       @sequencer = Sequencer.new(input)
+      if !@sequencer.parsed?
+        parser = @sequencer.parser
+        raise "Failed to parse: #{input}\n" + 
+          "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
+      end
       channel = 0
       while event = @sequencer.next
         pitches, velocity, duration = getPitchesVelocityDuration(event)    
@@ -41,7 +46,7 @@ module Cosy
           end
         end
       end
-      @track.events << MIDI::NoteOffEvent.new(1, 0, 0, 960)  
+      @track.events << MIDI::NoteOffEvent.new(1, 0, 0, 480) # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
       #print_midi
       File.open(output_file, 'wb'){ |file| @midi_sequence.write(file) }
     end
@@ -76,4 +81,4 @@ module Cosy
 end
 
 
-
+# Cosy::MidiRenderer.new.render 'c4 dfff4', 'test.mid'

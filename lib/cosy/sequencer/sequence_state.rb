@@ -13,7 +13,6 @@ module Cosy
       @index = 0
       @count = 0
       @iteration = 0
-      @sequence = sequence
       @length = sequence.length
       @iteration_limit = 1 # the default
       @parent = parent

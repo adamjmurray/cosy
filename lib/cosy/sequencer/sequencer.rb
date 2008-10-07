@@ -29,6 +29,10 @@ module Cosy
         @state = SequenceState.new(@tree) if @tree
       end
     end
+    
+    def parsed?
+      !@tree.nil?
+    end
 
     def next
       # puts "STATE: #@state"
@@ -144,6 +148,8 @@ module Cosy
 
 end
 
+
+# s = Cosy::Sequencer.new '(c4*{rand(10)} g3)*10'
 # s = Cosy::Sequencer.new '$x = c4:q:mf (f2|g2); $x*2 6 7 8'
 
 
