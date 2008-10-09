@@ -7,7 +7,9 @@ ol, ul, ul li {
 }
 </style>
 <p>
-This page lets you try out Cosy from the comfort of your browser. The entered text will submit to my web server where Cosy happily churns out a MIDI file<sup><a href="#note_1">[1]</a></sup>. The examples serve as a <em>very rough</em> initial attempt at some documentation.
+This page lets you try out Cosy from the comfort of your browser. If you don't know what Cosy is, <a href="/web/software/cosy">I describe it here</a>. The text entered into the form on this page will submit to my web server where Cosy happily churns out a MIDI file<sup><a href="#note_1">[1]</a></sup>. These examples serve as a <em>very rough</em> initial attempt at some documentation.
+</p>
+<p>Thanks for taking the time to try this out. If you have any problems using this page, questions, feedback, or whatever, please <a href="/web/about#contact-info">send me an email</a>.
 </p>
 
 <a name="examples">Examples:</a>
@@ -18,7 +20,7 @@ This page lets you try out Cosy from the comfort of your browser. The entered te
 var examples = {
   pitch: {
     cosy: 'C4 D4 Eb4 g#3 g3 c3 c2', 
-    description: 'a pitch symbol consists of:<ul><li>the note name: <b>A-G</b> (or <b>a-g</b>)</li><li>zero or more accidentals: <b>#</b> (sharp) or <b>b</b> (flat)</li><li>a octave number <b>0-9</b></li></ul> C4 is middle C (MIDI pitch 60) and A4 is A440, the standard reference pitch for tuning. -1 is also a valid octave number. C-1 is the lowest note, G9 is the highest.<br/><br/>List a series of pitches to play them in sequence. '
+    description: 'a pitch symbol consists of:<ul><li>the note name: <b>A-G</b> (or <b>a-g</b>)</li><li>zero or more accidentals: <b>#</b> (sharp) or <b>b</b> (flat)</li><li>an octave number <b>0-9</b></li></ul> C4 is middle C (MIDI pitch 60) and A4 is A440, the standard reference pitch for tuning. -1 is also a valid octave number. C-1 is the lowest note, G9 is the highest.<br/><br/>List a series of pitches to play them in sequence. '
   },
   duration: {
     cosy: 'C4:w h qt qt qt q. e q. e 8s r r r r r r r x x x x x x x x x x x x x x x x w',
@@ -42,11 +44,11 @@ var examples = {
   },
   repetition: {
     cosy: '((G4:e F4)*3 E4 D4)*2 C4*5',
-    description: 'To repeat a note, follow the note with <b>*N</b> where N is the number of repetitions. To repeat a portion of a sequence, wrap the subsequence in <b>(</b>parentheses<b>)</b> and the follow it with <b>*N</b>.'	
+    description: 'To repeat a note, follow the note with <b>*N</b> where N is the number of repetitions. To repeat a portion of a sequence, wrap the subsequence in <b>(</b>parentheses<b>)</b> and then follow it with <b>*N</b>.'	
   },
-  'count&nbsp;limit': {
+  'count-limit': {
     cosy: '(C4 D4 E4)&5 (G4 F4 E4)&4 ((B3 D4)*2 A3)&6 C4',
-    description: 'The count limit can be used to partially play/repeat a sequence and output a specific number of notes. To use it, wrap a subsequence in <b>(</b>parentheses<b>)</b> and the follow it with <b>&N</b> where N is the number of notes to play.'	
+    description: 'The count limit can be used to partially play/repeat a sequence and output a specific number of notes. To use it, wrap a subsequence in <b>(</b>parentheses<b>)</b> and then follow it with <b>&N</b> where N is the number of notes to play.'	
   },
   choice: {
     cosy: '( (C4 | E4 | G4)  (C5 | E5 | G5) )*8',
@@ -58,7 +60,7 @@ var examples = {
   },
   'chaining': {
     cosy: '((G4 F4 E4 D4)*4 C4):(q. e):(p mf ff)',
-    description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays will cycling through two durations (q. e) and three velocities (p mf ff)'	
+    description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays while cycling through two durations (q. e) and three velocities (p mf ff)'	
   }
 }
 
@@ -78,7 +80,6 @@ function load_example(name) {
 }
 
 function submit_cosy_form() {
-	location.href = "#form"
 	frames.results.location.href = 'http://compusition.com/html/generating.html'
 	setTimeout('doSubmit()', 500) // delay a moment to display the loading page and avoid a blank frame (what's half a second more in the grand scheme of things?)
 	return false
