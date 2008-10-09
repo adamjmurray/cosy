@@ -2,7 +2,7 @@ module Cosy
 	grammar Sequence
 	
 		rule root
-			statement* sequence_root? <CosyNode>
+			(statement space?)* sequence_root? <CosyNode>
 		end
 	
 		
@@ -12,7 +12,7 @@ module Cosy
 	
 		
 		rule assignment
-			var space? '=' sequence_root <AssignmentNode>
+			var space? '=' sequence_root space? <AssignmentNode>
 		end
 	
 	

@@ -1,25 +1,64 @@
-<html>
+<style>
+ol, ul, ul li {
+	margin-top:0;
+	padding-top:0;
+	padding-bottom:0;
+	margin-bottom:0;
+}
+</style>
+<p>
+This page lets you try out Cosy from the comfort of your browser. The entered text will submit to my web server where Cosy happily churns out a MIDI file<sup><a href="#note_1">[1]</a></sup>. The examples serve as a <em>very rough</em> initial attempt at some documentation.
+</p>
 
-Try Some Examples:
-<table><tr>
-<td style="vertical-align: top;"><ul>
+<a name="examples">Examples:</a>
+<table style="margin:0;padding:0;"><tbody style="border:0;"><tr>
+<td style="vertical-align: top;">
+	<ol style="padding-left:18px;">
 <script type="text/javascript">
-examples = {
-  pitches: {
+var examples = {
+  pitch: {
     cosy: 'C4 D4 Eb4 g#3 g3 c3 c2', 
-    description: 'a pitch is the note name <b>A-G</b> (or <b>a-g</b>), followed by an optional <b>#</b> (sharp) or <b>b</b> (flat), followed by a number 0-9 (the octave number, where C4 is middle C or MIDI value 60). List a series of pitches to play them in sequence. It is possible to use -1 for the octave. C-1 is the lowest note, G9 is the highest.'
+    description: 'a pitch symbol consists of:<ul><li>the note name: <b>A-G</b> (or <b>a-g</b>)</li><li>zero or more accidentals: <b>#</b> (sharp) or <b>b</b> (flat)</li><li>a octave number <b>0-9</b></li></ul> C4 is middle C (MIDI pitch 60) and A4 is A440, the standard reference pitch for tuning. -1 is also a valid octave number. C-1 is the lowest note, G9 is the highest.<br/><br/>List a series of pitches to play them in sequence. '
   },
-  notes: {
-    cosy: 'C4:e:pp D4 E4:q:f F4:e G4:w:p',
-    description: 'A single note has many parameters. Pitch, velocity (or intensity), and duration are some of the most important. Cosy supports a simple syntax for these 3 basic parameter types. Chain multiple parameters together with <b>:</b> (a colon) to form a note. When some parameters are not specified, the previous note\'s parameter value will be used. The initial defaults are pitch=C4, velocity=mf (medium loud), duration=q (quarter note). See the rhythms and velocities examples for more info on these parameters.'	
+  duration: {
+    cosy: 'C4:w h qt qt qt q. e q. e 8s r r r r r r r x x x x x x x x x x x x x x x x w',
+    description: 'Durations determine rhythm. By default, Cosy plays all notes legato, so the next note plays when the previous note ends. A duration symbol consists of:<ul><li>an optional number that multiplies the base duration</li><li>a base duration, which is one of the following letters:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>e</b> (eighth note)</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>x</b> (sixty-fourth note)</li></ul></li><li>zero or more modifiers, which is one of the following symbols:<ul><li><b>.</b> (dotted note, 150% base duration)</li><li><b>t</b> (triplet, 66.67% base duration)</li></ul></li></ul>For example, \'<b>q</b>\' is a quarter note, \'<b>3q</b>\' is a duration of 3 quarter notes, \'<b>qt</b>\' is a triplet quarter note, and \'<b>q..</b>\' is a double-dotted quarter note.'
   },
-  rhythm: {
-    cosy: 'C4:w h h q q q q e e e e e e e e s s s s s s s s s s s s s s s s r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x w',
-    description: 'Basic duration syntax is as follows:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>e</b> (eighth note)</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>q</b> (sixty-fourth note)</li></ul>Durations can be modified by following them with a single <b>t</b> (triplet) or a <b>.</b> (dot, which means multiply duration * 1.5).'
-  },
-  velocities: {
+  velocity: {
     cosy: 'C4:ppp pp p mp mf f ff fff',
-    description: 'Velocity syntax uses the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>f</b> (forte, loud)</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
+    description: 'Velocity determines the intensity (loudness) of a note. Velocity symbols are the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>f</b> (forte, loud)</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
+  },
+  note: {
+    cosy: 'C4:e:mf  D4  E4:q:mp  F4:e  G4:h\nA4:e:p  F4  E4:mp  D4:q.:mf  C4:w:ff',
+    description: 'A single note has many parameters. Pitch, velocity, and duration are the basic parameters needed for working with MIDI. Cosy understands symbols that represent these 3 basic parameter types. See the pitch, rhythm, and velocity examples for details.<br/><br/>Multiple parameters are chained together with <b>:</b> (colon) to form a note. If some parameters are not specified, the previous note\'s parameter will be used. The initial default is C4:q:mf, that is pitch=C4 (middle C), duration=q (quarter note), velocity=mf (medium loud).'	
+  },
+  chords: {
+	cosy: '[C3 G3 Eb4 C5]:h [C3 Ab3 Eb4 C5] [Db3 Ab3 F4 Db5] [G3 D4 F4 B4] [C2 C3 G3 C4 G4 C5]:2w',
+	description: 'Chords are a group of pitches in <b>[</b>square brackets<b>]</b>. All pitches in a chord sound simultaneously.'	
+  },
+  rests: {	
+	cosy: 'E4:e D4 C4 -e E4:s -e. F4:e G4 -q B3:q -q E3:w',
+	description: 'Rests are a duration with a \'<b>-</b>\' (negative sign) in front. For example, \'<b>-e</b>\' is an eighth rest. Pitch and velocity have no effect when a rest is played. Remember that notes use the previous parameter value if none is specified, so the duration must be set to a non-rest to play a note after a rest.'
+  },
+  repetition: {
+    cosy: '((G4:e F4)*3 E4 D4)*2 C4*5',
+    description: 'To repeat a note, follow the note with <b>*N</b> where N is the number of repetitions. To repeat a portion of a sequence, wrap the subsequence in <b>(</b>parentheses<b>)</b> and the follow it with <b>*N</b>.'	
+  },
+  'count&nbsp;limit': {
+    cosy: '(C4 D4 E4)&5 (G4 F4 E4)&4 ((B3 D4)*2 A3)&6 C4',
+    description: 'The count limit can be used to partially play/repeat a sequence and output a specific number of notes. To use it, wrap a subsequence in <b>(</b>parentheses<b>)</b> and the follow it with <b>&N</b> where N is the number of notes to play.'	
+  },
+  choice: {
+    cosy: '( (C4 | E4 | G4)  (C5 | E5 | G5) )*8',
+    description: 'Choices are separated by \'<b>|</b>\'. This is one of the basic non-deterministic features of Cosy. When confronted with a choice, Cosy will randomly choose one of the options.<br/><br/>Once a MIDI file is rendered, the choices are hardcoded in the file. If you render the same sequence again, the output should be different each time.'	
+  },
+  variables: {
+    cosy: '$C_MAJOR     = [C3 G3 E4 C5];\n$C_MINOR     = [C3 G3 Eb4 C5];\n$LEAD_IN     = G4 A4 Bb4 B4;\n$FINAL_PITCH = C2;\n\n$LEAD_IN:s $C_MAJOR:h $C_MINOR:h $FINAL_PITCH:w',	
+    description: 'Variables may be defined to reduce redundancy in the sequence or to make a sequence "self documenting". Variable names start with a \'<b>$</b>\', followed by an alphabetic character (<b>A-Z</b>, <b>a-z</b>) followed by any number of alphanumeric characters or underscores  (<b>A-Z</b>, <b>a-z</b>, <b>0-9</b>, <b>_</b>) .<br/><br/>Before the main sequence, a list of variable declarations can appear. These look like:<br/><b>$VARIABLE = {sequence};</b><br/>where {sequence} is any normal sequence. The variable names may then appear in the main sequence to insert the variable\'s value.'
+  },
+  'chaining': {
+    cosy: '((G4 F4 E4 D4)*4 C4):(q. e):(p mf ff)',
+    description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays will cycling through two durations (q. e) and three velocities (p mf ff)'	
   }
 }
 
@@ -32,31 +71,53 @@ function load_example(name) {
 	if(example) {
 		document.forms.cosy.i.value = example.cosy
 		desc_div = document.getElementById("example_description")
-		desc_div.style.backgroundColor = "#eee"
-		desc_div.innerHTML = "<u><strong>" + name + "</strong> example</u><br/>" + example.description
+		desc_div.style.display = ""
+		desc_div.innerHTML = "<u>" + name + " example</u><div>" + example.description + "</div>"
+		location.href="#examples"
 	}
 }
 
 function submit_cosy_form() {
+	location.href = "#form"
+	frames.results.location.href = 'http://compusition.com/html/generating.html'
+	setTimeout('doSubmit()', 500) // delay a moment to display the loading page and avoid a blank frame (what's half a second more in the grand scheme of things?)
+	return false
+}
+
+function doSubmit() {
 	i = document.forms.cosy.i.value
 	o = document.forms.cosy.o.value
 	frames.results.location.href = "http://compusition.com/ruby/cosy2midi.rb?i=" + encodeURIComponent(i) + "&o=" + encodeURIComponent(o)
-	return false
 }
 </script>
-</ul></td>
-<td style="vertical-align: top; padding-left: 30px;"><div style="padding: 10px;" id="example_description"></div><br/>
-</td></tr></table>
+</ol></td>
+<td style="vertical-align: top; padding-left: 6px;"><div style="display: none; background-color: #eee; border: 1px solid gray; -moz-border-radius: 5px;
+-webkit-border-radius: 5px; box-shadow: 10px 10px 5px #888; -webkit-box-shadow: rgb(136,136,136) 10px 10px 5px; padding: 5px 5px 5px 15px;" id="example_description"></div><br/>
+</td></tr></tbody></table>
+
+<a name="form"></a>
+Select an example, click the "Play in Browser" or "Download" button<sup><a href="#note_2">[2]</a></sup> below to generate a MIDI file. Feel free to change the example sequence or try writing your own.
 
 <form name="cosy" action="http://compusition.com/ruby/cosy2midi.rb" onsubmit="return submit_cosy_form()">
-	<input type="hidden" name="o" value="download"/>
-	<textarea rows="10" cols="54" name="i"></textarea>
+	<input type="hidden" name="o" value="download"></input>
+	<textarea rows="8" cols="54" name="i"></textarea>
 	<br/>
-	<input type="submit" value="Play in Browser" onclick="document.forms.cosy.o.value='embed'"/>
+	<input type="submit" value="Play in Browser" onclick="document.forms.cosy.o.value='embed'"></input>
 	<input type="submit" value="Download" onclick="document.forms.cosy.o.value='download'"></input>
+	<a href="#examples" style="margin-left:50px;">Back to examples</a>
 </form>
 
-<iframe name="results" src="http://compusition.com/blank.html" style="width:400px; height:100px;"></iframe>
+<iframe name="results" src="http://compusition.com/html/cosy-render-area.html" style="width:420px; height:100px;"></iframe>
 
-</html>
-
+<br/><br/>
+<u style="font-size: larger">NOTES</u>
+<ol>
+	<li><a name="note_1"></a>
+Please note that <a href="http://en.wikipedia.org/wiki/Musical_Instrument_Digital_Interface" title="Wikipedia: MIDI">MIDI files</a> are just instructions for generating music, not the raw audio data that you would find in a .wav or .mp3 file. MIDI files will normally play using your soundcard's built-in MIDI synthesizer, which probably sounds like a cheap 1980's synthesizer. This was the easiest way to let anyone try out Cosy from a web site. Remember, Cosy is about <em>sequencing</em>. It is up to the <em>synthesizers</em> to make it sound good. I typically would send MIDI to something like <a href="http://www.apple.com/logicstudio/" title="Logic Studio product page">Logic</a> to generate good-sounding output.<br/><br/>
+	</li>
+	<li><a name="note_2"></a>
+		The "Play in Browser" option requires that your browser has a MIDI plugin (like QuickTime). It works well for me on OS X (Safari or Firefox), but the QuickTime plugin often misbehaves on Windows. On Windows, sometimes there is a really loud noise when playback initially begins, sometimes the first note plays for too long on the first playback, and sometimes it doesn't work at all (Vista + Media Player *cough* *cough*).
+<br/><br/>
+		If you have any issues, please try the "Download" button, which should prompt you to save a file and open it on your computer's default MIDI player. This works fine everywhere I have tried it.
+	</li>
+</ol>

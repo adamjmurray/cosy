@@ -8,8 +8,8 @@ module Cosy
 
     attr_accessor :tree, :parser, :state
 
-    def initialize(sequence)
-      @bindings = {}
+    def initialize(sequence, bindings={})
+      @bindings = bindings
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
         @tree = sequence
@@ -70,7 +70,7 @@ module Cosy
           return enter(node.value)
           
         elsif node.is_a? ChainNode
-          if node.value.all?{|child| child.atom?} then
+          if node.value.all?{|child| child.atom? and not child.is_a? VariableNode} then
             value = Chain.new(node.value.collect{|child| child.value})
             value = value[0] if value.length == 1 # unwrap unnecessary arrays
             return emit(value)
@@ -79,13 +79,10 @@ module Cosy
             return enter(node.value[0])
           else
             # spawn multiple subsequencers
-            # TODO: something is really funky here, because I am not
-            # attaching the new child states to the current state, so
-            # count limites, etc won't work right (although the current)
-            # code for within_limits? will not work for chains and partial iteration
+            # TODO: within_limits? will not work for chains and partial iteration
             # becuase the shortest child will make it fail early (we need to only
             # consider the longest child in that scenario)
-            @children = node.value.collect{|child| Sequencer.new(child)}
+            @children = node.value.collect{|child| Sequencer.new(child, @bindings)}
             @child_looped = Array.new(@children.length)
             return self.next
           end

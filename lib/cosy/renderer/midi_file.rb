@@ -31,16 +31,20 @@ module Cosy
       end
       channel = 0
       while event = @sequencer.next
-        pitches, velocity, duration = getPitchesVelocityDuration(event)    
+        pitches, velocity, duration = getPitchesVelocityDuration(event)
+        velocity = velocity.to_i
+        duration = duration.to_i   
         if duration < 0
           @delta_time = -duration
         else
           # TODO: special case duration 0?
           pitches.each do |pitch|
+            pitch = pitch.to_i
             @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, @delta_time)
             @delta_time = 0
           end
           pitches.each do |pitch|
+            pitch = pitch.to_i
             @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)  
             duration = 0      
           end
@@ -81,4 +85,4 @@ module Cosy
 end
 
 
-# Cosy::MidiRenderer.new.render 'c4 dfff4', 'test.mid'
+# Cosy::MidiRenderer.new.render 'C4:w h. h', 'test.mid'

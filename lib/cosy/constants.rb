@@ -7,7 +7,11 @@ module Cosy
   $OCTAVE_OFFSET = 1  # this is a global instead of a constant so it can be altered if desired
 
   INTENSITY = {
-    'ppp'=>15, 'pp'=>31, 'p'=>47, 'mp'=>63, 
+    # If I go much below 24, ppp is barely audible with GM piano sound
+    # But maybe that's a dumb reason to not make it
+    # ppp=>15 pp=>31, p=>47
+    # This should be easily configurable with a command node
+    'ppp'=>24, 'pp'=>36, 'p'=>48, 'mp'=>63, 
     'mf'=>79, 'f'=>95, 'ff'=>111, 'fff'=>127    
   }
 

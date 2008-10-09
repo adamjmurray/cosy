@@ -292,6 +292,11 @@ class TestSequencingParser < Test::Unit::TestCase
     # 1 3 2 6   1 4 2 6   1 6 2 6 
   end
 
+  def test_assignments
+    parse '$X=1 2 3 4; $X'
+    parse '$X=1 2 3 4; $Y=5; $X $Y'   
+  end
+
   def test_invalid_syntax
     assert_failure '1.'
     assert_failure '1 2)*3'

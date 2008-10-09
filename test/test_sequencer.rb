@@ -216,6 +216,22 @@ class TestSequencer < Test::Unit::TestCase
     assert_failure 'asdf'
   end
   
+  def test_rhythm
+    assert_seq_equals [1920, 960, 480, 240, 120, 60, 30], 'w h q e s r x'
+    assert_seq_equals [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. e. s. r. x.'
+    # TODO: multiple dots, triplets, multipliers, combos
+  end
+  
+  def test_variables
+    assert_seq_equals [1,2,3,4], '$X=1 2 3 4; $X'
+    assert_seq_equals [1,2,3,4,5], '$X=1 2 3 4; $Y=5; $X $Y'
+    assert_seq_equals [1,2,3,4,5,[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y $Z'
+    #assert_seq_equals [1,2,3,4,[5,100],[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
+  end
+  
+
+
+  # full melodic (note, rhythm, velocity) sequence
       
   # complex choices
   # 'c4 ([c4 g4]*2 | [b2 b3 b4]*2)'
@@ -226,9 +242,5 @@ class TestSequencer < Test::Unit::TestCase
   # complex chains (1 2):(3 4)
   
   # nested chains?  (1:2  3:4):(5  6  7) should produce 1:2:5  3:4:6  1:2:7  
-
-# rhythm, especially dotted and triplet rhythm
-
-# full melodic (note, rhythm, velocity) sequence
   
 end
