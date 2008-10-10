@@ -90,8 +90,10 @@ class TestSequencer < Test::Unit::TestCase
   
   def test_fractional_repetitions
     assert_sequence   [1,2,1,2,1],  '(1 2)*2.5'
+    assert_sequence   [1,2,1,2,1],  '(1 2)*5/2'
     assert_sequence   [1,2,3,1],    '(1 2 3)*1.3'
     assert_sequence   [1,2,3,1,2],  '(1 2 3)*1.4'
+    assert_sequence   [1,2,3,1],    '(1 2 3)*4/3'
   end
   
   def test_nested_repetitions
@@ -101,6 +103,7 @@ class TestSequencer < Test::Unit::TestCase
   def test_count_limit
     assert_sequence   [1,1,1,1],    '1&4'
     assert_sequence   [1,1,1,1],    '(1)&4'
+    assert_sequence   [1,1,1,1],    '1&8/2'
     assert_sequence   [],           '1&0'
     assert_sequence   [],           '1&-1'
     assert_sequence   [1,2,1,2],    '(1 2)&4'
@@ -241,7 +244,7 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_rhythm_basic
-    assert_sequence [1920, 960, 480, 240, 120, 60, 30], 'w h q e s r x'
+    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'w h q e s r x'
     assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. e. s. r. x.'
   end
   
@@ -256,11 +259,17 @@ class TestSequencer < Test::Unit::TestCase
       2.0/3 => 't',
       2.0/3 * 1.5 => 't.',
       1.5 * 2.0/3 => '.t',
-      1.5 * 2.0/3 => '.t'
+      1.5 * 2.0/3 => '.t',
+      4.0/5 => ['4/5','']  # quintuplets!
     }
     tests.each_pair do |multiplier,modifier|
+      premod = ''
+      if modifier.is_a? Array
+        premod = modifier[0]
+        modifier = modifier[1]
+      end
       expected = base_expect.map{|val| val*multiplier}
-      input = base_input.map{|val|val+modifier}.join(' ')
+      input = base_input.map{|val|premod+val+modifier}.join(' ')
       assert_sequence expected, input
     end
   end

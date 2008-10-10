@@ -286,6 +286,16 @@ module Cosy
       return @value
     end
   end
+
+  class RatioNode < TerminalNode
+    def value
+      if not @value
+        ints = text_value.split("/").map{|s|s.to_i}
+        @value = ints[0].to_f / ints[1]
+      end
+      return @value
+    end
+  end
   
   class Value
     attr_accessor :value
@@ -454,6 +464,8 @@ end
 # puts s.inspect
 
 #Cosy::SequenceParser.new.verbose_parse '(1 2)@(3 $ 4)'
+
+#Cosy::SequenceParser.new.verbose_parse '(1 2)*2:(3 4 5):(6 7 8)'
 
 
 # Cosy::SequenceParser.new.verbose_parse '$x = C4 d4 e4; $x [e4 g5]'

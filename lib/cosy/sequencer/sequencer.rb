@@ -161,6 +161,7 @@ end
 #s = Cosy::Sequencer.new '(0 1):(2 3 4) 5' 
 
 # s = Cosy::Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
+# s = Cosy::Sequencer.new '(1 2)*2:(3 4 5):(6 7 8)'
 # 
 # max = 20
 # while v=s.next and max > 0
