@@ -3,7 +3,7 @@ module Cosy
 
     def init
       @prev_pitches  = [0]
-      @prev_duration = DURATION['quarter']
+      @prev_duration = DURATION_NAME['quarter']
       @prev_velocity = INTENSITY['mf']
     end
     

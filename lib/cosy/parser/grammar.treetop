@@ -83,8 +83,12 @@ module Cosy
 
 	
 		rule duration
-			multiplier:(number/'-')? metrical_duration:[WwHhQqEeSsRrXx] modifier:('t'? '.'*)? <DurationNode>
+			multiplier:(number/'-')? metrical_duration:[WwHhQqEeSsRrXx] modifier:duration_modifier* <DurationNode>
 		end
+		
+		rule duration_modifier
+		  't' / '.'
+	  end
 
 	
 		rule number

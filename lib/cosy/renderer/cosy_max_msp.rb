@@ -20,8 +20,8 @@ module Cosy
       @seq = Sequencer.new('')
       @time_to_next = 1
       @end = false      
-      @prev_duration = DURATION['sixtyfourth']
-      @ticks_per_bang = DURATION['sixtyfourth'].to_f
+      @prev_duration = DURATION_NAME['sixtyfourth']
+      @ticks_per_bang = DURATION_NAME['sixtyfourth'].to_f
     end
 
     def set(input)
@@ -34,7 +34,7 @@ module Cosy
       init
       @seq.restart if @seq
       @time_to_next = 1
-      @prev_duration = DURATION['sixtyfourth']
+      @prev_duration = DURATION_NAME['sixtyfourth']
       @end = false
     end
     

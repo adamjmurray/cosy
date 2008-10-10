@@ -6,121 +6,151 @@ require File.join(cosy_root, 'sequencer/sequencer')
 
 class TestSequencer < Test::Unit::TestCase
   include Cosy
+  SEQUENCE_COUNT_LIMIT = 1000
   
   def sequence input
     seq = Sequencer.new(input)
+    p = seq.parser
     assert_not_nil(seq.tree, 
       "Failed to parse: #{input}\n" + 
-      "(#{seq.parser.failure_line},#{seq.parser.failure_column}): #{seq.parser.failure_reason}")
+      "(#{p.failure_line},#{p.failure_column}): #{p.failure_reason}")
     return seq
   end
   
   def assert_done seq
-      assert_nil(seq.next)
+    assert_nil(seq.next)
   end
   
-  def assert_seq_equals expected_values, seq_str
-    seq = sequence seq_str
-    expected_values.each do |expected|
-      n = seq.next
-      assert_not_nil(n)
-      assert_equal expected,n
+  def assert_sequence(expected, input)
+    seq = sequence(input)
+    actual = []
+    count = 0
+    val = seq.next
+    while val and count < SEQUENCE_COUNT_LIMIT
+      actual << val
+      count += 1
+      val = seq.next
     end
-    assert_done seq        
+    if count == SEQUENCE_COUNT_LIMIT
+      fail "#{input} output more than #{SEQUENCE_COUNT_LIMIT}" 
+    end
+    assert_equal(expected, actual)
   end
   
-  def assert_failure invalid_syntax
-    seq = Sequencer.new(invalid_syntax)
-    assert_nil(seq.tree, "Successfully parsed invalid syntax: #{invalid_syntax}")
-    return nil
+  def assert_failure(input)
+    seq = Sequencer.new(input)
+    assert_nil(seq.tree, 
+      "Successfully parsed invalid syntax: #{input}")
+  end
+  
+  def test_infinite_loop_prevention
+    assert_raises(RuntimeError) { assert_sequence [], "1*#{SEQUENCE_COUNT_LIMIT+1}" }
   end
   
   def test_single_element
-    assert_seq_equals [1], '1'
+    assert_sequence [1], '1'
   end
   
   def test_simple_sequence
-    assert_seq_equals [1, 2], '1 2'
+    assert_sequence [1, 2], '1 2'
   end
   
   def test_single_chord
-    assert_seq_equals [[1,2,3]], '[1 2 3]'
+    assert_sequence [[1,2,3]], '[1 2 3]'
   end
   
   def test_numeric_chord_sequence
-    assert_seq_equals [[1,2],[3,4],[5,6,7]], '[1 2] [3 4] [5 6 7]'
+    assert_sequence [[1,2],[3,4],[5,6,7]], '[1 2] [3 4] [5 6 7]'
   end
   
   def test_chord_and_number_sequence
-    assert_seq_equals [1, [2,3], 4, [5,6]], '1 [2 3] 4 [5 6]'
+    assert_sequence [1, [2,3], 4, [5,6]], '1 [2 3] 4 [5 6]'
   end
   
   def test_repeated_sequence
-    assert_seq_equals   [1,1],      '1*2'
-    assert_seq_equals   [1,1,1],    '(1)*3'
-    assert_seq_equals   [],         '1*0'
-    assert_seq_equals   [],         '1*-1'
-    assert_seq_equals   [1,2],      '(1 2)*1'
-    assert_seq_equals   [1,2,1,2],  '(1 2)*2'
-    assert_seq_equals   [],         '(1 2)*0'
-    assert_seq_equals   [],         '(1 2)*-1'
+    assert_sequence   [1,1],      '1*2'
+    assert_sequence   [1,1,1],    '(1)*3'
+    assert_sequence   [],         '1*0'
+    assert_sequence   [],         '1*-1'
+    assert_sequence   [1,2],      '(1 2)*1'
+    assert_sequence   [1,2,1,2],  '(1 2)*2'
+    assert_sequence   [],         '(1 2)*0'
+    assert_sequence   [],         '(1 2)*-1'
   end
   
   def test_heterogenous_repeated_sequence
-    assert_seq_equals [0,1,1,1,2,3,2,3], '0 1*3 (2 3)*2'
+    assert_sequence [0,1,1,1,2,3,2,3,[4,5],[4,5],[4,5]],
+      '0 1*3 (2 3)*2 [4 5]*3'
   end
   
   def test_repeated_sequence_with_eval_repetitions
-    assert_seq_equals [1,2,1,2], '(1 2)*{8/4}'
+    assert_sequence [1,2,1,2], '(1 2)*{8/4}'
+    assert_sequence [1,1,1,1], '1*{2**2}'
   end
   
   def test_fractional_repetitions
-    assert_seq_equals   [1,2,1,2,1],      '(1 2)*2.5'
+    assert_sequence   [1,2,1,2,1],  '(1 2)*2.5'
+    assert_sequence   [1,2,3,1],    '(1 2 3)*1.3'
+    assert_sequence   [1,2,3,1,2],  '(1 2 3)*1.4'
   end
   
   def test_nested_repetitions
-    assert_seq_equals [1,2,3,2,3,1,2,3,2,3], '(1 (2 3)*2)*2'
+    assert_sequence [1,2,3,2,3,1,2,3,2,3], '(1 (2 3)*2)*2'
   end
   
-  def test_limited_repeat_sequence
-    assert_seq_equals   [1,1,1,1],    '1&4'
-    assert_seq_equals   [1,1,1,1],    '(1)&4'
-    assert_seq_equals   [],           '1&0'
-    assert_seq_equals   [],           '1&-1'
-    assert_seq_equals   [1,2,1,2],    '(1 2)&4'
-    assert_seq_equals   [1,2,1,2,1],  '(1 2)&5'
-    assert_seq_equals   [1,2,3,1],    '(1 2 3)&4'
-    assert_seq_equals   [],           '(1 2)&0'
-    assert_seq_equals   [],           '(1 2)&-1'    
+  def test_count_limit
+    assert_sequence   [1,1,1,1],    '1&4'
+    assert_sequence   [1,1,1,1],    '(1)&4'
+    assert_sequence   [],           '1&0'
+    assert_sequence   [],           '1&-1'
+    assert_sequence   [1,2,1,2],    '(1 2)&4'
+    assert_sequence   [1,2,1,2,1],  '(1 2)&5'
+    assert_sequence   [1,2,3,1],    '(1 2 3)&4'
+    assert_sequence   [],           '(1 2)&0'
+    assert_sequence   [],           '(1 2)&-1'    
+  end
+  
+  def test_eval_count_limit
+    assert_sequence [1,2],     '(1 2)&{8/4}'
+    assert_sequence [1,1,1,1], '1&{2**2}'    
+    assert_sequence [1,2,3,1], '(1 2 3)&{2**2}'    
+  end
+  
+  def test_nested_count_limit
+    assert_sequence [1,2,3,2,1,2,3,2,1], '(1 (2 3)&3)&9'
+  end
+  
+  def test_count_limit_and_repeat
+    assert_sequence [1,2,3,2,3,2,3,1,2], '(1 (2 3)*3)&9'
   end
   
   def test_notes
-    assert_seq_equals [60,65,67,68], 'C4 F4 G4 Ab4'      
+    assert_sequence [60,65,67,68], 'C4 F4 G4 Ab4'      
   end
   
   def test_repeated_notes
-    assert_seq_equals [60,65,65,65,67,68,67,68], 'C4 F4*3 (G4 Ab4)*2'      
+    assert_sequence [60,65,65,65,67,68,67,68], 'C4 F4*3 (G4 Ab4)*2'      
   end
   
   def test_note_chord
-     assert_seq_equals [[60,65,67,68]], '[C4 F4 G4 Ab4]'      
+     assert_sequence [[60,65,67,68]], '[C4 F4 G4 Ab4]'      
   end
   
   def test_chord_sequence
-    assert_seq_equals [[60,65],[67,68]], '[C4 F4] [G4 Ab4]'
+    assert_sequence [[60,65],[67,68]], '[C4 F4] [G4 Ab4]'
   end
   
   def test_repeated_chord
-    assert_seq_equals [[60,65],[60,65]], '[C4 F4]*2'      
+    assert_sequence [[60,65],[60,65]], '[C4 F4]*2'      
   end
   
   def test_simple_chain
-    assert_seq_equals [[1,2]], '1:2'
-    assert_seq_equals [[1,2,3]], '1:2:3'
+    assert_sequence [[1,2]],   '1:2'
+    assert_sequence [[1,2,3]], '1:2:3'
   end
   
   def test_simple_chain_sequence
-    assert_seq_equals [[1,2],[3,4,5]], '1:2 3:4:5'
+    assert_sequence [[1,2],[3,4,5]], '1:2 3:4:5'
   end
   
   def test_simple_choice
@@ -189,47 +219,64 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_chain_secondary_list
-    assert_seq_equals [[60,120],[60,240],65], 'c4:(s e) f4'
+    assert_sequence [[60,120],[60,240],65], 'c4:(s e) f4'
   end
   
   def test_complex_chain_same_length
-    assert_seq_equals [[1,3],[2,4]], '(1 2):(3 4)'
+    assert_sequence [[1,3],[2,4]], '(1 2):(3 4)'
   end
   
   def test_complex_chain_same_length_in_sequence
-    assert_seq_equals [[1,3],[2,4],5], '(1 2):(3 4) 5'
+    assert_sequence [[1,3],[2,4],5], '(1 2):(3 4) 5'
   end
     
   def test_complex_chain_different_length
-    assert_seq_equals [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
-    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,9]], '(1 2):(3 4 5):(6 7 8 9)'     
+    assert_sequence [[1,3],[2,4],[1,5]], '(1 2):(3 4 5)'
+    assert_sequence [[1,3,6],[2,4,7],[1,5,8],[2,3,9]], '(1 2):(3 4 5):(6 7 8 9)'     
   end
   
   def test_complex_chain_with_repetition
-    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2)*2:(3 4 5):(6 7 8)'     
-    assert_seq_equals [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2):(3 4 5)&4:(6 7 8)'     
+    assert_sequence [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2)*2:(3 4 5):(6 7 8)'     
+    assert_sequence [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2):(3 4 5)&4:(6 7 8)'     
   end
   
+  def test_rhythm_basic
+    assert_sequence [1920, 960, 480, 240, 120, 60, 30], 'w h q e s r x'
+    assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. e. s. r. x.'
+  end
+  
+  def test_rhythm_comprehensive
+    base_expect = DURATION.values
+    base_input = DURATION.keys
+    tests = { 
+      1 => '',
+      1.5 => '.',
+      1.5**2 => '.'*2,
+      1.5**3 => '.'*3,
+      2.0/3 => 't',
+      2.0/3 * 1.5 => 't.',
+      1.5 * 2.0/3 => '.t',
+      1.5 * 2.0/3 => '.t'
+    }
+    tests.each_pair do |multiplier,modifier|
+      expected = base_expect.map{|val| val*multiplier}
+      input = base_input.map{|val|val+modifier}.join(' ')
+      assert_sequence expected, input
+    end
+  end
+  
+  def test_variables
+    assert_sequence [1,2,3,4], '$X=1 2 3 4; $X'
+    assert_sequence [1,2,3,4,5], '$X=1 2 3 4; $Y=5; $X $Y'
+    assert_sequence [1,2,3,4,5,[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y $Z'
+    assert_sequence [1,2,3,4,[5,100],[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
+  end
+
   def test_invalid_sequence
     assert_failure '1.'
     assert_failure '1 2)*3'
     assert_failure 'asdf'
   end
-  
-  def test_rhythm
-    assert_seq_equals [1920, 960, 480, 240, 120, 60, 30], 'w h q e s r x'
-    assert_seq_equals [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. e. s. r. x.'
-    # TODO: multiple dots, triplets, multipliers, combos
-  end
-  
-  def test_variables
-    assert_seq_equals [1,2,3,4], '$X=1 2 3 4; $X'
-    assert_seq_equals [1,2,3,4,5], '$X=1 2 3 4; $Y=5; $X $Y'
-    assert_seq_equals [1,2,3,4,5,[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y $Z'
-    #assert_seq_equals [1,2,3,4,[5,100],[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
-  end
-  
-
 
   # full melodic (note, rhythm, velocity) sequence
       
