@@ -192,6 +192,10 @@ module Cosy
       #     return @length
     end
   end
+  
+  class ForEachNode < ContainerNode
+    
+  end
 
   class BehaviorNode < ContainerNode
   end
@@ -463,7 +467,7 @@ end
 # 
 # puts s.inspect
 
-#Cosy::SequenceParser.new.verbose_parse '(1 2)@(3 $ 4)'
+# Cosy::SequenceParser.new.verbose_parse '(1 2)@(3 $ 4)'
 
 #Cosy::SequenceParser.new.verbose_parse '(1 2)*2:(3 4 5):(6 7 8)'
 

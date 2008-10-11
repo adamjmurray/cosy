@@ -2,7 +2,7 @@ module Cosy
 	grammar Sequence
 	
 		rule root
-			(statement space?)* sequence_root? <CosyNode>
+			space? (statement space?)* sequence_root? <CosyNode>
 		end
 	
 		
@@ -12,12 +12,12 @@ module Cosy
 	
 		
 		rule assignment
-			var space? '=' sequence_root space? <AssignmentNode>
+			var space? '=' sequence_root <AssignmentNode>
 		end
 	
 	
 		rule sequence_root
-			choice  / space / ''
+			choice
 		end
 
 
@@ -31,9 +31,8 @@ module Cosy
 		end
 
 
-		# Todo: multiple modifiers
 		rule sequence_element
-			chain modifier:modifier <ModifiedNode> / chain 
+			chain modifier:modifier <ModifiedNode> / chain / foreach
 		end
 
 		
@@ -45,10 +44,15 @@ module Cosy
 		rule chain_element
 			element modifier:modifier <ModifiedNode> / element
 		end
-
+    
+		
+		rule foreach
+      '(' sequence_root ')@(' sequence_root ')' ('@(' sequence_root ')')* <ForEachNode>
+	  end
+		
 
 		rule element
-			'(' subsequence:choice ')' / chord / primitive
+			'(' subsequence:sequence_root ')' !'@' / chord / primitive
 		end
 
 
@@ -58,7 +62,7 @@ module Cosy
 
 
 		rule operator
-			space? ('*'/'&'/'@') space? <OperatorNode>
+			space? ('*'/'&') space? <OperatorNode>
 		end
 	
 	

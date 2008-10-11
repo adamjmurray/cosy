@@ -8,14 +8,16 @@ module Cosy
     attr_accessor :sequence, :index, :count, :iteration, 
                   :count_limit, :iteration_limit, :children, :parent
 
-    def initialize(sequence, parent=nil)
+    def initialize(sequence, context=nil, parent=nil)
       @sequence = sequence
+      @context = context # this is a sequence state that has bindings we may need to check, but not a true parent we can exit back up to (in the case of spawned parallel sequencers)
+      @parent = parent
+      @bindings = {}
       @index = 0
       @count = 0
       @iteration = 0
       @length = sequence.length
       @iteration_limit = 1 # the default
-      @parent = parent
       if defined? sequence.operator
         case sequence.operator
         when OP_COUNT_LIMIT
@@ -40,14 +42,41 @@ module Cosy
       top.iteration = 0
       return top
     end
+    
+    def top_state
+      top = self
+      top = top.parent while top.parent
+      return top
+    end
+    
+    def define_global_variable(name,value) 
+      top_state.define_variable(name, value)
+    end
+    
+    def define_variable(name,value) 
+      @bindings[name] = value
+    end
+    
+    def lookup(variable) 
+      value = @bindings[variable]
+      if value
+        return value
+      elsif @parent
+        return @parent.lookup(variable)
+      elsif @context
+        return @context.lookup(variable)
+      else
+        return nil
+      end
+    end
 
     def enter(node)
-      @children = [ SequenceState.new(node,self) ]
+      @children = [ SequenceState.new(node,@context,self) ]
       return @children[0]
     end
 
     def enter_chain(nodes)
-      @children = nodes.map{|node| SequenceState.new(node,self)}
+      @children = nodes.map{|node| SequenceState.new(node,@context,self)}
     end
 
     def exit
@@ -89,6 +118,7 @@ module Cosy
       s = "#{@sequence.inspect} : {idx=#@index,count=#@count,iter=#@iteration,len=#@length"
       s += ",iterlim=#@iteration_limit" if @iteration_limit
       s += ",countlim=#@count_limit" if @count_limit
+      s += ",bindings=#{@bindings.inspect}" if not @bindings.empty?
       s += '}'
     end
   end

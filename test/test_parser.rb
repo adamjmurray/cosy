@@ -276,12 +276,16 @@ class TestSequencingParser < Test::Unit::TestCase
     assert_node_length(1, '(1:2):6:(3 4)')
   end
   
-  def test_at_loop
+  def test_foreach
     parse '(1 2)@(3 4)'
     parse '(1 $ 2)@(3 4)'
   end
   
-  def test_nested_at_loop
+  def test_multi_foreach
+    parse '(1 2)@(3 4)@(5 6)'
+  end
+  
+  def test_nested_foreach
     parse '((1 2)@(3 4))@(5 6)'
     # should produce
     # 1 2 1 2   1 2 1 2

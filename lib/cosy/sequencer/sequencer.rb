@@ -8,8 +8,7 @@ module Cosy
 
     attr_accessor :tree, :parser, :state
 
-    def initialize(sequence, bindings={})
-      @bindings = bindings
+    def initialize(sequence, parent=nil)
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
         @tree = sequence
@@ -19,6 +18,7 @@ module Cosy
         @parser = SequenceParser.new 
         @tree = @parser.parse sequence
       end
+      @parent = parent
       restart
     end
 
@@ -26,7 +26,8 @@ module Cosy
       if @state
         @state = @state.reset
       else
-        @state = SequenceState.new(@tree) if @tree
+        context = (@parent ? @parent.state : nil)
+        @state = SequenceState.new(@tree, context) if @tree
       end
     end
     
@@ -35,7 +36,7 @@ module Cosy
     end
 
     def next
-      # puts "STATE: #@state"
+      #puts "STATE: #@state"
       if @children
         values = Chain.new(@children.collect{|child| child.next})
         values.each_with_index do |value,index|
@@ -59,7 +60,7 @@ module Cosy
         if node.is_a? AssignmentNode
           name = node.value[0].value # extract the String form the nested VariableNode
           value = node.value[1]
-          @bindings[name] = value
+          @state.define_global_variable(name, value)
           
         elsif node.is_a? VariableNode
           return enter_or_emit(node)
@@ -82,7 +83,7 @@ module Cosy
             # TODO: within_limits? will not work for chains and partial iteration
             # becuase the shortest child will make it fail early (we need to only
             # consider the longest child in that scenario)
-            @children = node.value.collect{|child| Sequencer.new(child, @bindings)}
+            @children = node.value.collect{|child| Sequencer.new(child, self)}
             @child_looped = Array.new(@children.length)
             return self.next
           end
@@ -92,6 +93,11 @@ module Cosy
 
         elsif node.is_a? ChoiceNode
           return enter_or_emit(node.value) # node.value makes a choice
+
+        elsif node.is_a? ForEachNode
+          puts node.children.inspect
+          puts "TODO: ForEachNode"
+          return enter_or_emit(node.children[node.children.length-1][@state.index])
 
         elsif node.atom?
           return emit(node.value)
@@ -110,9 +116,10 @@ module Cosy
       if node.nil?
         exit
       elsif node.is_a? VariableNode
-        variable = @bindings[node.value]
-        raise "Undefined variable #{node.value}" if not variable
-        enter(variable)
+        variable = node.value
+        value = @state.lookup(variable)
+        raise "Undefined variable #{variable}" if not value
+        enter(value)
       elsif node.atom?
         emit(node.value)
       else
@@ -163,6 +170,10 @@ end
 # s = Cosy::Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
 # s = Cosy::Sequencer.new '(1 2)*2:(3 4 5):(6 7 8)'
 # 
+# s = Cosy::Sequencer.new '(1 2)@(3 4)'
+
+
+# s = Cosy::Sequencer.new '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
