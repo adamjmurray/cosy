@@ -145,6 +145,7 @@ class TestSequencer < Test::Unit::TestCase
   
   def test_repeated_chord
     assert_sequence [[60,65],[60,65]], '[C4 F4]*2'      
+    assert_sequence [[60,65],[60,65]], '([C4 F4])*2'      
   end
   
   def test_simple_chain
@@ -243,6 +244,10 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [[1,3,6],[2,4,7],[1,5,8],[2,3,6]], '(1 2):(3 4 5)&4:(6 7 8)'     
   end
   
+  def test_nested_chain
+    assert_sequence [ [[1,2],5],[[3,4],6],[[1,2],7] ], '(1:2 3:4):(5 6 7)'
+  end
+  
   def test_rhythm_basic
     assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'w h q e s r x'
     assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. e. s. r. x.'
@@ -280,6 +285,22 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,2,3,4,5,[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y $Z'
     assert_sequence [1,2,3,4,[5,100],[6,7]], '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
   end
+  
+  def test_foreach_basic
+    assert_sequence [1,3,2,3], '(1 2)@($ 3)'
+    assert_sequence [1,3,1,2,3,2], '(1 2)@($ 3 $)'
+    assert_sequence [1,3,1,2,3,2,1,3,1], '(1 2 1)@($ 3 $)'
+  end
+  
+  def test_foreach_nested
+    assert_sequence [1,3,5,1,4,5,2,3,5,2,4,5], '(1 2)@(3 4)@($$ $ 5)' 
+    assert_sequence [1,3,5,1,4,5,2,3,5,2,4,5], '(1 2)@((3 4)@($$ $ 5))'  
+  end
+  
+  def test_foreach_complex_subsequence
+    assert_sequence [1,9,2,9,3,9,2,9], '(1 (2 3)&3)@($ 9)'
+    assert_sequence [1,1,9,2,2,9,3,3,9,2,2,9], '(1 (2 3)&3)@($*2 9)'
+  end
 
   def test_invalid_sequence
     assert_failure '1.'
@@ -292,11 +313,6 @@ class TestSequencer < Test::Unit::TestCase
   # complex choices
   # 'c4 ([c4 g4]*2 | [b2 b3 b4]*2)'
   # 'nested' choices
-          
-  # repeated chord
-  
-  # complex chains (1 2):(3 4)
-  
-  # nested chains?  (1:2  3:4):(5  6  7) should produce 1:2:5  3:4:6  1:2:7  
+
   
 end

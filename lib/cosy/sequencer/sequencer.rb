@@ -14,8 +14,7 @@ module Cosy
         @parser = nil
         @tree = sequence
       else
-        # This seems inefficient but we need a local parser so we can retreive parse failure
-        # info. Maybe I am worrying too much, but using a class parser would not be thread safe...
+        # we need a local parser so we can retreive parse failure info
         @parser = SequenceParser.new 
         @tree = @parser.parse sequence
       end
@@ -97,11 +96,6 @@ module Cosy
         elsif node.is_a? ChoiceNode
           return enter_or_emit(node.value) # node.value makes a choice
 
-        elsif node.is_a? ForEachNode
-          puts node.children.inspect
-          puts "TODO: ForEachNode"
-          return enter_or_emit(node.children[-1][@state.index])
-
         elsif node.atom?
           return emit(node.value)
           
@@ -118,11 +112,13 @@ module Cosy
     def enter_or_emit(node)
       if node.nil?
         exit
+      elsif node.is_a? Value
+        emit(node.value)
       elsif node.is_a? VariableNode
         variable = node.value
         value = @symbol_table.lookup(variable)
         raise "Undefined variable #{variable}" if not value
-        enter(value)
+        enter_or_emit(value)
       elsif node.atom?
         emit(node.value)
       else
@@ -174,9 +170,9 @@ end
 # s = Cosy::Sequencer.new '(1 2)*2:(3 4 5):(6 7 8)'
 # 
 
-# s = Cosy::Sequencer.new '(1 2)@(3 4)'
+# s = Cosy::Sequencer.new '(1 2)@(3 (4:5)*2 4)@($$ ($ 7)*2 8 9)'
 # 
-# max = 20
+# max = 60
 # while v=s.next and max > 0
 #   max -= 1
 #   puts "==> #{v.inspect} (#{v.class})"

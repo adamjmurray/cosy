@@ -307,6 +307,7 @@ module Cosy
     def initialize(value, text_value=nil)
       @value = value
       @text_value = text_value
+      @text_value ||= @value.to_s if @value
     end
     
     def inspect
