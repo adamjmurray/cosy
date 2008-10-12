@@ -1,18 +1,19 @@
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
 require File.join(cosy_root, 'parser/parser')
+require File.join(cosy_root, 'sequencer/symbol_table')
 
 module Cosy
 
   class SequenceState
 
     attr_accessor :sequence, :index, :count, :iteration, 
-                  :count_limit, :iteration_limit, :children, :parent
+                  :count_limit, :iteration_limit, :children, :parent,
+                  :symbol_table
 
-    def initialize(sequence, context=nil, parent=nil)
+    def initialize(sequence, symbol_table=SymbolTable.new, parent=nil)
       @sequence = sequence
-      @context = context # this is a sequence state that has bindings we may need to check, but not a true parent we can exit back up to (in the case of spawned parallel sequencers)
+      @symbol_table = symbol_table
       @parent = parent
-      @bindings = {}
       @index = 0
       @count = 0
       @iteration = 0
@@ -42,41 +43,14 @@ module Cosy
       top.iteration = 0
       return top
     end
-    
-    def top_state
-      top = self
-      top = top.parent while top.parent
-      return top
-    end
-    
-    def define_global_variable(name,value) 
-      top_state.define_variable(name, value)
-    end
-    
-    def define_variable(name,value) 
-      @bindings[name] = value
-    end
-    
-    def lookup(variable) 
-      value = @bindings[variable]
-      if value
-        return value
-      elsif @parent
-        return @parent.lookup(variable)
-      elsif @context
-        return @context.lookup(variable)
-      else
-        return nil
-      end
-    end
 
     def enter(node)
-      @children = [ SequenceState.new(node,@context,self) ]
+      @children = [ SequenceState.new(node,@symbol_table,self) ]
       return @children[0]
     end
 
     def enter_chain(nodes)
-      @children = nodes.map{|node| SequenceState.new(node,@context,self)}
+      @children = nodes.map{|node| SequenceState.new(node,@symbol_table,self)}
     end
 
     def exit

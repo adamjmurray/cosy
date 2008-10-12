@@ -1,6 +1,7 @@
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
 require File.join(cosy_root, 'parser/parser')
 require File.join(cosy_root, 'sequencer/sequence_state')
+require File.join(cosy_root, 'sequencer/symbol_table')
 
 module Cosy
 
@@ -8,7 +9,7 @@ module Cosy
 
     attr_accessor :tree, :parser, :state
 
-    def initialize(sequence, parent=nil)
+    def initialize(sequence, symbol_table=SymbolTable.new)
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
         @tree = sequence
@@ -18,16 +19,18 @@ module Cosy
         @parser = SequenceParser.new 
         @tree = @parser.parse sequence
       end
-      @parent = parent
+      @symbol_table = symbol_table
       restart
     end
 
     def restart
+      # A restart may need to reconstruct the state from the @tree if the sequence has
+      # completely finished, because it would have exited out of all states so
+      # @state could be nil
       if @state
         @state = @state.reset
       else
-        context = (@parent ? @parent.state : nil)
-        @state = SequenceState.new(@tree, context) if @tree
+        @state = SequenceState.new(@tree, @symbol_table) if @tree
       end
     end
     
@@ -60,7 +63,7 @@ module Cosy
         if node.is_a? AssignmentNode
           name = node.value[0].value # extract the String form the nested VariableNode
           value = node.value[1]
-          @state.define_global_variable(name, value)
+          @symbol_table[name] = value
           
         elsif node.is_a? VariableNode
           return enter_or_emit(node)
@@ -83,7 +86,7 @@ module Cosy
             # TODO: within_limits? will not work for chains and partial iteration
             # becuase the shortest child will make it fail early (we need to only
             # consider the longest child in that scenario)
-            @children = node.value.collect{|child| Sequencer.new(child, self)}
+            @children = node.value.collect{|child| Sequencer.new(child, @symbol_table)}
             @child_looped = Array.new(@children.length)
             return self.next
           end
@@ -97,7 +100,7 @@ module Cosy
         elsif node.is_a? ForEachNode
           puts node.children.inspect
           puts "TODO: ForEachNode"
-          return enter_or_emit(node.children[node.children.length-1][@state.index])
+          return enter_or_emit(node.children[-1][@state.index])
 
         elsif node.atom?
           return emit(node.value)
@@ -117,7 +120,7 @@ module Cosy
         exit
       elsif node.is_a? VariableNode
         variable = node.value
-        value = @state.lookup(variable)
+        value = @symbol_table.lookup(variable)
         raise "Undefined variable #{variable}" if not value
         enter(value)
       elsif node.atom?
@@ -170,10 +173,9 @@ end
 # s = Cosy::Sequencer.new '(1 2):(3 4 5):(6 7 8 9)'
 # s = Cosy::Sequencer.new '(1 2)*2:(3 4 5):(6 7 8)'
 # 
+
 # s = Cosy::Sequencer.new '(1 2)@(3 4)'
-
-
-# s = Cosy::Sequencer.new '$X=1 2 3 4; $Y=5; $Z=[6 7]; $X $Y:100 $Z'
+# 
 # max = 20
 # while v=s.next and max > 0
 #   max -= 1
