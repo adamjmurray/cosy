@@ -38,7 +38,7 @@ module Cosy
     end
 
     def next
-      #puts "STATE: #@state"
+     # puts "STATE: #@state"
       if @children
         values = Chain.new(@children.collect{|child| child.next})
         values.each_with_index do |value,index|
@@ -95,6 +95,9 @@ module Cosy
 
         elsif node.is_a? ChoiceNode
           return enter_or_emit(node.value) # node.value makes a choice
+
+        elsif node.is_a? ForEachNode
+          return enter(node)
 
         elsif node.atom?
           return emit(node.value)
@@ -170,9 +173,10 @@ end
 # s = Cosy::Sequencer.new '(1 2)*2:(3 4 5):(6 7 8)'
 # 
 
-# s = Cosy::Sequencer.new '(1 2)@(3 (4:5)*2 4)@($$ ($ 7)*2 8 9)'
+# s = Cosy::Sequencer.new '(-1 -2)@((3 4)@($$ $ 99))'
+# s = Cosy::Sequencer.new '0 (1 2)@($ 9) 0'
 # 
-# max = 60
+# max = 100
 # while v=s.next and max > 0
 #   max -= 1
 #   puts "==> #{v.inspect} (#{v.class})"

@@ -194,7 +194,12 @@ module Cosy
   end
   
   class ForEachNode < ContainerNode
-    
+    def length
+      1
+      # This is confusing, but the way foreach is handled inside a
+      # sequence_state requires this node be treated as a single element.
+      # It's the nested subsequence that actually has a length
+    end
   end
 
   class BehaviorNode < ContainerNode
@@ -467,6 +472,8 @@ end
 # s.add(60)
 # 
 # puts s.inspect
+
+# Cosy::SequenceParser.new.verbose_parse '(-1 -2)@((3 4)@($$ $ 99))'
 
 # Cosy::SequenceParser.new.verbose_parse '(1 2)@(3 $ 4)'
 

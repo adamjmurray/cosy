@@ -26,7 +26,7 @@ module Cosy
           # Maybe this should be wrapped in a SequenceNode too
           @symbol_table.push_magic_variable Value.new(sequencer.next)
         end
-        @sequence = sequence.children[-1]
+        @sequence = sequence.children[-1]        
       end
       
       @index = 0
@@ -43,7 +43,7 @@ module Cosy
           @iteration_limit = @sequence.operand  
         end
       end
-    
+
     end
 
     def reset
@@ -70,11 +70,12 @@ module Cosy
     end
 
     def exit
-      if advance_foreach
-        reset
+      if advance_foreach  
          # the sequencer is going to advance after an exit, so compensate
          # This seems messy, should this advance_foreach be happening somewhere else?
         @index = -1
+        @count = 0
+        @iteration = 0
         return self 
       end
       @parent.remove_child(self) if @parent
@@ -95,6 +96,7 @@ module Cosy
       elsif advance_foreach(index-1)
         sequencer.restart
         @symbol_table.push_magic_variable Value.new(sequencer.next) 
+        return true
       else
         return false 
       end
@@ -139,6 +141,3 @@ module Cosy
   end
 
 end
-
-
-# require File.join(cosy_root, 'sequencer/sequencer')

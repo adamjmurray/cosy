@@ -292,6 +292,12 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,3,1,2,3,2,1,3,1], '(1 2 1)@($ 3 $)'
   end
   
+  def test_foreach_in_sequence
+    assert_sequence [0,1,3,2,3,0], '0 (1 2)@($ 3) 0'
+    assert_sequence [0,1,3,1,2,3,2,0], '0 (1 2)@($ 3 $) 0'
+    assert_sequence [0,1,3,1,2,3,2,1,3,1,0], '0 (1 2 1)@($ 3 $) 0'
+  end
+  
   def test_foreach_nested
     assert_sequence [1,3,5,1,4,5,2,3,5,2,4,5], '(1 2)@(3 4)@($$ $ 5)' 
     assert_sequence [1,3,5,1,4,5,2,3,5,2,4,5], '(1 2)@((3 4)@($$ $ 5))'  
@@ -300,6 +306,11 @@ class TestSequencer < Test::Unit::TestCase
   def test_foreach_complex_subsequence
     assert_sequence [1,9,2,9,3,9,2,9], '(1 (2 3)&3)@($ 9)'
     assert_sequence [1,1,9,2,2,9,3,3,9,2,2,9], '(1 (2 3)&3)@($*2 9)'
+  end
+  
+  def test_foreach_repetition
+    assert_sequence [1,3,2,3,1,3,2,3], '((1 2)@($ 3))*2'
+    assert_sequence [1,3,2,3,1,3,2], '((1 2)@($ 3))&7'
   end
 
   def test_invalid_sequence
