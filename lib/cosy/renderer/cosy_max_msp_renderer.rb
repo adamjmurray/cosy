@@ -46,9 +46,11 @@ module Cosy
     
     # like restart but with inifinite loop prevention
     # should be used whenever automatically restarting at the end of a sequence
-    def autorestart
+    # TODO: maybe loops are better handled in here
+    def autorestart   
+      rebang = @rebang   
       restart
-      @suppress_rebang = @rebang
+      @suppress_rebang = rebang
     end
     
     def ticks_to_bangs(ticks)
