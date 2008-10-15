@@ -4,7 +4,7 @@ begin
 # ensure my lib dir is at front of search path
 $LOAD_PATH[0,0] = File.join(File.dirname(__FILE__), 'lib')
 
-require 'cosy/renderer/midi_file.rb'
+require 'cosy/renderer/midi_file_renderer.rb'
 module Cosy
   class RubyNode
     def value

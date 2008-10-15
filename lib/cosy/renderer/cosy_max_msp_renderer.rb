@@ -8,6 +8,8 @@
 require 'cosy'
 include Cosy
 
+OBJECT_NAME = 'ajm.cosy'
+
 module Cosy
   
   class MaxRenderer < AbstractRenderer  
@@ -28,7 +30,7 @@ module Cosy
         restart
         return true
       rescue Exception
-        error $!
+        error "#{OBJECT_NAME}: #{$!}"
         return false
       end
     end
