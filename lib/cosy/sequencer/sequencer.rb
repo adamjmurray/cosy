@@ -60,15 +60,12 @@ module Cosy
         node = @state.sequence
 
         if node.is_a? AssignmentNode
-          lhs = node.value[0]
-          rhs = node.value[1]
-          if lhs.is_a? TempoNode
-            return emit(Tempo.new(rhs.value))
-          elsif lhs.is_a? ConstantNode
-            puts "TODO: handle constant: #{lhs.value}"
+          if node.is_variable?
+            name = node.lhs.value # extract the String form the nested VariableNode
+            @symbol_table[name] = node.rhs
           else
-            name = lhs.value # extract the String form the nested VariableNode
-            @symbol_table[name] = rhs
+            # This will automatically wrap the rhs value in the appropriate class, like Tempo or Program
+            return emit(node.value)
           end
           
         elsif node.is_a? VariableNode
@@ -188,6 +185,8 @@ end
 # s = Cosy::Sequencer.new '0 (1 2)@($ 9) 0'
 # 
 # # s = Cosy::Sequencer.new '(C4 B3 A3 (G3 | B3))@(($ D4 E4)*4)'
+#
+# s= Cosy::Sequencer.new 'TEMPO=1; QNPM=2; QPM=3'
 # 
 # max = 100
 # while v=s.next and max > 0

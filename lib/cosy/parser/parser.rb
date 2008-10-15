@@ -126,6 +126,28 @@ module Cosy
   
   
   class AssignmentNode < ContainerNode
+    # the left hand side of the assignment
+    def lhs
+      children[0]
+    end
+    
+    # the right hand side of the assignment
+    def rhs
+      children[1]
+    end
+    
+    def is_variable?
+      lhs.is_a? VariableNode
+    end
+    
+    def value
+      case lhs
+      when TempoNode then Tempo.new(rhs.value)
+      when ProgramNode then Program.new(rhs.value)
+      else rhs
+      end
+    end
+    
     def length
       1
     end
@@ -354,17 +376,19 @@ module Cosy
   
   class Tempo < Value
   end
+  
+  class Program < Value
+  end
 
 
   class StringNode < TerminalNode
   end
 
   
-  class ConstantNode < TerminalNode
+  class TempoNode < TerminalNode
   end
-
   
-  class TempoNode < ConstantNode
+  class ProgramNode < TerminalNode
   end
   
 

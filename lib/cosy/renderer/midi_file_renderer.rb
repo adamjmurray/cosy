@@ -15,28 +15,32 @@ module Cosy
       
       @meta_track = add_track
       @meta_track.events << MIDI::MetaEvent.new(MIDI::META_SEQ_NAME, 'Cosy Sequence')
-      self.tempo = 120
+      tempo(120)
 
       @track = add_track
-      @track.events << MIDI::ProgramChange.new(0, 1, 0)
+      @channel = 1
+      program(0)
     end
 
     def render(input, output_filename)
       parse input
-      channel = 0
       @absolute_delta = delta_time = 0
       
       while event = next_event
-        if event.is_a? Tempo
-          self.tempo = event.value
-      
-        elsif event.is_a? NoteEvent
+        case event
+
+        when Tempo then tempo(event.value)
+
+        when Program then program(event.value)
+
+        when NoteEvent
           pitches, velocity, duration = event.pitches, event.velocity.to_i, event.duration.to_i
           if duration < 0
             delta_time = -duration
           else
             # TODO: special case duration 0?
-            render_note(channel, pitches, velocity, delta_time, duration)
+            render_note(pitches, velocity, delta_time, duration)
+            delta_time = 0
           end
           
         else
@@ -44,7 +48,7 @@ module Cosy
         end
       end
       
-      note_off(1, 0, 0, 480) # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
+      note_off(0, 0, 480) # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
       #print_midi
       File.open(output_filename, 'wb'){ |file| @midi_sequence.write(file) }
     end
@@ -72,32 +76,36 @@ module Cosy
     end
     
     # Set tempo in terms of Quarter Notes per Minute (often incorrectly referred to as BPM)
-    def tempo=(qnpm)
+    def tempo(qnpm)
       ms_per_quarter_note = MIDI::Tempo.bpm_to_mpq(qnpm)
       @meta_track.events << MIDI::Tempo.new(ms_per_quarter_note, @absolute_delta)
     end
     
-    def note_on(channel, pitch, velocity, delta_time)
-      @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, delta_time)
+    def program(program_number)
+      @track.events << MIDI::ProgramChange.new(@channel, program_number, 0)
+    end
+    
+    def note_on(pitch, velocity, delta_time)
+      @track.events << MIDI::NoteOnEvent.new(@channel, pitch, velocity, delta_time)
       @absolute_delta += delta_time
     end
     
-    def note_off(channel, pitch, velocity, delta_time)
-      @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, delta_time)  
+    def note_off(pitch, velocity, delta_time)
+      @track.events << MIDI::NoteOffEvent.new(@channel, pitch, velocity, delta_time)  
       @absolute_delta += delta_time
     end
     
-    def render_note(channel, pitches, velocity, delta_time, duration)
+    def render_note(pitches, velocity, delta_time, duration)
       pitches.each do |pitch|
         pitch = pitch.to_i
-        note_on(channel, pitch, velocity, delta_time)
+        note_on(pitch, velocity, delta_time)
         delta_time = 0 # if we're playing a chord the next pitch has delta_time=0
       end
       
       delta_time = duration
       pitches.each do |pitch|
         pitch = pitch.to_i
-        note_off(channel, pitch, velocity, delta_time)  
+        note_off(pitch, velocity, delta_time)  
         delta_time = 0 # if we're playing a chord the next pitch has delta_time=0  
       end
     end
@@ -107,4 +115,4 @@ module Cosy
 end
 
 
-Cosy::MidiRenderer.new.render 'C4 D4 [E4 b5] F4 G4; TEMPO=60; C3 D3 E3 F3 G3', 'test.mid'
+Cosy::MidiRenderer.new.render 'PROGRAM=0; C4:q; PGM=10; D4; PGM=20; E4; PGM=30; F4', 'test.mid'

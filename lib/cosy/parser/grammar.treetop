@@ -19,7 +19,9 @@ module Cosy
 		
 		
 		rule numeric_constant
-		  ('QPM' / 'QNPM' / 'TEMPO') '' <TempoNode>
+		  ('TEMPO'/ 'QPM' / 'QNPM') '' <TempoNode>
+		  /
+		  ('PROGRAM' / 'PGM') '' <ProgramNode>
 	  end
 	
 	

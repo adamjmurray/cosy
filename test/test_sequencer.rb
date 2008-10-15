@@ -313,6 +313,15 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,3,2,3,1,3,2], '((1 2)@($ 3))&7'
   end
 
+  def test_tempo  
+    assert_sequence [1,2,3], 'TEMPO=1; QNPM=2; QPM=3'
+  end
+  
+  def test_program  
+    assert_sequence [1,2], 'PROGRAM=1; PGM=2'
+    assert_sequence [1,2], 'PROGRAM=1; PGM=2;'
+  end
+
   def test_invalid_sequence
     assert_failure '1.'
     assert_failure '1 2)*3'
