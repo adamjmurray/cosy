@@ -1,4 +1,5 @@
-module Cosy
+module Cosy  
+  
   class AbstractRenderer
 
     def init
@@ -9,27 +10,38 @@ module Cosy
     
     ############
     private  
+    
+    def parse(input)
+      @sequencer = Sequencer.new(input)
+      if !@sequencer.parsed?
+        parser = @sequencer.parser
+        raise "Failed to parse: #{input}\n" + 
+          "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
+      end
+    end
 
-    def getPitchesVelocityDuration(event) 
+    def next_event
+      event = @sequencer.next
+      
       pitches  = @prev_pitches
       velocity = @prev_velocity
       duration = @prev_duration
       
       if event.is_a? Chord 
-        pitches = event.collect{|the| if the.respond_to? :value then the.value else the end}
+        pitches = event.collect{|p| if p.respond_to? :value then p.value else p end}
           
       elsif event.is_a? Chain
-        event.each do |evt|
-          if evt.is_a? Pitch
-            pitches = [evt.value]
-          elsif evt.is_a? Chord
-            pitches = evt.collect{|e| if e.respond_to? :value then e.value else e end}
-          elsif evt.is_a? Velocity
-            velocity = evt.value
-          elsif evt.is_a? Duration
-            duration = evt.value
+        event.each do |param|
+          if param.is_a? Pitch
+            pitches = [param.value]
+          elsif param.is_a? Chord
+            pitches = param.collect{|p| if p.respond_to? :value then p.value else p end}
+          elsif param.is_a? Velocity
+            velocity = param.value
+          elsif param.is_a? Duration
+            duration = param.value
           else
-            raise "Unimplemented chain value: #{evt.class}"
+            raise "Unimplemented chain value: #{param.class}"
           end
         end
    
@@ -41,20 +53,25 @@ module Cosy
         
       elsif event.is_a? Duration
         duration = event.value  
-        
-      elsif event.is_a? Fixnum
-        pitches = [event]
 
       else
-        raise "Unexpected event type #{event.class} (#{event.inspect})"
+        return event 
       end
 
       @prev_pitches = pitches
       @prev_velocity = velocity
       @prev_duration = duration
       
-      return pitches,velocity,duration
+      return NoteEvent.new(pitches,velocity,duration)
     end
     
   end
+  
+  class NoteEvent
+    attr_accessor :pitches, :velocity, :duration
+    def initialize(pitches, velocity, duration)
+      @pitches, @velocity, @duration = pitches, velocity, duration
+    end
+  end
+  
 end

@@ -3,9 +3,7 @@
 # and ajm objects (http://compusition.com/web/software/maxmsp/ajm-objects)
 
 # TODO
-#==> Need a Max help file for this.
 #==> Move ajm objects to github
-
 
 require 'cosy'
 include Cosy
@@ -17,25 +15,38 @@ module Cosy
   
     def initialize
       init
-      @seq = Sequencer.new('')
+      parse ''
       @time_to_next = 1
       @end = false      
       @prev_duration = DURATION_NAME['sixtyfourth']
       @ticks_per_bang = DURATION_NAME['sixtyfourth'].to_f
     end
 
-    def set(input)
-      @seq = Sequencer.new(input)
-      restart
-      return !@seq.tree.nil?
+    def sequence(input)
+      begin
+        parse input
+        restart
+        return true
+      rescue Exception
+        error $!
+        return false
+      end
     end
 
     def restart
       init
-      @seq.restart if @seq
+      @sequencer.restart
       @time_to_next = 1
       @prev_duration = DURATION_NAME['sixtyfourth']
       @end = false
+      @suppress_rebang = @rebang = false
+    end
+    
+    # like restart but with inifinite loop prevention
+    # should be used whenever automatically restarting at the end of a sequence
+    def autorestart
+      restart
+      @suppress_rebang = @rebang
     end
     
     def ticks_to_bangs(ticks)
@@ -43,47 +54,67 @@ module Cosy
     end
 
     def bang
-      if @seq and not @end
+      if not @end
         @time_to_next -= 1
         if @time_to_next <= 0
-          event = @seq.next
+          event = next_event
+          
           if not event
             @end = true
             out3 'bang'
-          else
-            pitches, velocity, duration = getPitchesVelocityDuration(event)    
-            duration = ticks_to_bangs(duration)
+          
+          elsif event.is_a? NoteEvent
+            pitches, velocity, duration = event.pitches, event.velocity, ticks_to_bangs(event.duration)
             if duration >= 0  
               # output in standard Max right-to-left order:
               out2 duration
               out1 velocity
               out0 pitches
-              @time_to_next = duration
+              
               if duration == 0
-                # TODO !! : prevent infinite loops
-                bang
+                # prevent infinite loops
+                if not @suppress_rebang
+                  @rebang = true
+                  bang
+                else
+                  @suppress_rebang = false
+                end
+              else
+                @suppress_rebang = @rebang = false
               end
-            else
-              @time_to_next = duration.abs
+              
             end
+            @time_to_next = duration.abs
+          
+          else
+            error "Unsupported Event: #{event.inspect}"
           end
+          
         end
       end
     end
+    
   end
 end
 
-$Renderer = Cosy::MaxRenderer.new
+RENDERER = Cosy::MaxRenderer.new
 
-def seq input
-  out4 $Renderer.set(input)
+################################################
+# The interface for Max (the supported messages)
+
+def sequence(input)
+  out4 RENDERER.sequence(input)
 end
 
 def restart
-  $Renderer.restart
+  RENDERER.restart
+end
+
+def autorestart
+  RENDERER.autorestart
 end
 
 def bang
-  $Renderer.bang
+  RENDERER.bang
 end
 

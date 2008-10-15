@@ -20,11 +20,8 @@ module Cosy
           Sequencer.new(subsequence, symbol_table)
         end
         @foreach.each do |sequencer| 
-          # not sure about wrapping in a Value... but I need some way to
-          # know what type of data I am dealing iwth in Sequener.enter_or_emit
-          # because normal variables are actually SequenceNodes
-          # Maybe this should be wrapped in a SequenceNode too
-          @symbol_table.push_magic_variable Value.new(sequencer.next)
+          magic_value = sequencer.next
+          @symbol_table.push_magic_variable(magic_value)
         end
         @sequence = sequence.children[-1]        
       end
@@ -91,11 +88,12 @@ module Cosy
       sequencer = @foreach[index]
       magic_value = sequencer.next
       if magic_value
-        @symbol_table.push_magic_variable Value.new(magic_value)
+        @symbol_table.push_magic_variable(magic_value)
         return true
       elsif advance_foreach(index-1)
         sequencer.restart
-        @symbol_table.push_magic_variable Value.new(sequencer.next) 
+        magic_value = sequencer.next
+        @symbol_table.push_magic_variable(magic_value) 
         return true
       else
         return false 

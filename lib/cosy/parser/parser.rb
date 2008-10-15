@@ -126,8 +126,11 @@ module Cosy
   
   
   class AssignmentNode < ContainerNode
+    def length
+      1
+    end
   end
-
+  
   
   class ChoiceNode < ContainerNode
     def length
@@ -348,11 +351,22 @@ module Cosy
   
   class Duration < Value
   end
+  
+  class Tempo < Value
+  end
 
 
   class StringNode < TerminalNode
   end
 
+  
+  class ConstantNode < TerminalNode
+  end
+
+  
+  class TempoNode < ConstantNode
+  end
+  
 
   class RubyNode < TerminalNode
     def value
@@ -472,6 +486,8 @@ end
 # s.add(60)
 # 
 # puts s.inspect
+
+# Cosy::SequenceParser.new.verbose_parse 'TEMPO = 120; C4; TEMPO=257; D4'
 
 # Cosy::SequenceParser.new.verbose_parse '(-1 -2)@((3 4)@($$ $ 99))'
 

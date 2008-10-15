@@ -60,9 +60,16 @@ module Cosy
         node = @state.sequence
 
         if node.is_a? AssignmentNode
-          name = node.value[0].value # extract the String form the nested VariableNode
-          value = node.value[1]
-          @symbol_table[name] = value
+          lhs = node.value[0]
+          rhs = node.value[1]
+          if lhs.is_a? TempoNode
+            return emit(Tempo.new(rhs.value))
+          elsif lhs.is_a? ConstantNode
+            puts "TODO: handle constant: #{lhs.value}"
+          else
+            name = lhs.value # extract the String form the nested VariableNode
+            @symbol_table[name] = rhs
+          end
           
         elsif node.is_a? VariableNode
           return enter_or_emit(node)
@@ -115,17 +122,21 @@ module Cosy
     def enter_or_emit(node)
       if node.nil?
         exit
-      elsif node.is_a? Value
-        emit(node.value)
       elsif node.is_a? VariableNode
         variable = node.value
         value = @symbol_table.lookup(variable)
+        # Todo: option to warn and continue instead of failing?
+        # or just do that in the renderer!
         raise "Undefined variable #{variable}" if not value
         enter_or_emit(value)
-      elsif node.atom?
+      elsif node.is_a? Value
+        emit(node)
+      elsif node.respond_to? :atom and node.atom?
         emit(node.value)
-      else
+      elsif node.is_a? SequencingNode
         enter(node)
+      else # node is actually a primitive
+        emit(node)
       end
     end
 
@@ -175,6 +186,8 @@ end
 
 # s = Cosy::Sequencer.new '(-1 -2)@((3 4)@($$ $ 99))'
 # s = Cosy::Sequencer.new '0 (1 2)@($ 9) 0'
+# 
+# # s = Cosy::Sequencer.new '(C4 B3 A3 (G3 | B3))@(($ D4 E4)*4)'
 # 
 # max = 100
 # while v=s.next and max > 0

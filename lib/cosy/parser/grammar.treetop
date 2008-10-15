@@ -2,18 +2,25 @@ module Cosy
 	grammar Sequence
 	
 		rule root
-			space? (statement space?)* sequence_root? <CosyNode>
+			 space? (statement ';' space?)* statement? space? <CosyNode>
 		end
 	
 		
 		rule statement
-			assignment ';'
+			assignment / sequence_root
 		end
 	
 		
 		rule assignment
+			numeric_constant space? '=' space? (number/ruby) <AssignmentNode>
+			/
 			var space? '=' sequence_root <AssignmentNode>
 		end
+		
+		
+		rule numeric_constant
+		  ('QPM' / 'QNPM' / 'TEMPO') '' <TempoNode>
+	  end
 	
 	
 		rule sequence_root

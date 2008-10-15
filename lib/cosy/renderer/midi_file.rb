@@ -11,48 +11,42 @@ module Cosy
     def initialize
       init
       @midi_sequence = MIDI::Sequence.new()
-      @delta_time = 0
+      @absolute_delta = 0
       
-      @meta_track = addTrack
-      # TODO: Cosy needs to support setting BPM inside the syntax
-      @meta_track.events << MIDI::Tempo.new(MIDI::Tempo.bpm_to_mpq(120))
+      @meta_track = add_track
       @meta_track.events << MIDI::MetaEvent.new(MIDI::META_SEQ_NAME, 'Cosy Sequence')
+      self.tempo = 120
 
-      @track = addTrack
+      @track = add_track
       @track.events << MIDI::ProgramChange.new(0, 1, 0)
     end
 
-    def render(input, output_file)
-      @sequencer = Sequencer.new(input)
-      if !@sequencer.parsed?
-        parser = @sequencer.parser
-        raise "Failed to parse: #{input}\n" + 
-          "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
-      end
+    def render(input, output_filename)
+      parse input
       channel = 0
-      while event = @sequencer.next
-        pitches, velocity, duration = getPitchesVelocityDuration(event)
-        velocity = velocity.to_i
-        duration = duration.to_i   
-        if duration < 0
-          @delta_time = -duration
+      @absolute_delta = delta_time = 0
+      
+      while event = next_event
+        if event.is_a? Tempo
+          self.tempo = event.value
+      
+        elsif event.is_a? NoteEvent
+          pitches, velocity, duration = event.pitches, event.velocity.to_i, event.duration.to_i
+          if duration < 0
+            delta_time = -duration
+          else
+            # TODO: special case duration 0?
+            render_note(channel, pitches, velocity, delta_time, duration)
+          end
+          
         else
-          # TODO: special case duration 0?
-          pitches.each do |pitch|
-            pitch = pitch.to_i
-            @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, @delta_time)
-            @delta_time = 0
-          end
-          pitches.each do |pitch|
-            pitch = pitch.to_i
-            @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, duration)  
-            duration = 0      
-          end
+          raise 'Unsupported Event: #{event.inspect}'
         end
       end
-      @track.events << MIDI::NoteOffEvent.new(1, 0, 0, 480) # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
+      
+      note_off(1, 0, 0, 480) # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
       #print_midi
-      File.open(output_file, 'wb'){ |file| @midi_sequence.write(file) }
+      File.open(output_filename, 'wb'){ |file| @midi_sequence.write(file) }
     end
     
     def print_midi
@@ -71,18 +65,46 @@ module Cosy
     ############
     private  
     
-    def addTrack
+    def add_track
       track = MIDI::Track.new(@midi_sequence)
       @midi_sequence.tracks << track
       return track
     end
     
-    def method_missing(name, *args, &block) 
-      @midi_sequence.send(name, *args, &block)
+    # Set tempo in terms of Quarter Notes per Minute (often incorrectly referred to as BPM)
+    def tempo=(qnpm)
+      ms_per_quarter_note = MIDI::Tempo.bpm_to_mpq(qnpm)
+      @meta_track.events << MIDI::Tempo.new(ms_per_quarter_note, @absolute_delta)
     end
+    
+    def note_on(channel, pitch, velocity, delta_time)
+      @track.events << MIDI::NoteOnEvent.new(channel, pitch, velocity, delta_time)
+      @absolute_delta += delta_time
+    end
+    
+    def note_off(channel, pitch, velocity, delta_time)
+      @track.events << MIDI::NoteOffEvent.new(channel, pitch, velocity, delta_time)  
+      @absolute_delta += delta_time
+    end
+    
+    def render_note(channel, pitches, velocity, delta_time, duration)
+      pitches.each do |pitch|
+        pitch = pitch.to_i
+        note_on(channel, pitch, velocity, delta_time)
+        delta_time = 0 # if we're playing a chord the next pitch has delta_time=0
+      end
+      
+      delta_time = duration
+      pitches.each do |pitch|
+        pitch = pitch.to_i
+        note_off(channel, pitch, velocity, delta_time)  
+        delta_time = 0 # if we're playing a chord the next pitch has delta_time=0  
+      end
+    end
+    
   end
 
 end
 
 
-# Cosy::MidiRenderer.new.render 'C4:w h. h', 'test.mid'
+Cosy::MidiRenderer.new.render 'C4 D4 [E4 b5] F4 G4; TEMPO=60; C3 D3 E3 F3 G3', 'test.mid'
