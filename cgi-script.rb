@@ -11,6 +11,11 @@ module Cosy
       raise 'embedded Ruby not allowed online'
     end
   end
+  class CommandNode
+    def value
+      raise 'embedded Ruby not allowed online'
+    end
+  end
 end
 
 require 'tempfile'

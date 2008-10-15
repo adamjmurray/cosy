@@ -321,6 +321,16 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,2], 'PROGRAM=1; PGM=2'
     assert_sequence [1,2], 'PROGRAM=1; PGM=2;'
   end
+  
+  def test_ruby
+    assert_sequence [1,7,2], '1 {3+4} 2'
+  end
+  
+  def test_command
+    $X = 0
+    assert_sequence [1,2], '1 {{$X=25}} 2'
+    assert_equal(25, $X)
+  end
 
   def test_invalid_sequence
     assert_failure '1.'

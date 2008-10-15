@@ -41,7 +41,7 @@ module Cosy
 
 
 		rule sequence_element
-			chain modifier:modifier <ModifiedNode> / chain / foreach
+			command / chain modifier:modifier <ModifiedNode> / chain / foreach
 		end
 
 		
@@ -99,17 +99,21 @@ module Cosy
 			multiplier:(number/'-')? metrical_duration:[WwHhQqEeSsRrXx] modifier:duration_modifier* <DurationNode>
 		end
 		
+		
 		rule duration_modifier
 		  't' / '.'
 	  end
+	
 	
 		rule number
 			ratio / float / int
 		end
 
+
     rule ratio
       int '/' int <RatioNode>
     end
+	
 	
 		rule float
 			'-'? [0-9]+ '.' [0-9]+ <FloatNode>
@@ -140,9 +144,8 @@ module Cosy
 		end
 		
 		
-		# TODO: use this somewhere!
 		rule command
-			'{' ruby '}'
+			'{' ruby:ruby '}' <CommandNode>
 		end
 
 

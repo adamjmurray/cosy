@@ -102,6 +102,12 @@ module Cosy
 
         elsif node.is_a? ForEachNode
           return enter(node)
+          
+        elsif node.is_a? CommandNode
+          # evaluate the command, but don't use it's value
+          advance
+          node.value
+          return self.next
 
         elsif node.atom?
           return emit(node.value)
@@ -137,9 +143,13 @@ module Cosy
       end
     end
 
-    def emit(value)
+    def advance
       @state.increase_count
       @state.advance
+    end
+
+    def emit(value)
+      advance
       return value
     end
 
@@ -186,7 +196,8 @@ end
 # 
 # # s = Cosy::Sequencer.new '(C4 B3 A3 (G3 | B3))@(($ D4 E4)*4)'
 #
-# s= Cosy::Sequencer.new 'TEMPO=1; QNPM=2; QPM=3'
+# 
+# s= Cosy::Sequencer.new '1 2 {{puts "hello world!"}} 3'
 # 
 # max = 100
 # while v=s.next and max > 0
