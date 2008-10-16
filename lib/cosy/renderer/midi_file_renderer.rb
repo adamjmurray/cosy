@@ -9,7 +9,7 @@ module Cosy
     attr_reader :midi_sequence
     
     def initialize
-      init
+      super
       @midi_sequence = MIDI::Sequence.new()
       @absolute_delta = 0
       

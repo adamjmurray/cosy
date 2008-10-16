@@ -87,6 +87,8 @@ module Cosy
 	
 		rule pitch
 			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <PitchNode>
+			/
+			note_name:[A-G] accidentals:('#'/'b'/'+'/'_')* <PitchNode>
 		end
 
 	
@@ -96,7 +98,7 @@ module Cosy
 
 	
 		rule duration
-			multiplier:(number/'-')? metrical_duration:[WwHhQqEeSsRrXx] modifier:duration_modifier* <DurationNode>
+			multiplier:(number/'-')? metrical_duration:[whqesrx] modifier:duration_modifier* <DurationNode>
 		end
 		
 		

@@ -184,7 +184,7 @@ class TestSequencingParser < Test::Unit::TestCase
     end
   end
 
-  ALL_DURATIONS = %w{W w H h Q q E e S s R r X x}
+  ALL_DURATIONS = %w{w h q e s r x}
 
   def test_base_durations
     ALL_DURATIONS.each do |dur|

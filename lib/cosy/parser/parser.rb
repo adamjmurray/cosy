@@ -260,18 +260,20 @@ module Cosy
   class PitchNode < TerminalNode
     def value
       if not @value then
-        @value = PITCH_CLASS[note_name.text_value.upcase]
+        pitch_class_value = PITCH_CLASS[note_name.text_value.upcase]
+        accidental_value = 0
         accidentals.text_value.each_byte do |byte|
           case byte.chr
-          when '#'; @value += 1
-          when 'b'; @value -= 1
-          when '+'; @value += 0.5
-          when '_'; @value -= 0.5 
+          when '#' then accidental_value += 1
+          when 'b' then accidental_value -= 1
+          when '+' then accidental_value += 0.5
+          when '_' then accidental_value -= 0.5 
           end
         end
-        @value += 12*(octave.value+$OCTAVE_OFFSET)
+        octave_value = 12*(octave.value+$OCTAVE_OFFSET) if defined? octave
+        @value = Pitch.new(pitch_class_value, accidental_value, octave_value, text_value)
       end
-      return Pitch.new(@value, text_value)
+      return @value
     end
   end
 
@@ -366,6 +368,27 @@ module Cosy
   end
   
   class Pitch < Value
+    attr_reader :pitch_class, :accidental, :octave
+    def initialize(pitch_class, accidental, octave, text_value)
+      @pitch_class = pitch_class
+      @accidental = accidental
+      @octave = octave
+      @value = pitch_class
+      @value += accidental
+      @value += octave if octave
+      @text_value = text_value
+    end
+    
+    def has_octave?
+      not @octave.nil?
+    end
+    
+    def octave=(octave)
+      @octave = octave
+      @value = pitch_class
+      @value += accidental
+      @value += octave if octave
+    end
   end
   
   class Velocity < Value
@@ -502,20 +525,6 @@ class Fixnum
   include Cosy::ValueEquality
 end
 
-# require 'set'
-# s = Set.new
-# #s.add(60)
-# s.add(Cosy::Pitch.new(60))
-# puts '.'
-# s.add(Cosy::Pitch.new(60))
-# puts '..'
-# s.add(60)
-# puts '...'
-# s.add(Cosy::Pitch.new(60))
-# puts '....'
-# s.add(60)
-# 
-# puts s.inspect
 
 # Cosy::SequenceParser.new.verbose_parse '1 2 {{puts 3+4}} 4'
 

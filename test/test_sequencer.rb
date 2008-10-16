@@ -25,11 +25,9 @@ class TestSequencer < Test::Unit::TestCase
     seq = sequence(input)
     actual = []
     count = 0
-    val = seq.next
-    while val and count < SEQUENCE_COUNT_LIMIT
+    while val=seq.next and count < SEQUENCE_COUNT_LIMIT
       actual << val
       count += 1
-      val = seq.next
     end
     if count == SEQUENCE_COUNT_LIMIT
       fail "#{input} output more than #{SEQUENCE_COUNT_LIMIT}" 

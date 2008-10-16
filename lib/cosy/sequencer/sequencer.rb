@@ -199,8 +199,9 @@ end
 # 
 # # s = Cosy::Sequencer.new '(C4 B3 A3 (G3 | B3))@(($ D4 E4)*4)'
 #
-# 
-# s= Cosy::Sequencer.new '1 2 {sequence.children[0]} 3'
+
+
+# s = Cosy::Sequencer.new 'C4 E'
 # 
 # max = 100
 # while v=s.next and max > 0

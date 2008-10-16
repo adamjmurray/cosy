@@ -16,7 +16,7 @@ module Cosy
     attr_accessor :seq, :time_to_next, :prev_duration, :end, :ticks_per_bang
   
     def initialize
-      init
+      super
       parse ''
       @time_to_next = 1
       @end = false      
