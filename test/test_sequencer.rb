@@ -9,12 +9,12 @@ class TestSequencer < Test::Unit::TestCase
   SEQUENCE_COUNT_LIMIT = 1000
   
   def sequence input
-    seq = Sequencer.new(input)
-    p = seq.parser
-    assert_not_nil(seq.tree, 
+    sequencer = Sequencer.new(input)
+    p = sequencer.parser
+    assert_not_nil(sequencer.sequence, 
       "Failed to parse: #{input}\n" + 
       "(#{p.failure_line},#{p.failure_column}): #{p.failure_reason}")
-    return seq
+    return sequencer
   end
   
   def assert_done seq
@@ -38,8 +38,8 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def assert_failure(input)
-    seq = Sequencer.new(input)
-    assert_nil(seq.tree, 
+    sequencer = Sequencer.new(input)
+    assert_nil(sequencer.sequence, 
       "Successfully parsed invalid syntax: #{input}")
   end
   
@@ -330,6 +330,16 @@ class TestSequencer < Test::Unit::TestCase
     $X = 0
     assert_sequence [1,2], '1 {{$X=25}} 2'
     assert_equal(25, $X)
+  end
+  
+  def test_self_aware_ruby
+    # TODO: I don't like that we need to call value, maybe rethink the interface,
+    # or provide some convenience methods...
+    assert_sequence [1,1,2], '1 {sequence.children[0].value} 2'
+  end
+  
+  def test_self_aware_command
+    assert_sequence [1,2,1], '1 2 {{sequence.children.reverse!}} 3'
   end
 
   def test_invalid_sequence

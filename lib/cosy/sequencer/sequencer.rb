@@ -7,34 +7,34 @@ module Cosy
 
   class Sequencer
 
-    attr_accessor :tree, :parser, :state
+    attr_accessor :parser, :sequence, :state
 
     def initialize(sequence, symbol_table=SymbolTable.new)
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
-        @tree = sequence
+        @sequence = sequence
       else
         # we need a local parser so we can retreive parse failure info
         @parser = SequenceParser.new 
-        @tree = @parser.parse sequence
+        @sequence = @parser.parse sequence
       end
       @symbol_table = symbol_table
       restart
     end
 
     def restart
-      # A restart may need to reconstruct the state from the @tree if the sequence has
+      # A restart may need to reconstruct the state from the @sequence if the sequence has
       # completely finished, because it would have exited out of all states so
       # @state could be nil
       if @state
         @state = @state.reset
       else
-        @state = SequenceState.new(@tree, @symbol_table) if @tree
+        @state = SequenceState.new(@sequence, @symbol_table) if @sequence
       end
     end
     
     def parsed?
-      !@tree.nil?
+      !@sequence.nil?
     end
 
     def next
@@ -106,8 +106,11 @@ module Cosy
         elsif node.is_a? CommandNode
           # evaluate the command, but don't use it's value
           advance
-          node.value
+          node.value(binding)
           return self.next
+          
+        elsif node.is_a? RubyNode
+          return emit(node.value(binding))
 
         elsif node.atom?
           return emit(node.value)
@@ -197,7 +200,7 @@ end
 # # s = Cosy::Sequencer.new '(C4 B3 A3 (G3 | B3))@(($ D4 E4)*4)'
 #
 # 
-# s= Cosy::Sequencer.new '1 2 {{puts "hello world!"}} 3'
+# s= Cosy::Sequencer.new '1 2 {sequence.children[0]} 3'
 # 
 # max = 100
 # while v=s.next and max > 0

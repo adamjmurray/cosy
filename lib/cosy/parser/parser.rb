@@ -393,16 +393,16 @@ module Cosy
   
 
   class RubyNode < TerminalNode
-    def value
-      Kernel.eval script.text_value
+    def value(binding=nil)
+      eval(script.text_value, binding)
     end
   end
   # NOTE: if I ever introduce other things that eval, make sure
   # to override them and raise in error for the online version
 
   class CommandNode < TerminalNode
-    def value
-      ruby.value
+    def value(binding=nil)
+      ruby.value(binding)
     end
   end
 
