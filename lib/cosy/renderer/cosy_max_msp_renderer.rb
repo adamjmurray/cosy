@@ -16,11 +16,8 @@ module Cosy
     attr_accessor :seq, :time_to_next, :prev_duration, :end, :ticks_per_bang
   
     def initialize
-      super
       parse ''
-      @time_to_next = 1
-      @end = false      
-      @prev_duration = DURATION_NAME['sixtyfourth']
+      restart
       @ticks_per_bang = DURATION_NAME['sixtyfourth'].to_f
     end
 

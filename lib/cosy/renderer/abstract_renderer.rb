@@ -87,7 +87,7 @@ module Cosy
       @prev_velocity = velocity
       @prev_duration = duration
       
-      return NoteEvent.new(pitches,velocity,duration)
+      return NoteEvent.new(pitch_values,velocity,duration)
     end
     
   end
