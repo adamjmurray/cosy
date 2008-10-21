@@ -26,7 +26,7 @@ module Cosy
     end
     
     def self.default_duration
-      DURATION_NAME['quarter']
+      DURATION['quarter']
     end
     
     def parse(input)

@@ -181,6 +181,13 @@ class TestSequencingParser < Test::Unit::TestCase
       parse vel
     end
   end
+  
+  def test_velocities_upcase
+    INTENSITY.keys.each do |vel| 
+      # Only try this with p, pp, ppp, etc
+      parse vel.upcase if vel.length <= 3
+    end
+  end
 
   def test_base_durations
     DURATION.keys.each do |dur|

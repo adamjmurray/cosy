@@ -12,13 +12,13 @@ module Cosy
 	
 		
 		rule assignment
-			numeric_constant space? '=' space? (number/ruby) <AssignmentNode>
+			property space? '=' space? (number/ruby) <AssignmentNode>
 			/
 			var space? '=' sequence_root <AssignmentNode>
 		end
 		
 		
-		rule numeric_constant
+		rule property
 		  ('TEMPO'/ 'QPM' / 'QNPM') '' <TempoNode>
 		  /
 		  ('PROGRAM' / 'PGM') '' <ProgramNode>
@@ -81,26 +81,37 @@ module Cosy
 
 
 		rule primitive
-			velocity / pitch / duration / number / string / var / ruby
+			pitch / velocity / duration  / number / string / var / ruby
 		end
 
 	
 		rule pitch
-			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
+			note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
+			/
+			'y' number <NumericPitchNode>
 		end
 
 	
 		rule velocity
-			('mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'forte'/'fo'/'o') '' <VelocityNode>
+			( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
+			  'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' /
+			  'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O'
+			) '' <VelocityNode>
+      /
+			'v' number <NumericVelocityNode>
 		end
 
 	
 		rule duration
 			multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
+			/
+			'u' number <NumericDurationNode>
 		end
 
 		
 		rule metrical_duration
+		  'whole' / 'half' / 'quarter' / 'eighth' / 'sixteenth' /
+		  'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
 		  [WwHhQqIiSsRrXx] 
 	  end
 
