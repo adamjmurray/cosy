@@ -8,12 +8,17 @@ class TestSequencer < Test::Unit::TestCase
   include Cosy
   SEQUENCE_COUNT_LIMIT = 1000
   
+  # define constants for intensities: P, PP, PPP, MP, etc
+  INTENSITY.each do |key,value|
+    const_set(key.upcase, value) if key.length <= 3
+  end
+  
   def sequence input
     sequencer = Sequencer.new(input)
     p = sequencer.parser
-    assert_not_nil(sequencer.sequence, 
-      "Failed to parse: #{input}\n" + 
-      "(#{p.failure_line},#{p.failure_column}): #{p.failure_reason}")
+    flunk("Failed to parse: #{input}\n" + 
+      "(#{p.failure_line},#{p.failure_column}): #{p.failure_reason}"
+    ) if sequencer.sequence.nil?
     return sequencer
   end
   
@@ -125,15 +130,25 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,2,3,2,3,2,3,1,2], '(1 (2 3)*3)&9'
   end
   
-  def test_notes
-    assert_sequence [60,65,67,68], 'C4 F4 G4 Ab4'      
+  def test_pitches
+    assert_sequence [60,65,67,68,66], 'C4 F4 G4 Ab4 F#4'      
+    assert_sequence [60,65,67,68,66], 'c4 f4 g4 ab4 F#4'      
+    assert_sequence [0,5,7,8,6], 'C F G Ab F#'     
+    assert_sequence [0,5,7,8,6], 'c f g ab f#'      
+  end
+
+  def test_numeric_pitches
+    assert_sequence [60,65,67,68], 'y60 y65 y67 y68'      
+    assert_sequence [60.0,65.5], 'y60.0 y65.5'
+    assert_sequence [25.0], 'y100/4'
+    assert_sequence [16], 'y{4**2}'          
   end
   
-  def test_repeated_notes
+  def test_repeated_pitches
     assert_sequence [60,65,65,65,67,68,67,68], 'C4 F4*3 (G4 Ab4)*2'      
   end
   
-  def test_note_chord
+  def test_chord
      assert_sequence [[60,65,67,68]], '[C4 F4 G4 Ab4]'      
   end
   
@@ -248,6 +263,9 @@ class TestSequencer < Test::Unit::TestCase
   
   def test_rhythm_basic
     assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'w h q i s r x'
+    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'W H Q I S R X'
+    assert_sequence [1920,  960, 480, 240, 120, 60, 60, 30, 30], 
+        'whole half quarter eighth sixteenth thirtysecond thirty-second sixtyfourth sixty-fourth'
     assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. i. s. r. x.'
   end
   
@@ -275,6 +293,27 @@ class TestSequencer < Test::Unit::TestCase
       input = base_input.map{|val|premod+val+modifier}.join(' ')
       assert_sequence expected, input
     end
+  end
+  
+  def test_rhythm_numeric
+    assert_sequence [100, 200, 300], 'u100 u200 u300'
+    assert_sequence [100.5, 200.33, -30.0], 'u100.5 u200.33 u-30.0'
+    assert_sequence [5.0/4], 'u5/4'
+    assert_sequence [20], 'u{5*4}'
+  end
+  
+  def test_velocity
+    assert_sequence [PPP, PP, P, MP, MF, O, FF, FFF], 'ppp pp p mp mf o ff fff'
+    assert_sequence [PP, P, MP, MP, MF, MF, O, FF], 
+      'pianissimo piano mezzopiano mezzo-piano mezzoforte mezzo-forte forte fortissimo'
+  end
+  
+  def test_numeric_velocity
+    assert_sequence [1, 2, 3, 4], 'v1 v2 v3 v4'
+    assert_sequence [1.1, 2.02, 3.0], 'v1.1 v2.02 v3.0'
+    assert_sequence [10.0/3], 'v10/3'
+    assert_sequence [7], 'v{9-2}'
+    
   end
   
   def test_variables

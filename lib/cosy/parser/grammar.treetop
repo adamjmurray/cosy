@@ -88,7 +88,7 @@ module Cosy
 		rule pitch
 			note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
 			/
-			'y' number:number <NumericPitchNode>
+			'y' number:(number/ruby) <NumericPitchNode>
 		end
 
 	
@@ -98,14 +98,14 @@ module Cosy
 			  'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O'
 			) '' <VelocityNode>
       /
-			'v' number:number <NumericVelocityNode>
+			'v' number:(number/ruby) <NumericVelocityNode>
 		end
 
 	
 		rule duration
 			multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
 			/
-			'u' number:number <NumericDurationNode>
+			'u' number:(number/ruby) <NumericDurationNode>
 		end
 
 		
