@@ -176,31 +176,27 @@ class TestSequencingParser < Test::Unit::TestCase
     parse '[2 c#+4] 3 (4.0 6*3)*2'
   end
   
-  ALL_VELOCITIES = %w{ppp pp p mp mf f ff fff}
-  
   def test_velocities
-    ALL_VELOCITIES.each do |vel| 
+    INTENSITY.keys.each do |vel| 
       parse vel
     end
   end
 
-  ALL_DURATIONS = %w{w h q e s r x}
-
   def test_base_durations
-    ALL_DURATIONS.each do |dur|
+    DURATION.keys.each do |dur|
       parse dur
     end
   end
 
   def test_triplet_durations
-    ALL_DURATIONS.each do |dur|
+    DURATION.keys.each do |dur|
       parse dur + 't'
     end
   end
 
   def test_dotted_durations
     %w{ .  ..  ...  .... }.each do |dots|
-      ALL_DURATIONS.each do |dur|
+      DURATION.keys.each do |dur|
         parse dur + dots
       end
     end
@@ -208,33 +204,33 @@ class TestSequencingParser < Test::Unit::TestCase
 
   def test_triplet_dotted_durations
     %w{ .  ..  ...  .... }.each do |dots|
-      ALL_DURATIONS.each do |dur|
+      DURATION.keys.each do |dur|
         parse dur + 't' + dots
       end
     end
   end
 
   def test_duration_multiplier
-    ALL_DURATIONS.each_with_index do |dur,index|
+    DURATION.keys.each_with_index do |dur,index|
       parse index.to_s + dur
     end
   end
 
   def test_negative_duration_multiplier
-    ALL_DURATIONS.each_with_index do |dur,index|
+    DURATION.keys.each_with_index do |dur,index|
       parse "-#{index}#{dur}"
     end
   end
   
   def test_negative_duration
-    ALL_DURATIONS.each_with_index do |dur,index|
+    DURATION.keys.each_with_index do |dur,index|
       parse '-' + dur
     end  
   end
 
   def test_multiplier_triplet_dotted_durations
     %w{ .  ..  ...  .... }.each_with_index do |dots,index|
-      ALL_DURATIONS.each do |dur|
+      DURATION.keys.each do |dur|
         parse index.to_s + dur + 't' + dots
       end
     end    

@@ -11,12 +11,13 @@ module Cosy
     # But maybe that's a dumb reason to not make it
     # ppp=>15 pp=>31, p=>47
     # This should be easily configurable with a command node
-    'ppp'=>24, 'pp'=>36, 'p'=>48, 'mp'=>63, 
-    'mf'=>79, 'f'=>95, 'ff'=>111, 'fff'=>127    
+    'ppp'=>24, 'pp'=>36, 'p'=>48, 'mp'=>63, 'mf'=>79, 
+    'forte'=>95, 'o'=>95,
+    'ff'=>111, 'fff'=>127    
   }
 
   DURATION = { # standard number of MIDI ticks for these note durations:
-    'w'=>1920, 'h'=>960, 'q'=>480, 'e'=>240, 's'=>120, 'r'=>60, 'x'=>30
+    'w'=>1920, 'h'=>960, 'q'=>480, 'i'=>240, 's'=>120, 'r'=>60, 'x'=>30
   }
   
   DURATION_NAME = {

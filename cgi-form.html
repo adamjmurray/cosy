@@ -9,8 +9,6 @@ ol, ul, ul li {
 <p>
 This page lets you try out Cosy from the comfort of your browser. If you don't know what Cosy is, <a href="/web/software/cosy">I describe it here</a>. The text entered into the form on this page will submit to my web server where Cosy happily churns out a MIDI file<sup><a href="#note_1">[1]</a></sup>. These examples serve as a <em>very rough</em> initial attempt at some documentation.
 </p>
-<p>Thanks for taking the time to try this out. If you have any problems using this page, questions, feedback, or whatever, please <a href="/web/about#contact-info">send me an email</a>.
-</p>
 
 <a name="examples">Examples:</a>
 <table style="margin:0;padding:0;"><tbody style="border:0;"><tr>
@@ -23,15 +21,15 @@ var examples = {
     description: 'a pitch symbol consists of:<ul><li>the note name: <b>A-G</b> (or <b>a-g</b>)</li><li>zero or more accidentals: <b>#</b> (sharp) or <b>b</b> (flat)</li><li>an octave number <b>0-9</b></li></ul> C4 is middle C (MIDI pitch 60) and A4 is A440, the standard reference pitch for tuning. -1 is also a valid octave number. C-1 is the lowest note, G9 is the highest.<br/><br/>List a series of pitches to play them in sequence. '
   },
   duration: {
-    cosy: 'C4:w h qt qt qt q. e q. e 8s r r r r r r r x x x x x x x x x x x x x x x x w',
+    cosy: 'C4:w h qt qt qt q. i q. i 8s r r r r r r r x x x x x x x x x x x x x x x x w',
     description: 'Durations determine rhythm. By default, Cosy plays all notes legato, so the next note plays when the previous note ends. A duration symbol consists of:<ul><li>an optional number that multiplies the base duration</li><li>a base duration, which is one of the following letters:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>e</b> (eighth note)</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>x</b> (sixty-fourth note)</li></ul></li><li>zero or more modifiers, which is one of the following symbols:<ul><li><b>.</b> (dotted note, 150% base duration)</li><li><b>t</b> (triplet, 66.67% base duration)</li></ul></li></ul>For example, \'<b>q</b>\' is a quarter note, \'<b>3q</b>\' is a duration of 3 quarter notes, \'<b>qt</b>\' is a triplet quarter note, and \'<b>q..</b>\' is a double-dotted quarter note.'
   },
   velocity: {
-    cosy: 'C4:ppp pp p mp mf f ff fff',
-    description: 'Velocity determines the intensity (loudness) of a note. Velocity symbols are the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>f</b> (forte, loud)</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
+    cosy: 'C4:ppp pp p mp mf o ff fff',
+    description: 'Velocity determines the intensity (loudness) of a note. Velocity symbols are the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>o</b> (f<u>o</u>rte, loud)</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
   },
   note: {
-    cosy: 'C4:e:mf  D4  E4:q:mp  F4:e  G4:h\nA4:e:p  F4  E4:mp  D4:q.:mf  C4:w:ff',
+    cosy: 'C4:i:mf  D4  E4:q:mp  F4:i  G4:h\nA4:i:p  F4  E4:mp  D4:q.:mf  C4:w:ff',
     description: 'A single note has many parameters. Pitch, velocity, and duration are the basic parameters needed for working with MIDI. Cosy understands symbols that represent these 3 basic parameter types. See the pitch, rhythm, and velocity examples for details.<br/><br/>Multiple parameters are chained together with <b>:</b> (colon) to form a note. If some parameters are not specified, the previous note\'s parameter will be used. The initial default is C4:q:mf, that is pitch=C4 (middle C), duration=q (quarter note), velocity=mf (medium loud).'	
   },
   chords: {
@@ -39,11 +37,11 @@ var examples = {
 	description: 'Chords are a group of pitches in <b>[</b>square brackets<b>]</b>. All pitches in a chord sound simultaneously.'	
   },
   rests: {	
-	cosy: 'E4:e D4 C4 -e E4:s -e. F4:e G4 -q B3:q -q E3:w',
+	cosy: 'E4:i D4 C4 -i E4:s -i. F4:i G4 -q B3:q -q E3:w',
 	description: 'Rests are a duration with a \'<b>-</b>\' (negative sign) in front. For example, \'<b>-e</b>\' is an eighth rest. Pitch and velocity have no effect when a rest is played. Remember that notes use the previous parameter value if none is specified, so the duration must be set to a non-rest to play a note after a rest.'
   },
   repetition: {
-    cosy: '((G4:e F4)*3 E4 D4)*2 C4*5',
+    cosy: '((G4:i F4)*3 E4 D4)*2 C4*5',
     description: 'To repeat a note, follow the note with <b>*N</b> where N is the number of repetitions. To repeat a portion of a sequence, wrap the subsequence in <b>(</b>parentheses<b>)</b> and then follow it with <b>*N</b>.'	
   },
   'count-limit': {
@@ -59,8 +57,8 @@ var examples = {
     description: 'Variables may be defined to reduce redundancy in the sequence or to make a sequence "self documenting". Variable names start with a \'<b>$</b>\', followed by an alphabetic character (<b>A-Z</b>, <b>a-z</b>) followed by any number of alphanumeric characters or underscores  (<b>A-Z</b>, <b>a-z</b>, <b>0-9</b>, <b>_</b>) .<br/><br/>Before the main sequence, a list of variable declarations can appear. These look like:<br/><b>$VARIABLE = {sequence};</b><br/>where {sequence} is any normal sequence. The variable names may then appear in the main sequence to insert the variable\'s value.'
   },
   'chaining': {
-    cosy: '((G4 F4 E4 D4)*4 C4):(q. e):(p mf ff)',
-    description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays while cycling through two durations (q. e) and three velocities (p mf ff)'	
+    cosy: '((G4 F4 E4 D4)*4 C4):(i. e):(p mf ff)',
+    description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters. This is a form of <a href="/web/articles/musical-decoupling">musical decoupling</a>.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays while cycling through two durations (q. e) and three velocities (p mf ff)'	
   }
 }
 
@@ -105,12 +103,15 @@ Select an example, click the "Play in Browser" or "Download" button<sup><a href=
 	<br/>
 	<input type="submit" value="Play in Browser" onclick="document.forms.cosy.o.value='embed'"></input>
 	<input type="submit" value="Download" onclick="document.forms.cosy.o.value='download'"></input>
-	<a href="#examples" style="margin-left:50px;">Back to examples</a>
 </form>
 
 <iframe name="results" src="http://compusition.com/html/cosy-render-area.html" style="width:420px; height:100px;"></iframe>
 
 <br/><br/>
+<p>If you have any problems using this page, questions, feedback, or whatever, please <a href="/web/about#contact-info">send me an email</a> or use the link at the bottom to leave a comment on this page. Windows users, check Note #2 below for some info on a problem you may encounter.
+</p>
+<br/>
+
 <u style="font-size: larger">NOTES</u>
 <ol>
 	<li><a name="note_1"></a>

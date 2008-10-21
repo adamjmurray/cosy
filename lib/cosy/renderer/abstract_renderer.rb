@@ -7,25 +7,25 @@ module Cosy
     end
     
     def init
-      @prev_pitches  = default_pitches
-      @prev_octave   = default_octave
-      @prev_velocity = default_velocity
-      @prev_duration = default_duration
+      @prev_pitches  = AbstractRenderer.default_pitches
+      @prev_octave   = AbstractRenderer.default_octave
+      @prev_velocity = AbstractRenderer.default_velocity
+      @prev_duration = AbstractRenderer.default_duration
     end
     
-    def default_pitches
+    def self.default_pitches
       [Pitch.new(0, 0, nil, '0')]
     end
     
-    def default_octave
+    def self.default_octave
       60 # the middle C octave
     end
     
-    def default_velocity
+    def self.default_velocity
       INTENSITY['mf']
     end
     
-    def default_duration
+    def self.default_duration
       DURATION_NAME['quarter']
     end
     

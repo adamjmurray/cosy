@@ -81,26 +81,29 @@ module Cosy
 
 
 		rule primitive
-			pitch / velocity / duration / number / string / var / ruby
+			velocity / pitch / duration / number / string / var / ruby
 		end
 
 	
 		rule pitch
-			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:int <PitchNode>
-			/
-			note_name:[A-G] accidentals:('#'/'b'/'+'/'_')* <PitchNode>
+			note_name:[A-Ga-g] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
 		end
 
 	
 		rule velocity
-			('mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'f') '' <VelocityNode>
+			('mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'forte'/'fo'/'o') '' <VelocityNode>
 		end
 
 	
 		rule duration
-			multiplier:(number/'-')? metrical_duration:[whqesrx] modifier:duration_modifier* <DurationNode>
+			multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
 		end
+
 		
+		rule metrical_duration
+		  [WwHhQqIiSsRrXx] 
+	  end
+
 		
 		rule duration_modifier
 		  't' / '.'

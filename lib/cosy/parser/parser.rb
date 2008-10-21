@@ -270,7 +270,8 @@ module Cosy
           when '_' then accidental_value -= 0.5 
           end
         end
-        octave_value = 12*(octave.value+$OCTAVE_OFFSET) if defined? octave
+#        puts "OCTAVE: #{octave.inspect}"
+        octave_value = 12*(octave.value+$OCTAVE_OFFSET) if not octave.text_value.empty?
         @value = Pitch.new(pitch_class_value, accidental_value, octave_value, text_value)
       end
       return @value
