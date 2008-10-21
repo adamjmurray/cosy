@@ -270,11 +270,18 @@ module Cosy
           when '_' then accidental_value -= 0.5 
           end
         end
-#        puts "OCTAVE: #{octave.inspect}"
         octave_value = 12*(octave.value+$OCTAVE_OFFSET) if not octave.text_value.empty?
         @value = Pitch.new(pitch_class_value, accidental_value, octave_value, text_value)
       end
       return @value
+    end
+  end
+  
+  class NumericPitchNode < PitchNode
+    def value
+      if not @value
+        @value = Pitch.new(number.value, 0, 0, number.text_value)
+      end
     end
   end
 
@@ -301,12 +308,30 @@ module Cosy
       return Duration.new(@value, text_value)
     end  
   end
+  
+  class NumericDurationNode < DurationNode
+    def value
+      if not @value
+        @value = Duration.new(number.value, number.text_value)
+      end
+      return @value
+    end
+  end
 
   class VelocityNode < TerminalNode
     def value
       @value = INTENSITY[text_value.downcase] if not @value
       return Velocity.new(@value, text_value)
     end
+  end
+  
+  class NumericVelocityNode < TerminalNode
+    def value
+      if not @value
+        @value = Velocity.new(number.value, number.text_value)
+      end
+      return @value
+    end    
   end
 
   class FloatNode < TerminalNode

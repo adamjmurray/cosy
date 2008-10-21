@@ -2,7 +2,10 @@ require 'test/unit'
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
 require File.join(cosy_root, 'parser/parser')
 
-class TestSequencingParser < Test::Unit::TestCase
+# These tests check that the grammar and parser accept 
+# the input that they was designed to accept.
+
+class TestParser < Test::Unit::TestCase
   include Cosy  
   PARSER = SequenceParser.new
 
@@ -194,25 +197,36 @@ class TestSequencingParser < Test::Unit::TestCase
       parse dur
     end
   end
+  
+  def test_base_durations_upcase
+    DURATION.keys.each do |dur|
+      parse dur.upcase if dur.length == 1
+    end
+  end
 
   def test_triplet_durations
-    DURATION.keys.each do |dur|
-      parse dur + 't'
+    %w{ t  tt  ttt  tttt }.each do |mod|
+      DURATION.keys.each do |dur|
+        parse dur + mod
+        parse dur.upcase + mod if dur.length == 1
+      end
     end
   end
 
   def test_dotted_durations
-    %w{ .  ..  ...  .... }.each do |dots|
+    %w{ .  ..  ...  .... }.each do |mod|
       DURATION.keys.each do |dur|
-        parse dur + dots
+        parse dur + mod
+        parse dur.upcase + mod if dur.length == 1
       end
     end
   end
 
   def test_triplet_dotted_durations
-    %w{ .  ..  ...  .... }.each do |dots|
+    %w{ .t  t. ..t .t. t.. tt. t.t .tt ..t.tt...t.t }.each do |mod|
       DURATION.keys.each do |dur|
-        parse dur + 't' + dots
+        parse dur + mod
+        parse dur.upcase + mod if dur.length == 1
       end
     end
   end
@@ -220,27 +234,43 @@ class TestSequencingParser < Test::Unit::TestCase
   def test_duration_multiplier
     DURATION.keys.each_with_index do |dur,index|
       parse index.to_s + dur
+      parse index.to_s + dur.upcase if dur.length == 1
     end
   end
 
   def test_negative_duration_multiplier
     DURATION.keys.each_with_index do |dur,index|
       parse "-#{index}#{dur}"
+      parse "-#{index}#{dur.upcase}" if dur.length == 1
     end
   end
   
   def test_negative_duration
     DURATION.keys.each_with_index do |dur,index|
       parse '-' + dur
+      parse '-' + dur.upcase if dur.length == 1
     end  
   end
 
   def test_multiplier_triplet_dotted_durations
-    %w{ .  ..  ...  .... }.each_with_index do |dots,index|
+    %w{ .t  t. ..t .t. t.. tt. t.t .tt ..t.tt...t.t }.each_with_index do |mod,index|
       DURATION.keys.each do |dur|
-        parse index.to_s + dur + 't' + dots
+        parse index.to_s + dur + 't' + mod
+        parse index.to_s + dur.upcase + 't' + mod if dur.upcase == 1
       end
     end    
+  end
+
+  def test_numeric_pitch
+    parse 'y60'
+  end
+
+  def test_numeric_velocity
+    parse 'v60'
+  end
+  
+  def test_numeric_duration
+    parse 'u60'
   end
 
   def test_element_chain
@@ -290,18 +320,17 @@ class TestSequencingParser < Test::Unit::TestCase
   
   def test_nested_foreach
     parse '((1 2)@(3 4))@(5 6)'
-    # should produce
-    # 1 2 1 2   1 2 1 2
-    
     parse '((1 $ 2 $$)@(3 4 $))@(5 6)'
-    # should produce
-    # 1 3 2 5   1 4 2 5   1 5 2 5
-    # 1 3 2 6   1 4 2 6   1 6 2 6 
   end
 
-  def test_assignments
+  def test_assign_variable
     parse '$X=1 2 3 4; $X'
     parse '$X=1 2 3 4; $Y=5; $X $Y'   
+  end
+  
+  def test_assign_property
+    parse 'TEMPO=1;QNPM=2.3; QPM=155/4'
+    parse 'PROGRAM=1;PGM={2+3}'
   end
 
   def test_invalid_syntax

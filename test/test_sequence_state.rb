@@ -2,13 +2,13 @@ require 'test/unit'
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
 require File.join(cosy_root, 'sequencer/sequence_state')
 
-class TestSequencer < Test::Unit::TestCase
+class TestSequenceState < Test::Unit::TestCase
   include Cosy
   PARSER = SequenceParser.new
   
   def get_state input
-    seq = PARSER.parse input
-    SequenceState.new seq
+    seq = PARSER.parse(input)
+    return SequenceState.new(seq)
   end
   
   def test_no_limit
@@ -36,7 +36,5 @@ class TestSequencer < Test::Unit::TestCase
   end
 
   # todo: test advancing and increasing count, and within_limits?
-  # but first I want to flesh out the sequencing implementation so I
-  # don't have to redo all of this
   
 end
