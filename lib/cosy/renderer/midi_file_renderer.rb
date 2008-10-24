@@ -11,7 +11,7 @@ module Cosy
     def initialize
       super
       @midi_sequence = MIDI::Sequence.new()
-      @absolute_delta = 0
+      @meta_delta = 0
       
       @meta_track = add_track
       @meta_track.events << MIDI::MetaEvent.new(MIDI::META_SEQ_NAME, 'Cosy Sequence')
@@ -78,7 +78,8 @@ module Cosy
     # Set tempo in terms of Quarter Notes per Minute (often incorrectly referred to as BPM)
     def tempo(qnpm)
       ms_per_quarter_note = MIDI::Tempo.bpm_to_mpq(qnpm)
-      @meta_track.events << MIDI::Tempo.new(ms_per_quarter_note, @absolute_delta)
+      @meta_track.events << MIDI::Tempo.new(ms_per_quarter_note, @meta_delta)
+      @meta_delta = 0
     end
     
     def program(program_number)
@@ -87,12 +88,12 @@ module Cosy
     
     def note_on(pitch, velocity, delta_time)
       @track.events << MIDI::NoteOnEvent.new(@channel, pitch, velocity, delta_time)
-      @absolute_delta += delta_time
+      @meta_delta += delta_time
     end
     
     def note_off(pitch, velocity, delta_time)
       @track.events << MIDI::NoteOffEvent.new(@channel, pitch, velocity, delta_time)  
-      @absolute_delta += delta_time
+      @meta_delta += delta_time
     end
     
     def render_note(pitches, velocity, delta_time, duration)
@@ -114,5 +115,6 @@ module Cosy
 
 end
 
-
-Cosy::MidiRenderer.new.render 'PROGRAM=0; C4:q; PGM=10; D4; PGM=20; E4; PGM=30; F4', 'test.mid'
+#Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
+# Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
+#Cosy::MidiRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
