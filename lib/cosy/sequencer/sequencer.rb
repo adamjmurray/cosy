@@ -31,6 +31,8 @@ module Cosy
       else
         @state = SequenceState.new(@sequence, @symbol_table) if @sequence
       end
+      @children = nil
+      @chilren_looped = nil
     end
     
     def parsed?

@@ -27,7 +27,12 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def assert_sequence(expected, input)
-    seq = sequence(input)
+    if input.is_a? Sequencer
+      seq = input
+    else
+      seq = sequence(input)
+    end
+    
     actual = []
     count = 0
     while val=seq.next and count < SEQUENCE_COUNT_LIMIT
@@ -377,6 +382,29 @@ class TestSequencer < Test::Unit::TestCase
   
   def test_self_aware_command
     assert_sequence [1,2,1], '1 2 {{sequence.children.reverse!}} 3'
+  end
+  
+  def test_restart_after_complete
+    seq = sequence('1 2 3')
+    assert_sequence([1,2,3], seq)
+    seq.restart
+    assert_sequence([1,2,3], seq)
+    
+    seq = sequence('1 (2 3)*2 (5 6):(7 8)')
+    assert_sequence([1,2,3,2,3,[5,7],[6,8]], seq)
+    seq.restart
+    assert_sequence([1,2,3,2,3,[5,7],[6,8]], seq)
+  end
+  
+  def test_restart_after_partial
+    seq = sequence('1 (2 3)*2 (5 6):(7 8)')
+    actual = []
+    4.times{ actual << seq.next }
+    seq.restart
+    6.times{ actual << seq.next }
+    seq.restart
+    actual << seq.next
+    assert_equal([1,2,3,2,  1,2,3,2,3,[5,7],  1], actual)
   end
 
   def test_invalid_sequence
