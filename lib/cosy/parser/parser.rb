@@ -64,7 +64,7 @@ module Cosy
       end)
     end
 
-    def print_syntax_tree tree
+    def print_raw_parse_tree tree
       depth = 0
       tree.visit_parse_tree(lambda do |node|
         if not node.empty? then

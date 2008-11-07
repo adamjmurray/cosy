@@ -12,7 +12,7 @@ OBJECT_NAME = 'ajm.cosy'
 
 module Cosy
   
-  class MaxRenderer < AbstractRenderer  
+  class MaxRenderer < AbstractMidiRenderer  
     attr_accessor :seq, :time_to_next, :prev_duration, :end, :ticks_per_bang
   
     def initialize

@@ -12,7 +12,7 @@ class TestRenderer < Test::Unit::TestCase
   end
    
   def assert_sequence(expected, input)
-    renderer = AbstractRenderer.new
+    renderer = AbstractMidiRenderer.new
     renderer.parse(input)
     actual = []
     count = 0
@@ -27,8 +27,8 @@ class TestRenderer < Test::Unit::TestCase
   end
   
   def note(pitches,duration=nil,velocity=nil)
-    velocity ||= AbstractRenderer.default_velocity
-    duration ||= AbstractRenderer.default_duration
+    velocity ||= AbstractMidiRenderer.default_velocity
+    duration ||= AbstractMidiRenderer.default_duration
     NoteEvent.new(pitches,velocity,duration)
   end
   
@@ -105,7 +105,7 @@ class TestRenderer < Test::Unit::TestCase
   end
   
   def test_choice
-    renderer = AbstractRenderer.new
+    renderer = AbstractMidiRenderer.new
     renderer.parse('( (C4 | E4 | G4)  (C5 | E5 | G5) )*8')
     actual = []
     count = 0

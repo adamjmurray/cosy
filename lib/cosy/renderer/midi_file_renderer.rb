@@ -5,7 +5,7 @@ require File.join(cosy_root, 'cosy')
 
 module Cosy
 
-  class MidiRenderer < AbstractRenderer
+  class MidiRenderer < AbstractMidiRenderer
     attr_reader :midi_sequence
     
     def initialize
