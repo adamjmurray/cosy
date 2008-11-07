@@ -1,16 +1,16 @@
 module Cosy  
   
-  class AbstractMidiRenderer
+  class AbstractRenderer
 
     def initialize
       init
     end
     
     def init
-      @prev_pitches  = AbstractMidiRenderer.default_pitches
-      @prev_octave   = AbstractMidiRenderer.default_octave
-      @prev_velocity = AbstractMidiRenderer.default_velocity
-      @prev_duration = AbstractMidiRenderer.default_duration
+      @prev_pitches  = AbstractRenderer.default_pitches
+      @prev_octave   = AbstractRenderer.default_octave
+      @prev_velocity = AbstractRenderer.default_velocity
+      @prev_duration = AbstractRenderer.default_duration
     end
     
     def self.default_pitches
