@@ -135,6 +135,20 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,2,3,2,3,2,3,1,2], '(1 (2 3)*3)&9'
   end
   
+  def test_strings
+    assert_sequence ['a','b','c'], "'a' 'b' 'c'"
+    assert_sequence ['a','b','c'], '"a" "b" "c"'
+  end
+  
+  def test_escaped_strings
+    # checks to make sure we can sequence things like
+    # "nested \\"quoted\\" strings"  and  'this test\'s confusing!'
+    assert_sequence ['"',"'"], '\'"\' "\'"'
+    assert_sequence ['"',"'"], "'\"' \"'\""
+    assert_sequence ["'"], "'\\''"
+    assert_sequence ['"'], '"\""'
+  end
+  
   def test_pitches
     assert_sequence [60,65,67,68,66], 'C4 F4 G4 Ab4 F#4'      
     assert_sequence [60,65,67,68,66], 'c4 f4 g4 ab4 F#4'      

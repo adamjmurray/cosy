@@ -18,7 +18,7 @@ module Cosy
     def initialize
       parse ''
       restart
-      @ticks_per_bang = DURATION_NAME['sixtyfourth'].to_f
+      @ticks_per_bang = DURATION['sixtyfourth'].to_f
     end
 
     def sequence(input)
@@ -36,7 +36,7 @@ module Cosy
       init
       @sequencer.restart
       @time_to_next = 1
-      @prev_duration = DURATION_NAME['sixtyfourth']
+      @prev_duration = DURATION['sixtyfourth']
       @end = false
       @suppress_rebang = @rebang = false
     end

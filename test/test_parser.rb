@@ -50,7 +50,8 @@ class TestParser < Test::Unit::TestCase
   
   def test_string
     parse '"a b c"'
-    parse '"a b\\" c"'
+    parse '"a b\" c"'
+    parse '"a b\\" c"' # equivalent with previous line
     parse '"a b c" "a b\\" c"'
     parse "'a b c'"  
     parse "'a b\\' c'"  

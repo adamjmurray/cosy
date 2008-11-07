@@ -431,6 +431,18 @@ module Cosy
 
 
   class StringNode < TerminalNode
+    def value
+      if not @value
+        # strip off the surrounding quotes
+        @value = text_value[1...-1] 
+        # and unescape
+        case text_value[0].chr
+        when '"' then @value.gsub!('\"', '"')
+        when "'" then @value.gsub!("\\'", "'")
+        end
+      end
+      return @value
+    end
   end
 
   
