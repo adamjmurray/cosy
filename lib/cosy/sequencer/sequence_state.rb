@@ -40,7 +40,6 @@ module Cosy
           @iteration_limit = @sequence.operand  
         end
       end
-
     end
 
     def reset
@@ -84,7 +83,7 @@ module Cosy
       index ||= @foreach.length-1
       return false if index < 0
       
-      symbol_table.pop_magic_variable
+      @symbol_table.pop_magic_variable
       sequencer = @foreach[index]
       magic_value = sequencer.next
       if magic_value
