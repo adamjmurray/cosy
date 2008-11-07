@@ -45,7 +45,7 @@ module Cosy
       velocity = @prev_velocity
       duration = @prev_duration
       
-      if event.is_a? Chord 
+      if event.is_a? Chord and event.all?{|e| e.is_a? Pitch}
         pitches = event
           
       elsif event.is_a? Chain
@@ -59,7 +59,7 @@ module Cosy
           elsif param.is_a? Duration
             duration = param.value
           else
-            raise "Unimplemented chain value: #{param.class}"
+            return event
           end
         end
    

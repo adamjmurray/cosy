@@ -87,6 +87,10 @@ module Cosy
   end
 
 
+  class Label < Value
+  end
+
+
   # Allows a Cosy Value object to be equal to the underlying @value it wraps
   module ValueEquality
     alias orig_ee ==

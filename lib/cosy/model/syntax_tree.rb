@@ -376,6 +376,16 @@ module Cosy
       return @value
     end
   end
+  
+  
+  class LabelNode < TerminalNode
+    def value
+      if not @value
+        @value = Label.new(text_value[1..-1])
+      end
+      return @value
+    end
+  end
 
   
   class TempoNode < TerminalNode

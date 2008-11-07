@@ -62,7 +62,7 @@ module Cosy
           
           if not event
             @end = true
-            out3 'bang'
+            out4 'bang'
           
           elsif event.is_a? NoteEvent
             pitches, velocity, duration = event.pitches, event.velocity, ticks_to_bangs(event.duration)
@@ -88,7 +88,22 @@ module Cosy
             @time_to_next = duration.abs
           
           else
-            error "Unsupported Event: #{event.inspect}"
+            if event.is_a? Chain
+              # this is kind of nasty, but I don't want to try to flatten
+              # things in this way in AbstractRenderer#next_event because
+              # other renderers may need to interpret Labels or
+              # do handle chords of non-pitches differently
+              raw = event
+              event = []
+              raw.each do |e|
+                case e
+                when Value then event << e.value
+                when Chord then event += e
+                else event << e
+                end
+              end
+            end
+            out3 event
           end
           
         end
@@ -104,7 +119,7 @@ RENDERER = Cosy::MaxRenderer.new
 # The interface for Max (the supported messages)
 
 def sequence(input)
-  out4 RENDERER.sequence(input)
+  out5 RENDERER.sequence(input)
 end
 
 def restart

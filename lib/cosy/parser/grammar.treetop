@@ -46,7 +46,7 @@ module Cosy
 
 		
 		rule chain
-			chain_element (':' chain_element)* <ChainNode>
+			(label ':')? chain_element (':' chain_element)* <ChainNode>
 		end
 
 
@@ -148,8 +148,13 @@ module Cosy
 		end
 		
 		
+		rule label
+		  '#' [\w-]+ <LabelNode>
+	  end
+		
+		
 		rule var
-			'$' [A-Za-z] [\w]*  <VariableNode>
+			'$' [A-Za-z] [\w-]*  <VariableNode>
 			/ 
 			'$'+ <VariableNode>
 		end

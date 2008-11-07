@@ -333,6 +333,12 @@ class TestParser < Test::Unit::TestCase
     parse 'TEMPO=1;QNPM=2.3; QPM=155/4'
     parse 'PROGRAM=1;PGM={2+3}'
   end
+  
+  def test_label
+    parse '#label:5'
+    parse '#1:c:mf'
+    parse '#env:[1 250 1 500 0 250]'
+  end
 
   def test_invalid_syntax
     assert_failure '1.'

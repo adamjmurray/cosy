@@ -203,7 +203,7 @@ end
 #
 
 
-# s = Cosy::Sequencer.new 'C4 E'
+# s = Cosy::Sequencer.new '#env:1'
 # 
 # max = 100
 # while v=s.next and max > 0
