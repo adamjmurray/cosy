@@ -127,4 +127,4 @@ end
 #Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
 # Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
 #Cosy::MidiRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
-Cosy::MidiRenderer.new.render 'c -q d:q', 'test.mid'
+#Cosy::MidiRenderer.new.render 'c -i d', 'test.mid'
