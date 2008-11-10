@@ -16,19 +16,39 @@ module Cosy
     attr_accessor :seq, :time_to_next, :prev_duration, :end, :ticks_per_bang
   
     def initialize
+      super
       parse ''
       restart
       @ticks_per_bang = DURATION['sixtyfourth'].to_f
     end
 
-    def sequence(input)
+    def sequence(cosy_syntax)
       begin
-        parse input
+        parse cosy_syntax
         restart
         return true
       rescue Exception
         error "#{OBJECT_NAME}: #{$!}"
         return false
+      end
+    end
+    
+    def define(name, cosy_syntax)
+      begin
+        define_sequence(name, cosy_syntax)
+        return true
+      rescue Exception
+        error "#{OBJECT_NAME}: #{$!}"
+        return false
+      end
+    end
+
+    def play(name)
+      begin
+        load_sequence(name)
+        restart
+      rescue Exception
+        error "#{OBJECT_NAME}: #{$!}"
       end
     end
 
@@ -122,6 +142,14 @@ def sequence(input)
   out5 RENDERER.sequence(input)
 end
 
+def define(name, input)
+  out5 RENDERER.define(name, input)
+end
+
+def play(name)
+  RENDERER.play(name)
+end
+
 def restart
   RENDERER.restart
 end
@@ -133,4 +161,7 @@ end
 def bang
   RENDERER.bang
 end
+
+inlet_assist 'sequence/define/play'
+outlet_assist 'pitch','velocity','duration','other','bang when done','parsed successfully?'
 
