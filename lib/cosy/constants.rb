@@ -35,7 +35,10 @@ module Cosy
 
   TEMPO_LABELS = ['tempo', 'qnpm', 'qpm', 'bpm']
   PROGRAM_LABELS = ['program', 'pgm']
-
+  CHANNEL_LABELS = ['channel', 'chan']
+  CC_LABELS = ['control', 'cc']
+  PITCH_BEND_LABELS = ['pitch-bend', 'pitchbend', 'bend', 'pb']
+  
 #######################################
 # Sequence Behavior Operators
   

@@ -61,18 +61,35 @@ module Cosy
         else 
           if event.is_a? Chain
             if label = event.find{|e| e.is_a? Label}
-              if value = event.find{|e| e.is_a? Numeric}
-                label = label.value.downcase
+              label = label.value.downcase
+              values = event.find_all{|e| e.is_a? Numeric}
+              value = values[0]
+              if(not values.empty?)
                 if TEMPO_LABELS.include? label
                   tempo(value)
                   next
+                  
                 elsif PROGRAM_LABELS.include? label
                   program(value)
                   next
+                  
+                elsif CHANNEL_LABELS.include? label
+                  @channel = value
+                  next
+                  
+                elsif CC_LABELS.include? label and values.length >= 2
+                  cc(values[0],values[1])
+                  next
+                  
+                elsif PITCH_BEND_LABELS.include? label
+                  pitch_bend(value)
+                  next
                 end
+                
               end
             end
           end
+          
           raise "Unsupported Event: #{event.inspect}"
         end
       end
@@ -81,10 +98,12 @@ module Cosy
       @time += 480
       note_off(0, 0) 
       
+      print_midi
+      
       @meta_track.recalc_delta_from_times
       @track.recalc_delta_from_times
       
-      #print_midi
+      print_midi
       File.open(output_filename, 'wb') { |file| @midi_sequence.write(file) }
     end
     
@@ -96,7 +115,7 @@ module Cosy
         track.each do |event|
           event.print_decimal_numbers = true # default = false (print hex)
           event.print_note_names = true # default = false (print note numbers)
-          puts event
+          puts "#{event.to_s} (#{event.time_from_start})"
         end
       end
     end
@@ -136,10 +155,28 @@ module Cosy
       @time += duration.to_i
     end
     
+    def cc(controller, value)
+      event = MIDI::Controller.new(@channel, controller.to_i, value.to_i)
+      @track.insert(event, @time)
+    end
+    
+    def pitch_bend(value)
+      if value.is_a? Float
+        # assume range -1.0 to 1.0
+        # pitch bends go from 0 (lowest) to 16383 (highest) with 8192 in the center
+        value = (value * 8191 + 8192).to_i # this will never give 0, oh well
+      else
+        value = value.to_i
+      end
+      event = MIDI::PitchBend.new(@channel, value)
+      @track.insert(event, @time)
+    end
   end
 
 end
 
+#Cosy::MidiRenderer.new.render 'c #cc:1:0 c #cc:0:127', 'test.mid'
+#Cosy::MidiRenderer.new.render 'c #pb:1.0 c #pb:-1.0 c #pb:0.0 c', 'test.mid'
 #Cosy::MidiRenderer.new.render '#tempo:60 e*4 120:#tempo b3*8 #tempo:240 c4*16', 'test.mid'
 #Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
 # Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
