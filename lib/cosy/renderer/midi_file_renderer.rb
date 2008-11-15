@@ -46,8 +46,8 @@ module Cosy
       while event = next_event
         case event
 
+        # Maybe these 2 cases are obsolete now?
         when Tempo then tempo(event.value)
-
         when Program then program(event.value)
 
         when NoteEvent
@@ -58,7 +58,23 @@ module Cosy
             rest(-duration)
           end
           
-        else raise 'Unsupported Event: #{event.inspect}' end
+        else 
+          if event.is_a? Chain
+            if label = event.find{|e| e.is_a? Label}
+              if value = event.find{|e| e.is_a? Numeric}
+                label = label.value.downcase
+                if TEMPO_LABELS.include? label
+                  tempo(value)
+                  next
+                elsif PROGRAM_LABELS.include? label
+                  program(value)
+                  next
+                end
+              end
+            end
+          end
+          raise "Unsupported Event: #{event.inspect}"
+        end
       end
       
       # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
@@ -68,7 +84,7 @@ module Cosy
       @meta_track.recalc_delta_from_times
       @track.recalc_delta_from_times
       
-      print_midi
+      #print_midi
       File.open(output_filename, 'wb') { |file| @midi_sequence.write(file) }
     end
     
@@ -124,7 +140,7 @@ module Cosy
 
 end
 
-Cosy::MidiRenderer.new.render '#tempo=:60 e*4 #tempo:120 d*8 #tempo:240 c*16', 'test.mid'
+#Cosy::MidiRenderer.new.render '#tempo:60 e*4 120:#tempo b3*8 #tempo:240 c4*16', 'test.mid'
 #Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
 # Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
 #Cosy::MidiRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'

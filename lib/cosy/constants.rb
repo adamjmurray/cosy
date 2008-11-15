@@ -30,6 +30,11 @@ module Cosy
     'x'=>30,   'sixtyfourth'=>30,  'sixty-fourth'=>30
   }
 
+#######################################
+# MIDI controls
+
+  TEMPO_LABELS = ['tempo', 'qnpm', 'qpm', 'bpm']
+  PROGRAM_LABELS = ['program', 'pgm']
 
 #######################################
 # Sequence Behavior Operators
