@@ -1,4 +1,27 @@
-module Cosy  
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+require File.join(cosy_root, 'model/events')
+
+module Cosy    
+  
+  class RendererDefaults
+    
+    def self.DEFAULT_PITCHES
+      [Pitch.new(0, 0, nil, '0')]
+    end
+    
+    def self.DEFAULT_OCTAVE
+      60 # the middle C octave
+    end
+    
+    def self.DEFAULT_VELOCITY
+      INTENSITY['mf']
+    end
+    
+    def self.DEFAULT_DURATION
+      DURATION['quarter']
+    end
+  end
+  
   
   class AbstractRenderer
 
@@ -8,36 +31,10 @@ module Cosy
     end
     
     def init
-      @prev_pitches  = AbstractRenderer.default_pitches
-      @prev_octave   = AbstractRenderer.default_octave
-      @prev_velocity = AbstractRenderer.default_velocity
-      @prev_duration = AbstractRenderer.default_duration
-    end
-    
-    def self.default_pitches
-      [Pitch.new(0, 0, nil, '0')]
-    end
-    
-    def self.default_octave
-      60 # the middle C octave
-    end
-    
-    def self.default_velocity
-      INTENSITY['mf']
-    end
-    
-    def self.default_duration
-      DURATION['quarter']
-    end
-    
-    def get_sequencer(cosy_syntax) 
-      sequencer = Sequencer.new(cosy_syntax)
-      if !sequencer.parsed?
-        parser = sequencer.parser
-        raise "Failed to parse: #{input}\n" + 
-          "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
-      end
-      return sequencer
+      @prev_pitches  = RendererDefaults.DEFAULT_PITCHES
+      @prev_octave   = RendererDefaults.DEFAULT_OCTAVE
+      @prev_velocity = RendererDefaults.DEFAULT_VELOCITY
+      @prev_duration = RendererDefaults.DEFAULT_DURATION
     end
     
     def parse(cosy_syntax)
@@ -69,8 +66,8 @@ module Cosy
       elsif event.is_a? Chain
         event.each do |param|
           case param
-          when Pitch then pitches = [param]
-          when Chord then pitches = param
+          when Pitch    then pitches = [param]
+          when Chord    then pitches  = param
           when Velocity then velocity = param.value
           when Duration then duration = param.value
           else return event end
@@ -103,40 +100,16 @@ module Cosy
       return NoteEvent.new(pitch_values,velocity,duration)
     end
     
-  end
-  
-  class NoteEvent
-    attr_accessor :pitches, :velocity, :duration
-    def initialize(pitches, velocity, duration)
-      if pitches.is_a? Array
-        @pitches = pitches
-      else 
-        @pitches = [pitches] 
+    private
+    def get_sequencer(cosy_syntax) 
+      sequencer = Sequencer.new(cosy_syntax)
+      if !sequencer.parsed?
+        parser = sequencer.parser
+        raise "Failed to parse: #{input}\n" + 
+        "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
       end
-      @velocity, @duration = velocity, duration
+      return sequencer
     end
-    
-    def eql?(other)
-      self == other
-    end
-    
-    def ==(other)
-      other.is_a? NoteEvent and other.pitches==@pitches and 
-        other.velocity==@velocity and other.duration==@duration
-    end
-    
-    def to_s
-      inspect
-    end
-    
-    def inspect
-      s = "Note<"
-      s += @pitches.inspect
-      s += ',' + @velocity.inspect if @velocity
-      s += ',' + @duration.inspect if @duration
-      s += ">"
-      return s
-    end
+        
   end
-  
 end

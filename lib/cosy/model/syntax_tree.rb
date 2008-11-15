@@ -1,5 +1,4 @@
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-require File.join(cosy_root, 'model/values')
+require File.expand_path(File.join(File.dirname(__FILE__), 'values'))
 
 class Treetop::Runtime::SyntaxNode
 
