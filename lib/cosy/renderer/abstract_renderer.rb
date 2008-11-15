@@ -3,8 +3,7 @@ require File.join(cosy_root, 'model/events')
 
 module Cosy    
   
-  class RendererDefaults
-    
+  class RendererDefaults  
     def self.DEFAULT_PITCHES
       [Pitch.new(0, 0, nil, '0')]
     end
@@ -105,7 +104,7 @@ module Cosy
       sequencer = Sequencer.new(cosy_syntax)
       if !sequencer.parsed?
         parser = sequencer.parser
-        raise "Failed to parse: #{input}\n" + 
+        raise "Failed to parse: #{cosy_syntax}\n" + 
         "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
       end
       return sequencer

@@ -46,7 +46,7 @@ module Cosy
 
 		
 		rule chain
-			(label ':')? chain_element (':' chain_element)* <ChainNode>
+			chain_element (':' chain_element)* <ChainNode>
 		end
 
 
@@ -81,7 +81,7 @@ module Cosy
 
 
 		rule primitive
-			pitch / velocity / duration  / number / string / var / ruby
+			pitch / velocity / duration  / number / string / label / var / ruby
 		end
 
 	

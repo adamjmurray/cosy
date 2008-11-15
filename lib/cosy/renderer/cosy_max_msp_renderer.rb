@@ -117,6 +117,7 @@ module Cosy
               event = []
               raw.each do |e|
                 case e
+                when Label then event.insert(0, e.value)
                 when Value then event << e.value
                 when Chord then event += e
                 else event << e
