@@ -1,7 +1,8 @@
 require 'rubygems'
 require 'midilib'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
-require File.join(cosy_root, 'cosy')
+cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+require cosy_root
+require File.join(cosy_root, 'util/mergesort')
 
 module MIDI
   class Track
@@ -9,6 +10,21 @@ module MIDI
       event.time_from_start = time
       events << event
       return event
+    end
+    
+    # Redefine recalc method to use a stable mergesort instead of the default sort
+    # (otherwise this method should be the same as the original source,
+    #  which was true as of Midilib 1.0.0)
+    def recalc_delta_from_times(starting_at=0, list=@events)
+      prev_time_from_start = 0
+      # We need to sort the sublist. sublist.sort! does not do what we want.
+      list[starting_at .. -1] = list[starting_at .. -1].mergesort { | e1, e2 |
+        e1.time_from_start <=> e2.time_from_start
+      }
+      list[starting_at .. -1].each { | e |
+        e.delta_time = e.time_from_start - prev_time_from_start
+        prev_time_from_start = e.time_from_start
+      }
     end
   end
   
@@ -21,6 +37,8 @@ module MIDI
     end
   end
 end
+
+
 
 module Cosy
 
@@ -98,12 +116,10 @@ module Cosy
       @time += 480
       note_off(0, 0) 
       
-      print_midi
-      
       @meta_track.recalc_delta_from_times
       @track.recalc_delta_from_times
       
-      print_midi
+      #print_midi
       File.open(output_filename, 'wb') { |file| @midi_sequence.write(file) }
     end
     
@@ -177,7 +193,7 @@ end
 
 #Cosy::MidiRenderer.new.render 'c #cc:1:0 c #cc:0:127', 'test.mid'
 #Cosy::MidiRenderer.new.render 'c #pb:1.0 c #pb:-1.0 c #pb:0.0 c', 'test.mid'
-#Cosy::MidiRenderer.new.render '#tempo:60 e*4 120:#tempo b3*8 #tempo:240 c4*16', 'test.mid'
+Cosy::MidiRenderer.new.render '#tempo:60 e*4 120:#tempo d*8 #tempo:240 c4*16', 'test.mid'
 #Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
 # Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
 #Cosy::MidiRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
