@@ -4,7 +4,7 @@ cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 # Due to a bug? in polyglot/treetop, when requiring this file from a file in another
 # folder (like a rake task or test case) it can't find the grammar file unless I add
 # this folder to the path:
-$LOAD_PATH[0,0] = File.dirname(__FILE__)
+$LOAD_PATH.insert(0, File.dirname(__FILE__))
 require 'grammar'
 require File.join(cosy_root, 'constants')
 require File.join(cosy_root, 'model/syntax_tree')
