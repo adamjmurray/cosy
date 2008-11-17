@@ -1,1 +1,49 @@
-TODO
+Cosy
+a COmpact Sequencing sYntax
+
+
+== Description ==
+Cosy is a domain specific language (DSL) for composing musical patterns and
+general purpose sequencing.
+
+
+== Status ==
+This project is very immature and unstable. The sequencing code needs a major
+rewrite and I am planning to change some of the syntax in a way that will
+break backward compatibility. So use at your own risk until further notice.
+
+
+== Dependencies ==
+Cosy depends on the following Ruby libraries:
+* treetop (which depends on polyglot)
+* midilib 
+
+To run Cosy you will need to install the gems for those libraries:
+gem install treetop
+gem install midilib
+
+
+== Running Cosy ==
+Currently there are two main use cases for Cosy:
+* Generating MIDI files
+* Running Cosy inside Max/MSP
+
+To generate a MIDI file, take a look at:
+lib/cosy/renderer/midi_file_renderer.rb
+There are some commented out examples of rendering MIDI at the bottom
+of this file.
+
+To run things inside Max/MSP right now you unfortunately need the latest
+version of my ajm.ruby object which I have no released yet. I will be
+moving my Max project to github at some point so people can grab the latest
+development version of that project. In the meantime, if you are interested
+in using this with Max/MSP email me and I can hook you up.
+
+In the future I plan to allow for generating MIDI and OSC messages in
+realtime. I am also considering adding renderers for csound and lilypond.
+
+
+== Documentation ==
+Currently the closest thing to documentation is the examples for the online
+preview at: 
+http:/compusition.com/web/software/cosy/online
