@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+cosy_root = File.expand_path(File.dirname(__FILE__)+'/../lib/cosy')
+require cosy_root+'/renderer/midi_file_renderer.rb'
+
+def usage
+  command = File.basename($0)
+  puts "usage: #{command} <cosyfile> <midifile>"
+  puts "       #{command} -e '<syntax>' <midifile>"
+  exit
+end
+
+if ARGV[0] == '-e'
+  usage if ARGV.length != 3
+  cosy_syntax = ARGV[1]
+  output_path = ARGV[2]
+else
+  usage if ARGV.length != 2
+  cosy_syntax = IO.read(ARGV[0]) 
+  output_path = ARGV[1]  
+end
+
+Cosy::MidiRenderer.new.render(cosy_syntax, output_path)

@@ -1,6 +1,8 @@
 Cosy
 a COmpact Sequencing sYntax
 
+http://compusition.com/web/software/cosy
+
 
 == Description ==
 Cosy is a domain specific language (DSL) for composing musical patterns and
@@ -28,10 +30,10 @@ Currently there are two main use cases for Cosy:
 * Generating MIDI files
 * Running Cosy inside Max/MSP
 
-To generate a MIDI file, take a look at:
-lib/cosy/renderer/midi_file_renderer.rb
-There are some commented out examples of rendering MIDI at the bottom
-of this file.
+An executable script is provided to generate MIDI files from Cosy syntax:
+bin/cosy2midi
+Run this script with no arguments for usage instructions.
+Some example input files are provided in the examples folder (TODO add more!)
 
 To run things inside Max/MSP right now you unfortunately need the latest
 version of my ajm.ruby object which I have no released yet. I will be
