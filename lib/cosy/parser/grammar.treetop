@@ -1,178 +1,178 @@
 module Cosy
-	grammar Sequence
-	
-		rule root
-			 space? (statement ';' space?)* statement? space? <CosyNode>
-		end
-	
-		
-		rule statement
-			assignment / sequence_root
-		end
-	
-		
-		rule assignment
-			property space? '=' space? (number/ruby) <AssignmentNode>
-			/
-			var space? '=' sequence_root <AssignmentNode>
-		end
-		
-		
-		rule property
-		  ('TEMPO'/ 'QPM' / 'QNPM') '' <TempoNode>
-		  /
-		  ('PROGRAM' / 'PGM') '' <ProgramNode>
-	  end
-	
-	
-		rule sequence_root
-			choice
-		end
+  grammar Sequence
+
+    rule root
+      space? (statement ';' space?)* statement? space? <CosyNode>
+    end
 
 
-		rule choice
-			space? sequence (space? '|' space? sequence)* space? <ChoiceNode>
-		end
+    rule statement
+      assignment / sequence_root
+    end
 
 
-		rule sequence
-			space? sequence_element (space sequence_element)* space? <SequenceNode>
-		end
-
-
-		rule sequence_element
-			command / chain modifier:modifier <ModifiedNode> / chain / foreach
-		end
-
-		
-		rule chain
-			chain_element (':' chain_element)* <ChainNode>
-		end
-
-
-		rule chain_element
-			element modifier:modifier <ModifiedNode> / element
-		end
-    
-		
-		rule foreach
-      '(' sequence_root ')@(' sequence_root ')' ('@(' sequence_root ')')* <ForEachNode>
-	  end
-		
-
-		rule element
-			'(' subsequence:sequence_root ')' !'@' / chord / primitive
-		end
-
-
-		rule modifier
-			 operator:operator operand:element <BehaviorNode>
-		end
-
-
-		rule operator
-			space? ('*'/'&') space? <OperatorNode>
-		end
-	
-	
-	  rule chord
-			'[' space? primitive (space primitive)* space? ']' <ChordNode>
-	  end
-
-
-		rule primitive
-			pitch / velocity / duration  / number / string / label / var / ruby
-		end
-
-	
-		rule pitch
-			note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
-			/
-			'y' number:(number/ruby) <NumericPitchNode>
-		end
-
-	
-		rule velocity
-			( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
-			  'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' /
-			  'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O'
-			) '' <VelocityNode>
+    rule assignment
+      property space? '=' space? (number/ruby) <AssignmentNode>
       /
-			'v' number:(number/ruby) <NumericVelocityNode>
-		end
+      var space? '=' sequence_root <AssignmentNode>
+    end
 
-	
-		rule duration
-			multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
-			/
-			'u' number:(number/ruby) <NumericDurationNode>
-		end
 
-		
-		rule metrical_duration
-		  'whole' / 'half' / 'quarter' / 'eighth' / 'sixteenth' /
-		  'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
-		  [WwHhQqIiSsRrXx] 
-	  end
+    rule property
+      ('TEMPO'/ 'QPM' / 'QNPM') '' <TempoNode>
+      /
+      ('PROGRAM' / 'PGM') '' <ProgramNode>
+    end
 
-		
-		rule duration_modifier
-		  't' / '.'
-	  end
-	
-	
-		rule number
-			ratio / float / int
-		end
+
+    rule sequence_root
+      choice
+    end
+
+
+    rule choice
+      space? sequence (space? '|' space? sequence)* space? <ChoiceNode>
+    end
+
+
+    rule sequence
+      space? sequence_element (space sequence_element)* space? <SequenceNode>
+    end
+
+
+    rule sequence_element
+      command / chain modifier:modifier <ModifiedNode> / chain / foreach
+    end
+
+
+    rule chain
+      chain_element (':' chain_element)* <ChainNode>
+    end
+
+
+    rule chain_element
+      element modifier:modifier <ModifiedNode> / element
+    end
+
+
+    rule foreach
+      '(' sequence_root ')@(' sequence_root ')' ('@(' sequence_root ')')* <ForEachNode>
+    end
+
+
+    rule element
+      '(' subsequence:sequence_root ')' !'@' / chord / primitive
+    end
+
+
+    rule modifier
+      operator:operator operand:element <BehaviorNode>
+    end
+
+
+    rule operator
+      space? ('*'/'&') space? <OperatorNode>
+    end
+
+
+    rule chord
+      '[' space? primitive (space primitive)* space? ']' <ChordNode>
+    end
+
+
+    rule primitive
+      pitch / velocity / duration  / number / string / label / var / ruby
+    end
+
+
+    rule pitch
+      note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
+      /
+      'y' number:(number/ruby) <NumericPitchNode>
+    end
+
+
+    rule velocity
+      ( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
+      'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' /
+      'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O'
+      ) '' <VelocityNode>
+      /
+      'v' number:(number/ruby) <NumericVelocityNode>
+    end
+
+
+    rule duration
+      multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
+      /
+      'u' number:(number/ruby) <NumericDurationNode>
+    end
+
+
+    rule metrical_duration
+      'whole' / 'half' / 'quarter' / 'eighth' / 'sixteenth' /
+      'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
+      [WwHhQqIiSsRrXx] 
+    end
+
+
+    rule duration_modifier
+      't' / '.'
+    end
+
+
+    rule number
+      ratio / float / int
+    end
 
 
     rule ratio
       int '/' int <RatioNode>
     end
-	
-	
-		rule float
-			'-'? [0-9]+ '.' [0-9]+ <FloatNode>
-		end
-
-	
-		rule int
-			'-'? [0-9]+ <IntNode>
-		end
-	
-	
-		rule string
-		  "'" ("\\'" / !"'" .)* "'" <StringNode>
-			/
-		  '"' ('\"' / !'"' .)* '"' <StringNode>
-		end
-		
-		
-		rule label
-		  '#' [\w-]+ <LabelNode>
-	  end
-		
-		
-		rule var
-			'$' [A-Za-z] [\w-]*  <VariableNode>
-			/ 
-			'$'+ <VariableNode>
-		end
-	
-	
-		rule ruby
-			'{' script:( string / !('}'/'"'/"'") . )* '}' <RubyNode>
-		end
-		
-		
-		rule command
-			'{' ruby:ruby '}' <CommandNode>
-		end
 
 
-		rule space
-			[\s]+
-		end	
+    rule float
+      '-'? [0-9]+ '.' [0-9]+ <FloatNode>
+    end
 
-	end
+
+    rule int
+      '-'? [0-9]+ <IntNode>
+    end
+
+
+    rule string
+      "'" ("\\'" / !"'" .)* "'" <StringNode>
+      /
+      '"' ('\"' / !'"' .)* '"' <StringNode>
+    end
+
+
+    rule label
+      '#' [\w-]+ <LabelNode>
+    end
+
+
+    rule var
+      '$' [A-Za-z] [\w-]*  <VariableNode>
+      / 
+      '$'+ <VariableNode>
+    end
+
+
+    rule ruby
+      '{' script:( string / !('}'/'"'/"'") . )* '}' <RubyNode>
+    end
+
+
+    rule command
+      '{' ruby:ruby '}' <CommandNode>
+    end
+
+
+    rule space
+      [\s]+
+    end	
+
+  end
 end

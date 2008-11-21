@@ -100,7 +100,7 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence   [1,2,1,2,1],  '(1 2)*2.5'
     assert_sequence   [1,2,1,2,1],  '(1 2)*5/2'
     assert_sequence   [1,2,3,1],    '(1 2 3)*1.3'
-    assert_sequence   [1,2,3,1,2],  '(1 2 3)*1.4'
+    assert_sequence   [1,2,3,1,2],  '(1 2 3)*1.5'
     assert_sequence   [1,2,3,1],    '(1 2 3)*4/3'
   end
   
@@ -391,11 +391,11 @@ class TestSequencer < Test::Unit::TestCase
   def test_self_aware_ruby
     # TODO: I don't like that we need to call value, maybe rethink the interface,
     # or provide some convenience methods...
-    assert_sequence [1,1,2], '1 {sequence.children[0].value} 2'
+    assert_sequence [1,1,2], '1 {node.parent.children[0].value} 2'
   end
   
   def test_self_aware_command
-    assert_sequence [1,2,1], '1 2 {{sequence.children.reverse!}} 3'
+    assert_sequence [1,2,1], '1 2 {{node.parent.children.reverse!}} 3'
   end
   
   def test_restart_after_complete

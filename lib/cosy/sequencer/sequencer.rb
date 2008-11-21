@@ -1,178 +1,122 @@
 cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
 require File.join(cosy_root, 'parser/parser')
-require File.join(cosy_root, 'sequencer/sequence_state')
 require File.join(cosy_root, 'sequencer/symbol_table')
+require File.join(cosy_root, 'sequencer/context')
 
 module Cosy
 
+  # A Sequencer traverses a Cosy sequence and emits values one at a time.
   class Sequencer
 
-    attr_accessor :parser, :sequence, :state
+    attr_accessor :parser, :sequence, :context
 
     def initialize(sequence, symbol_table=SymbolTable.new)
+      # Careful! Passing in a symbol_table is probably
+      # going to cause conflicts in the magic variable stack
+      # in some nested foreach situations
+      # TODO: test this case, and create a copy of the symbol
+      # table if needed
+      
       if sequence.is_a? Treetop::Runtime::SyntaxNode
         @parser = nil
         @sequence = sequence
       else
         # we need a local parser so we can retreive parse failure info
         @parser = SequenceParser.new 
-        @sequence = @parser.parse sequence
+        @sequence = @parser.parse(sequence)
       end
-      @symbol_table = symbol_table
-      restart
-    end
-
-    def restart
-      # A restart may need to reconstruct the state from the @sequence if the sequence has
-      # completely finished, because it would have exited out of all states so
-      # @state could be nil
-      if @state
-        @state = @state.reset
-      else
-        @state = SequenceState.new(@sequence, @symbol_table) if @sequence
-      end
-      @children = nil
-      @chilren_looped = nil
+      @context = Context.new(self, symbol_table, @sequence)
     end
     
+    # Indicates whether the sequence has parsed succesfully.
     def parsed?
-      !@sequence.nil?
+      not @sequence.nil?
     end
 
+    # Restart the sequence from the beginning.
+    def restart  
+      @context.reset
+      end_chain
+    end
+
+    # Get the next value in the sequence, or nil if the end of
+    # the sequence has been reached.
     def next
-     # puts "STATE: #@state"
-      if @children
-        values = Chain.new(@children.collect{|child| child.next})
-        values.each_with_index do |value,index|
-          if value.nil?
-            @children[index].restart
-            @child_looped[index] = true
-            values[index] = @children[index].next
-          end
-        end
-        if not @child_looped.all?
-          return values
-        else
-          @children = nil
-          @chilren_looped = nil
-          return exit
-        end
-        
-      elsif @state and @state.within_limits?
-        node = @state.sequence
+      loop do
+        if not @chained_sequencers
+          node = @context.node
+          case node
+          when nil 
+            return nil # nothing left to do
 
-        if node.is_a? AssignmentNode
-          if node.is_variable?
-            name = node.lhs.value # extract the String form the nested VariableNode
-            @symbol_table[name] = node.rhs
+          when ChainNode
+            begin_chain(node)
+            next
+
           else
-            # This will automatically wrap the rhs value in the appropriate class, like Tempo or Program
-            return emit(node.value)
+            result = node.evaluate(@context)
+            #puts "RESULTS == #{result}"
+            case result
+            when SequencingNode
+              @context.enter(result)
+              next
+            when nil
+              @context.exit    
+              next
+            else
+              # we have a value to return, unless we've exceeded a count limit
+              if context.increment_count
+                @context.exit
+                return result
+              else
+                @context.exit # must occur *after* a failed context.increment_count
+                next
+              end
+            end
           end
-          
-        elsif node.is_a? VariableNode
-          return enter_or_emit(node)
-          
-        elsif node.is_a? ModifiedNode
-          # entering this node already captured the behavior in the state, so
-          # we can just go ahead and enter the value
-          return enter(node.value)
-          
-        elsif node.is_a? ChainNode
-          if node.value.all?{|child| child.atom? and not child.is_a? VariableNode} then
-            value = Chain.new(node.value.collect{|child| child.value})
-            value = value[0] if value.length == 1 # unwrap unnecessary arrays
-            return emit(value)
-          elsif node.value.length == 1
-            # handle simple subsequence, like (1 2)*2
-            return enter(node.value[0])
-          else
-            # spawn multiple subsequencers
-            # TODO: within_limits? will not work for chains and partial iteration
-            # becuase the shortest child will make it fail early (we need to only
-            # consider the longest child in that scenario)
-            @children = node.value.collect{|child| Sequencer.new(child, @symbol_table)}
-            @child_looped = Array.new(@children.length)
-            return self.next
-          end
-
-        elsif node.is_a? SequenceNode  
-          return enter_or_emit(node.value[@state.index])
-
-        elsif node.is_a? ChoiceNode
-          return enter_or_emit(node.value) # node.value makes a choice
-
-        elsif node.is_a? ForEachNode
-          return enter(node)
-          
-        elsif node.is_a? CommandNode
-          # evaluate the command, but don't use it's value
-          advance
-          node.value(binding)
-          return self.next
-          
-        elsif node.is_a? RubyNode
-          return emit(node.value(binding))
-
-        elsif node.atom?
-          return emit(node.value)
           
         else
-          raise "Unexpected node type #{node.class} (#{node.inspect})"
+          # chained_sequencers
+          chain = next_chain
+          if not @chain_end.all? and context.increment_count
+            return chain
+          else
+            end_chain
+            @context.exit
+            next
+          end
         end
       end
-      return exit
     end
-
+    
     ##############
     private
-
-    def enter_or_emit(node)
-      if node.nil?
-        exit
-      elsif node.is_a? VariableNode
-        variable = node.value
-        value = @symbol_table.lookup(variable)
-        # Todo: option to warn and continue instead of failing?
-        # or just do that in the renderer!
-        raise "Undefined variable #{variable}" if not value
-        enter_or_emit(value)
-      elsif node.is_a? Value
-        emit(node)
-      elsif node.respond_to? :atom and node.atom?
-        emit(node.value)
-      elsif node.is_a? SequencingNode
-        enter(node)
-      else # node is actually a primitive
-        emit(node)
+    
+    def begin_chain(node)
+      @chained_sequencers = node.children.collect do |subsequence|
+        Sequencer.new(subsequence, @context.symbol_table)
       end
+      @chain_end = Array.new(@chained_sequencers.length)
     end
-
-    def advance
-      @state.increase_count
-      @state.advance
+    
+    def end_chain
+      @chained_sequencers = nil
+      @chain_end = nil
     end
-
-    def emit(value)
-      advance
-      return value
-    end
-
-    def enter(node)
-      @state = @state.enter(node)
-      return self.next
-    end
-
-    def exit
-      if @state
-        @state = @state.exit
-        if @state
-          @state.advance
-          return self.next
+    
+    # Get the next chain value when a chained sequence is occurring.
+    def next_chain
+      chain = Chain.new(@chained_sequencers.collect{|seq| seq.next})
+      chain.each_with_index do |value,index|
+        if value.nil?
+          @chained_sequencers[index].restart
+          @chain_end[index] = true
+          chain[index] = @chained_sequencers[index].next
         end
       end
-      return nil
+      return chain
     end
+    
   end
 
 end
@@ -203,10 +147,26 @@ end
 #
 
 
-# s = Cosy::Sequencer.new '#env:1'
+
+#s = Cosy::Sequencer.new '(5 6 ((1 2)*2 [3 4])&6)&19'
+#s = Cosy::Sequencer.new 'c (1 2)&3 e'
+
+#s = Cosy::Sequencer.new '$x=c d $y; $y=a b; [6 7] $x*2 g'
+#s = Cosy::Sequencer.new '1 2 3 4 {{if visit_count(node.parent)==5 then clear_visits(node.parent); node.parent.children.reverse! end}}'
+
+
+# s = Cosy::Sequencer.new '((2 3 4)&5:(1 0))&8 c'
+# s = Cosy::Sequencer.new '(2 3 4)&5:(1 0)&8 c' # subtle difference, worth documenting!
+
+# s = Cosy::Sequencer.new '(c e)@(2 3)@(4 $ $$ 5)'
 # 
+# s = Cosy::Sequencer.new '(1 2 3)*1.3'
+#    
 # max = 100
 # while v=s.next and max > 0
 #   max -= 1
 #   puts "==> #{v.inspect} (#{v.class})"
 # end
+
+
+

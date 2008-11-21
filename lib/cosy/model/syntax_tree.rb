@@ -19,13 +19,11 @@ class Treetop::Runtime::SyntaxNode
   end
 
   def children
-    @children = [] if not @children
-    return @children
+    @children ||= []
   end
 
   def value
-    @value = text_value.strip if not @value
-    return @value
+    @value ||= text_value.strip
   end
 
   def empty?
@@ -33,22 +31,20 @@ class Treetop::Runtime::SyntaxNode
   end
 
   def length
-    if not @length then
-      @length = (empty? ? 0 : 1)
-    end
-    return @length
+    @length ||= (empty? ? 0 : 1)
   end
-  def size
-    length
-  end
+  alias size length
 
   def to_s
     text_value
   end
 
   def inspect
-    clazz = self.class.to_s.split('::').last
-    "#{clazz} '#{text_value.strip}'"
+    "#{clazz} '#{text_value}'"
+  end
+  
+  def clazz
+    self.class.to_s.split('::').last
   end
 
   def atom?
@@ -58,27 +54,51 @@ end
 
 
 module Cosy
-
+  
+  # The base class for Cosy sequencing nodes
+  # TODO: rename to Node!
   class SequencingNode < Treetop::Runtime::SyntaxNode
+    
+    # Evaluate the current node under the given context.
+    # evaluate() should do one of 3 things:
+    #   1. return a value, if applicable (if the node is an atomic value)
+    #   2. return the next node below this node to evaluate
+    #   3. return nil if there are no more nodes below this node
+    def evaluate(context)
+      raise "Unsupported Operation for #{clazz}"
+    end
+   
   end
 
   class TerminalNode < SequencingNode
+    
     def nonterminal?
       false
     end
+    
     def terminal?
       true
     end
+    
     def atom?
       true
     end
+    
+    def evaluate(context)
+      return value(context)
+    end
+    
   end
 
+
   class ContainerNode < SequencingNode   
+
     def children
       if not @children
+        #puts "getting children for #{self.inspect}"
         @children = []
         visit_parse_tree(lambda do |node|
+          #puts node.inspect
           if node != self and node.is_a? SequencingNode and (node.terminal? or node.children.size > 1) then
             @children << node
             return false
@@ -90,21 +110,27 @@ module Cosy
       return @children
     end
 
-    def value
-      children
-    end
-
     def length
-      value.length
+      children.length
     end
 
-    def [] index
-      value[index]
+    def [](index)
+      children[index]
     end
+
   end
   
   
   class SequenceNode < ContainerNode
+    def evaluate(context) 
+      index = context.visit_count(self)
+      if index < length
+        context.mark_visit(self)
+        return children[index]
+      else
+        return nil
+      end
+    end
   end
   
   
@@ -122,97 +148,168 @@ module Cosy
     def rhs
       children[1]
     end
-    
-    def is_variable?
-      lhs.is_a? VariableNode
-    end
-    
-    def value
-      case lhs
-      when TempoNode then Tempo.new(rhs.value)
-      when ProgramNode then Program.new(rhs.value)
-      else rhs
+
+    def evaluate(context)
+      if lhs.is_a? VariableNode
+        name = lhs.value
+        context.symbol_table[name] = rhs
+        return nil
+      else  
+        # deprecate this in favor of labelled chain nodes
+        return case lhs
+        when TempoNode then Tempo.new(rhs.value(context))
+        when ProgramNode then Program.new(rhs.value(context))
+        else rhs
+        end
       end
-    end
-    
-    def length
-      1
     end
   end
   
   
   class ChoiceNode < ContainerNode
-    def length
-      1
-    end
-    def value
-      children[rand(children.length)]
+    def evaluate(context) 
+      if context.visited?(self)
+        return nil
+      else
+        context.mark_visit(self)
+        return children[rand(children.length)]
+      end
     end
   end
   
 
   class ModifiedNode < ContainerNode
     def operator
-      eval_modifier if not @operator
+      if not @operator
+        if not modifier.empty?
+          @operator = modifier.operator.text_value
+        else
+          @operator = ''
+        end
+      end
       return @operator
     end
 
-    def operand
-      eval_modifier # can't cache this in case it's Ruby code...
-      return @operand
-    end
-
-    def value
-      # children[0] is the subsequence being modified
-      @value = children[0] if not @value
-      return @value
-    end
-    
-    def length
-      1 # this node has nothing to iterate over, need to descend to its value
-    end
-
-    ##########
-    private
-
-    def eval_modifier
+    def operand(context)
+      # can't cache this in case its a RubyNode
       if not modifier.empty?
-        @operator = modifier.operator.value
-        @operand = modifier.operand.value
+        return modifier.operand.value(context)
       else
-        @operator = ''
-        @operand = 1
+        return 1
       end
     end
+    
+    def evaluate(context)
+      # TODO: split repetition and count limit into different classes
+      if operator == OP_COUNT_LIMIT
+        if not context.visited?(self)
+          context.create_count_limit(self,operand(context))
+        end
+        return children.first
+
+      else
+        iteration = context.visit_count(self)
+        limit = iteration_limit(context) 
+        if not limit or iteration < limit
+          subsequence = children.first
+          if limit.is_a? Float and limit.to_i==iteration
+            # create a count limit to impose a partial iteration on the final iteration
+            partial_iteration = limit - limit.to_i
+            count_limit = (partial_iteration * subsequence.length).round
+            return nil if count_limit < 1 # the limit is already reached
+            context.create_count_limit(self,count_limit)
+          end
+          context.mark_visit(self)
+          return subsequence
+        else
+          return nil
+        end
+      end
+    end
+    
+    #######
+    private
+
+    def iteration_limit(context)
+      state = context.states[self]
+      limit = state[:iter_limit]
+      if not limit
+        if operator == OP_ITER_LIMIT
+          limit = operand(context)
+        end
+        state[:iter_limit] = limit
+      end
+      return limit
+    end
+    
   end
   
   
   class ChainNode < ContainerNode
-    def value
-      if not @value
-        @value = Chain.new(@children)
-      end
-      return @value
-    end
-    
-    def length
-      1
-      # this might need to be put into a different method?
-      # doesn't work with current sequencing logic
-      # if not @length 
-      #       @length = (value.max{|a,b| a.length<=>b.length}).length
-      #     end
-      #     return @length
-    end
   end
   
   
   class ForEachNode < ContainerNode
-    def length
-      1
-      # This is confusing, but the way foreach is handled inside a
-      # sequence_state requires this node be treated as a single element.
-      # It's the nested subsequence that actually has a length
+    def evaluate(context)
+      if context.visited? self
+        if next_foreach(context)
+          return children[-1]
+        else
+          return nil
+        end
+      else
+        context.mark_visit(self)
+        start_foreach(context)
+        return children[-1]
+      end
+    end
+    
+    ###########
+    private
+    
+    def start_foreach(context)
+      symbol_table = context.symbol_table
+      state = context.states[self]
+      # TODO? should chains work this way too?
+      
+      foreach_sequencers = children[0...-1].collect do |sequence|              
+        Sequencer.new(sequence, symbol_table)
+      end
+      foreach_sequencers.each do |sequencer| 
+        magic_value = sequencer.next
+        symbol_table.push_magic_variable(magic_value)
+      end
+      state[:foreach] = foreach_sequencers
+    end
+    
+    def next_foreach(context)
+      state = context.states[self]      
+      
+      foreach_sequencers = state[:foreach]
+      return false if not foreach_sequencers
+      
+      symbol_table = context.symbol_table
+      index = foreach_sequencers.length-1
+      
+      return evaluate_magic_variables(foreach_sequencers, symbol_table, index)
+    end
+    
+    def evaluate_magic_variables(sequencers, symbol_table, index)  
+      return false if index < 0
+      symbol_table.pop_magic_variable
+      sequencer = sequencers[index]
+      magic_value = sequencer.next
+      if magic_value
+        symbol_table.push_magic_variable(magic_value)
+        return true
+      elsif evaluate_magic_variables(sequencers, symbol_table, index-1)
+        sequencer.restart
+        magic_value = sequencer.next
+        symbol_table.push_magic_variable(magic_value) 
+        return true
+      else
+        return false 
+      end
     end
   end
   
@@ -223,36 +320,55 @@ module Cosy
 
   class OperatorNode < TerminalNode
   end
+  
+  
+  class RepetitionNode < BehaviorNode
+  end
+  
+  
+  class LimitCountNode < BehaviorNode
+  end
 
 
   class VariableNode < TerminalNode
+    def evaluate(context)
+      if context.visited?(self)
+        return nil
+      else
+        context.mark_visit(self)
+        sequence = context.symbol_table.lookup(value)
+        if sequence
+          return sequence
+        else
+          STDERR.puts "Undefined variable: #{name}"
+          # TODO return some special undefined variable error type
+          # so it can be handled by the sequencer
+          return nil  
+        end
+      end
+    end
   end
 
   
   class ChordNode < ContainerNode 
-    def value
-      # don't want to cache, so we can re-eval ruby
-      # if not @value then
-      #   @value = Chord.new(@children.collect{|child| child.value})
-      # end
-      #  return @value
-      # But maybe it would be better to do what chain node does, and require
-      # the sequencer to evaluate!
-      Chord.new(@children.collect{|child| child.value})
-    end
-
-    def length
-      1 # even though there could be multiple children, this node is atomic
-    end
 
     def atom?
       true
     end
+
+    def value(context)
+      Chord.new(@children.collect{|child| child.value(context)})
+    end
+    
+    def evaluate(context)
+      return value(context)
+    end
+    
   end
   
 
   class PitchNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value then
         pitch_class_value = PITCH_CLASS[note_name.text_value.upcase]
         accidental_value = 0
@@ -273,7 +389,7 @@ module Cosy
   
   
   class NumericPitchNode < PitchNode
-    def value
+    def value(context=nil)
       if not @value
         @value = Pitch.new(number.value, 0, 0, number.text_value)
       end
@@ -282,7 +398,7 @@ module Cosy
 
 
   class DurationNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value
         @value = DURATION[metrical_duration.text_value.downcase]
         if multiplier.text_value != ''
@@ -307,7 +423,7 @@ module Cosy
   
   
   class NumericDurationNode < DurationNode
-    def value
+    def value(context=nil)
       if not @value
         @value = Duration.new(number.value, number.text_value)
       end
@@ -317,7 +433,7 @@ module Cosy
 
 
   class VelocityNode < TerminalNode
-    def value
+    def value(context=nil)
       @value = INTENSITY[text_value.downcase] if not @value
       return Velocity.new(@value, text_value)
     end
@@ -325,7 +441,7 @@ module Cosy
 
   
   class NumericVelocityNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value
         @value = Velocity.new(number.value, number.text_value)
       end
@@ -335,7 +451,7 @@ module Cosy
 
 
   class FloatNode < TerminalNode
-    def value
+    def value(context=nil)
       @value = text_value.to_f if not @value
       return @value
     end
@@ -343,7 +459,7 @@ module Cosy
 
 
   class IntNode < TerminalNode
-    def value
+    def value(context=nil)
       @value = text_value.to_i if not @value
       return @value
     end
@@ -351,7 +467,7 @@ module Cosy
 
 
   class RatioNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value
         ints = text_value.split("/").map{|s|s.to_i}
         @value = ints[0].to_f / ints[1]
@@ -362,7 +478,7 @@ module Cosy
 
 
   class StringNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value
         # strip off the surrounding quotes
         @value = text_value[1...-1] 
@@ -378,7 +494,7 @@ module Cosy
   
   
   class LabelNode < TerminalNode
-    def value
+    def value(context=nil)
       if not @value
         @value = Label.new(text_value[1..-1])
       end
@@ -396,8 +512,12 @@ module Cosy
   
 
   class RubyNode < TerminalNode
-    def value(binding=nil)
-      eval(script.text_value, binding)
+    def value(context=nil)
+      if context
+        eval(script.text_value, context.get_binding)
+      else
+        eval(script.text_value)
+      end
     end
   end
   # NOTE: if I ever introduce other things that eval, make sure
@@ -405,8 +525,12 @@ module Cosy
 
 
   class CommandNode < TerminalNode
-    def value(binding=nil)
-      ruby.value(binding)
+    def atom?
+      false
+    end    
+    def evaluate(context=nil)
+      ruby.value(context)
+      return nil
     end
   end
 

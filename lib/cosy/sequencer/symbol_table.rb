@@ -31,6 +31,12 @@ module Cosy
     def pop_magic_variable()
       @magic.pop
     end
+    
+    # Undefine all variables. Useful when resetting a context.
+    def clear()
+      super
+      @magic.clear
+    end
   
     # Lookup a variable definition, taking into account the rules for magic variables.
     # If the variable is not found in this scope, and a parent scope exists, the parent
@@ -51,6 +57,10 @@ module Cosy
         value = @parent.lookup(name)
       end
       return value
+    end
+    
+    def inspect
+      super + " " + @magic.inspect
     end
   end
   

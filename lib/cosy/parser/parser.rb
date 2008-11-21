@@ -40,7 +40,6 @@ module Cosy
         tree = tree.children[0]
       end
       # construct parent-children relationships
-      # is this really necessary? might want it in the future...
       parents = []
       tree.visit(lambda do |node| # enter
         node.parent = parents.last
@@ -80,7 +79,6 @@ module Cosy
   end
 
 end
-
 
 # Cosy::SequenceParser.new.verbose_parse '1 2 {{puts 3+4}} 4'
 
