@@ -15,7 +15,14 @@ if ARGV[0] == '-e'
   output_path = ARGV[2]
 else
   usage if ARGV.length != 2
-  cosy_syntax = IO.read(ARGV[0]) 
+  cosy_syntax = ""
+  File.open(ARGV[0]) do |file| 
+    file.each_line do |line| 
+      if not line[0..1] == "--" # a comment
+        cosy_syntax += line
+      end
+    end
+  end 
   output_path = ARGV[1]  
 end
 

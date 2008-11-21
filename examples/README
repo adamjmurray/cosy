@@ -1,0 +1,5 @@
+These examples can be converted to a MIDI file with the bin/cosy2midi command.
+
+-- Cosy input files can have comments by starting a line with two hyphens (--)
+
+
