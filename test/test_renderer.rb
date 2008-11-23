@@ -55,7 +55,7 @@ class TestRenderer < Test::Unit::TestCase
       r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(30),
       r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(1920)
     ],
-    'C4:w h qt qt qt q. i q. i 8s r r r r r r r r x x x x x x x x x x x x x x x x w'
+    'C4:w h qt qt qt q. ei q. i 8s r r r r r r r r x x x x x x x x x x x x x x x x w'
   end
   
   def test_velocity

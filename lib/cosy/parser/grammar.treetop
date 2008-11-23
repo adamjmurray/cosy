@@ -94,8 +94,8 @@ module Cosy
 
     rule velocity
       ( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
-      'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' /
-      'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O'
+      'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' / 'fo' /
+      'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O' / 'FO'
       ) '' <VelocityNode>
       /
       'v' number:(number/ruby) <NumericVelocityNode>
@@ -110,7 +110,7 @@ module Cosy
 
 
     rule metrical_duration
-      'whole' / 'half' / 'quarter' / 'eighth' / 'sixteenth' /
+      'whole' / 'half' / 'quarter' / 'eighth' / 'ei' / 'sixteenth' /
       'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
       [WwHhQqIiSsRrXx] 
     end
