@@ -15,7 +15,7 @@ module Cosy
     def self.DEFAULT_PLAYBACK_BUFFER; 1 end
     
     # Default sleep time in between the scheduler servicing events.
-    def self.DEFAULT_SCHEDULER_RATE; 0.05 end # 5 milliseconds
+    def self.DEFAULT_SCHEDULER_RATE; 0.005 end # 5 milliseconds
 
     attr_accessor :playback_buffer, :scheduler_rate
 
@@ -32,7 +32,7 @@ module Cosy
         at_exit { @@midi.close }
       end
       
-      @channel = 1
+      @channel = 0
       @time = 0
       tempo(120)
       
@@ -84,7 +84,7 @@ module Cosy
                   next
 
                 elsif CHANNEL_LABELS.include? label
-                  @channel = value
+                  @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
                   next
 
                 elsif CC_LABELS.include? label and values.length >= 2
