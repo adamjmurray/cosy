@@ -103,6 +103,14 @@ module Cosy
       @text_value
     end
     
+    def inspect
+      str = "#@text_value (#{self.class}={value=#@value, pitch_class=#@pitch_class"
+      str += ", accidental=#@accidental" if @accidental
+      str += ", octave=#@octave" if @octave
+      str += ")"
+      return str
+    end
+    
     private
     def recalc_value
       @value = @pitch_class
@@ -231,8 +239,8 @@ module Cosy
       end
     end
   end
-
 end
+
 
 
 class Fixnum

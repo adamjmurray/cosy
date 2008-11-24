@@ -371,13 +371,17 @@ module Cosy
     def value(context=nil)
       if not @value then
         pitch_class_value = PITCH_CLASS[note_name.text_value.upcase]
-        accidental_value = 0
-        accidentals.text_value.each_byte do |byte|
-          case byte.chr
-          when '#' then accidental_value += 1
-          when 'b' then accidental_value -= 1
-          when '+' then accidental_value += 0.5
-          when '_' then accidental_value -= 0.5 
+        if accidentals.text_value.empty?
+          accidental_value = nil
+        else
+          accidental_value = 0
+          accidentals.text_value.each_byte do |byte|
+            case byte.chr
+            when '#' then accidental_value += 1
+            when 'b' then accidental_value -= 1
+            when '+' then accidental_value += 0.5
+            when '_' then accidental_value -= 0.5 
+            end
           end
         end
         octave_value = octave.value if not octave.text_value.empty?
@@ -393,6 +397,7 @@ module Cosy
       if not @value
         @value = Pitch.new(number.value)
       end
+      return @value
     end
   end
   
@@ -447,8 +452,10 @@ module Cosy
 
   class VelocityNode < TerminalNode
     def value(context=nil)
-      @value = INTENSITY[text_value.downcase] if not @value
-      return Velocity.new(@value, text_value)
+      if not @value
+        @value = Velocity.new(INTENSITY[text_value.downcase], text_value)
+      end
+      return @value
     end
   end
 

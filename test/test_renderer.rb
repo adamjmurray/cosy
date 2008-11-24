@@ -146,6 +146,10 @@ class TestRenderer < Test::Unit::TestCase
     '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)'
   end
   
+  def test_repeated_numeric_pitches
+    assert_sequence [n(60)]*4, 'y60*4'
+  end
+  
   def test_intervals
     assert_sequence [n(60),n(62),n(63)], 'C M2 m2'
   end

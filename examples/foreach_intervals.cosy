@@ -1,0 +1,12 @@
+-- Using a foreach loop with an interval sequence
+
+(C4:ei F4 G4 C4)@($ M2 m2 p5 -M2 -m2)
+
+-- This means for each pitch C4,F4,G4,C4 do the following:
+-- play the starting pitch, the pitch a major 2nd above that, 
+-- then a minor 2nd above that, a perfect 5th above,
+-- major 2nd down, and a minor 2nd down
+--
+-- In other words, it's the same as this sequence:
+-- (C4:ei D4 Eb4 Bb4 Ab4 G4) (F4 G4 Ab4 Eb5 Db5 C) 
+-- (G4 A4 Bb4 F5 Eb5 D5) (C4 D4 Eb4 Bb4 Ab4 G4) 
