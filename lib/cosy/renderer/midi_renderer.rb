@@ -9,8 +9,15 @@ module Cosy
 
     # TODO: time for some refactoring with the MidiFileRenderer
     # too much duplicated logic here
+    
+    # Time to wait in seconds, before starting playback
+    # It's a good idea to have a buffer so the first note doesn't start late.
+    def self.DEFAULT_PLAYBACK_BUFFER; 1 end
+    
+    # Default sleep time in between the scheduler servicing events.
+    def self.DEFAULT_SCHEDULER_RATE; 0.05 end # 5 milliseconds
 
-    attr_accessor :seq, :time_to_next, :prev_duration, :end, :ticks_per_bang
+    attr_accessor :playback_buffer, :scheduler_rate
 
     def initialize(driver=nil)
       super()
@@ -28,11 +35,14 @@ module Cosy
       @channel = 1
       @time = 0
       tempo(120)
+      
+      @playback_buffer = MidiRenderer.DEFAULT_PLAYBACK_BUFFER
+      @scheduler_rate = MidiRenderer.DEFAULT_SCHEDULER_RATE
     end
 
     def start_scheduler
       if not @scheduler
-        @scheduler = MIDIator::Timer.new( 0.05 ) # 5 ms
+        @scheduler = MIDIator::Timer.new(@scheduler_rate) 
         Signal.trap("INT"){ stop_scheduler }
       end
     end
@@ -46,7 +56,7 @@ module Cosy
       parse input
       start_scheduler
 
-      @start_time = Time.now.to_f
+      @start_time = Time.now.to_f + @playback_buffer
       while event = next_event
         case event
 
