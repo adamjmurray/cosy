@@ -269,6 +269,14 @@ class TestParser < Test::Unit::TestCase
   def test_numeric_duration
     parse 'u60'
   end
+  
+  def test_interval
+    INTERVAL_QUALITY.keys.each do |quality|
+      for degree in 1..15 do
+        parse "#{quality}#{degree}"
+      end
+    end
+  end
 
   def test_element_chain
     parse '4:5:C4'

@@ -81,7 +81,7 @@ module Cosy
 
 
     rule primitive
-      pitch / velocity / duration  / number / string / label / var / ruby
+      interval / pitch / velocity / duration  / number / string / label / var / ruby
     end
 
 
@@ -90,13 +90,23 @@ module Cosy
       /
       'y' number:(number/ruby) <NumericPitchNode>
     end
+    
+    
+    rule interval
+      sign:[+-]? 
+      quality:(
+        'major' / 'maj' / 'minor' / 'min' / 'perfect' / 'per' / 'augmented' / 'aug' / 'diminished' / 'dim' /
+        'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM'
+        / [MmpP])
+      degree:[0-9]+ <IntervalNode>
+    end
 
 
     rule velocity
       ( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
       'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' / 'fo' /
       'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O' / 'FO'
-      ) '' <VelocityNode>
+      ) ![\w] <VelocityNode>
       /
       'v' number:(number/ruby) <NumericVelocityNode>
     end

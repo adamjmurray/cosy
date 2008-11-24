@@ -44,12 +44,28 @@ module Cosy
   
   
   class Pitch < Value
+    
     attr_reader :pitch_class, :accidental, :octave
-    def initialize(pitch_class, accidental, octave, text_value)
+    
+    def initialize(*args)
+      case args.length
+      when 1
+        self.value = args[0]
+      when 3
+        @pitch_class = args[0]
+        @accidental = args[1]
+        @octave = args[2]
+        recalc_value
+      end
+    end
+    
+    def pitch_class=(pitch_class)
       @pitch_class = pitch_class
+      recalc_value
+    end
+    
+    def accidental=(accidental)
       @accidental = accidental
-      @octave = octave
-      @text_value = text_value
       recalc_value
     end
     
@@ -62,11 +78,116 @@ module Cosy
       recalc_value
     end
     
+    def value=(val)
+      @value = val
+      @pitch_class = val % 12
+      case @pitch_class
+      when 1,3,6,8,10
+        @pitch_class -= 1
+        @accidental = 1
+      end
+      @octave = val/12 - $OCTAVE_OFFSET
+      recalc_text_value
+    end
+    
+    def +(other)
+      if other.respond_to? :value
+        return Pitch.new(@value + other.value)
+      else
+        # TODO: better type checking?
+        return Pitch.new(@value + other)
+      end
+    end
+    
+    def to_s
+      @text_value
+    end
+    
     private
     def recalc_value
-      @value = pitch_class
-      @value += accidental
-      @value += octave if octave
+      @value = @pitch_class
+      @value += @accidental if @accidental
+      @value += 12*(@octave+$OCTAVE_OFFSET) if @octave
+      recalc_text_value
+    end
+    
+    def recalc_text_value
+      @text_value = PITCH_CLASS.index(@pitch_class)
+      if @text_value
+        @accidental.abs.times{|i| @text_value += if @accidental > 0 then '#' else 'b' end} if @accidental
+        @text_value += @octave.to_s if @octave
+
+      # else ??? 
+      # this case can happen with fractional pitches (microtones), need to think more about how this should work
+      end
+    end
+  end
+  
+  
+  class Interval < Value
+    
+    attr_accessor :quality, :degree, :text_value
+    
+    def initialize(*args)
+      case args.length
+      when 1
+        @text_value = args[0]
+        if @text_value =~ /(-?)([A-Za-z]*)(\d*)/
+          sign = $1
+          qual = $2
+          qual = qual.downcase unless qual.length == 1
+          @quality = INTERVAL_QUALITY[qual]
+          @degree = $3.to_i
+          @degree *= -1 if sign=='-'
+        else
+          raise "Bad interval format: #{text_value}"
+        end
+      when 2
+        @quality = args[0]
+        @degree = args[1].to_i
+      else
+        raise "Bad arguments #{args.inspect}"
+      end
+      if not INTERVAL_QUALITY.has_value? @quality
+        raise "Unknown quality #{if not qual.nil? then qual else @quality end}"
+      end
+      recalc_value
+    end
+    
+    def quality=(quality)
+      @quality = quality
+      if not INTERVAL_QUALITY.has_value? @quality
+        raise "Unknown quality #{@quality}"
+      end
+      recalc_value
+    end
+    
+    def degree=(degree)
+      @degree = degree.to_i
+      recalc_value
+    end
+    
+    # TODO text_value
+    
+    private
+    def recalc_value
+      deg = @degree.abs % 7
+      @value = INTERVAL_DEGREE[deg]
+      # now value is set to a perfect/major interval, so
+      # adjust if needed for the other possible interval qualities
+      case @quality
+      when :minor then @value -= 1
+      when :diminished then 
+        case deg
+        when 1,4,5 # perfect intervals diminish by one semitone
+          @value -= 1
+        else
+          @value -= 2
+        end
+      when :augmented then @value += 1
+      end
+      @value += 12 if @value < 0
+      @value *= -1 if @degree < 0
     end
   end
   

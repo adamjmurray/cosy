@@ -20,7 +20,8 @@ module Cosy
     'fff'=>127    
   }
 
-  DURATION = { # defines standard number of MIDI ticks for note durations
+  # Define standard number of MIDI ticks for note durations.
+  DURATION = { 
     'w'=>1920, 'whole'=>1920,
     'h'=>960,  'half'=>960,
     'q'=>480,  'quarter'=>480, 
@@ -28,6 +29,29 @@ module Cosy
     's'=>120,  'sixteenth'=>120,
     'r'=>60,   'thirtysecond'=>60, 'thirty-second'=>60,
     'x'=>30,   'sixtyfourth'=>30,  'sixty-fourth'=>30
+  }
+  
+  INTERVAL_QUALITY = {
+    # This is case insensitive except when there is only one letter (m != M)
+    # So call downcase() when looking up in this map, unless the string length is 1
+    'M'=>:major,                        'maj'=>:major,      'major'=>:major,
+    'm'=>:minor,                        'min'=>:minor,      'minor'=>:minor,
+    'p'=>:perfect,    'P'=>:perfect,    'per'=>:perfect,    'perfect'=>:perfect,
+                                        'aug'=>:augmented,  'augmented'=>:augmented,
+                                        'dim'=>:diminished, 'diminished'=>:diminished
+  }
+  
+  # Maps unison, second, third, fourth, etc to number of semitones
+  # in the perfect/major interval.
+  INTERVAL_DEGREE = {
+    0 => 11, # under mod 7 arithmetic, the 0 degree is a 7th
+    1 => 0,
+    2 => 2,
+    3 => 4,
+    4 => 5,
+    5 => 7,
+    6 => 9,
+    7 => 11
   }
 
 #######################################

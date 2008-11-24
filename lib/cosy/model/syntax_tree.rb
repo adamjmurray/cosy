@@ -380,8 +380,8 @@ module Cosy
           when '_' then accidental_value -= 0.5 
           end
         end
-        octave_value = 12*(octave.value+$OCTAVE_OFFSET) if not octave.text_value.empty?
-        @value = Pitch.new(pitch_class_value, accidental_value, octave_value, text_value)
+        octave_value = octave.value if not octave.text_value.empty?
+        @value = Pitch.new(pitch_class_value, accidental_value, octave_value)
       end
       return @value
     end
@@ -391,8 +391,21 @@ module Cosy
   class NumericPitchNode < PitchNode
     def value(context=nil)
       if not @value
-        @value = Pitch.new(number.value, 0, 0, number.text_value)
+        @value = Pitch.new(number.value)
       end
+    end
+  end
+  
+  
+  class IntervalNode < TerminalNode
+    def value(context=nil)
+      if not @value
+        deg = degree.text_value.to_i
+        deg *= -1 if sign.text_value=='-'
+        qual = INTERVAL_QUALITY[quality.text_value]
+        @value = Interval.new(qual,deg)
+      end
+      return @value
     end
   end
 

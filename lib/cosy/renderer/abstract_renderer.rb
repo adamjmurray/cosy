@@ -5,11 +5,11 @@ module Cosy
   
   class RendererDefaults  
     def self.DEFAULT_PITCHES
-      [Pitch.new(0, 0, nil, '0')]
+      [Pitch.new(0, 0, self.DEFAULT_OCTAVE)]
     end
     
     def self.DEFAULT_OCTAVE
-      60 # the middle C octave
+      4 # the middle C octave
     end
     
     def self.DEFAULT_VELOCITY
@@ -59,7 +59,10 @@ module Cosy
       velocity = @prev_velocity
       duration = @prev_duration
       
-      if event.is_a? Chord and event.all?{|e| e.is_a? Pitch}
+      if event.is_a? Interval
+        pitches = @prev_pitches.map{|pitch| pitch+event}
+      
+      elsif event.is_a? Chord and event.all?{|e| e.is_a? Pitch}
         pitches = event
           
       elsif event.is_a? Chain
