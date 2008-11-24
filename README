@@ -10,19 +10,24 @@ general purpose sequencing.
 
 
 == Status ==
-This project is very immature and unstable. The sequencing code needs a major
-rewrite and I am planning to change some of the syntax in a way that will
-break backward compatibility. So use at your own risk until further notice.
+This project is very immature. The syntax is not finalized, so I can't
+guarantee I won't change it in a way that will break backward compatibility.
+There are probably lots of bugs right now. 
+Use at your own risk!
 
 
 == Dependencies ==
 Cosy depends on the following Ruby libraries:
 * treetop (which depends on polyglot)
 * midilib 
+* midiator
 
 To run Cosy you will need to install the gems for those libraries:
 gem install treetop
 gem install midilib
+gem install midiator
+
+midiator-0.3.0 or higher is needed for direct output on OS X
 
 
 == Running Cosy ==

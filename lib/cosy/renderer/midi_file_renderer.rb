@@ -42,7 +42,7 @@ end
 
 module Cosy
 
-  class MidiRenderer < AbstractRenderer
+  class MidiFileRenderer < AbstractRenderer
     attr_reader :midi_sequence
     
     def initialize

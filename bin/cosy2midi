@@ -1,29 +1,83 @@
 #!/usr/bin/env ruby
+require 'optparse' 
+require 'ostruct'
 cosy_root = File.expand_path(File.dirname(__FILE__)+'/../lib/cosy')
-require cosy_root+'/renderer/midi_file_renderer.rb'
 
-def usage
-  command = File.basename($0)
-  puts "usage: #{command} <cosyfile> <midifile>"
-  puts "       #{command} -e '<syntax>' <midifile>"
-  exit
+module Cosy
+  class CommandLineArgs
+    def self.parse(command, args)
+      options = OpenStruct.new
+
+      parser = OptionParser.new do |opts|
+        opts.banner = "\nUsage: #{command} [options] [cosyfile] [midifile]"  
+      
+        opts.separator ""
+
+        opts.separator "#{command} supports two modes for generating MIDI:"
+        opts.separator "  1. realtime playback, used when no midifile is specified"
+        opts.separator "  2. offline generation of MIDI files"
+
+        opts.separator ""
+        
+        opts.separator "Options:"        
+        
+        opts.on("-d", "--driver DRIVER_NAME", 
+          "MIDIator driver used for realtime output."
+        ) { |driver| options.driver = driver }
+
+        opts.separator ""
+        
+        opts.on("-e", "--eval 'COSY_SYNTAX'", 
+          "Provides input to convert to MIDI.",
+          "If this option is not used, a cosyfile",
+          "must be specified."       
+        ) { |input| options.input = input }
+        
+        opts.separator ""
+        opts.on("-h", "--help", 
+          "Display this help and exit."
+        ) { |val| puts opts.to_s; exit }
+           
+        opts.separator ""    
+        
+        opts.separator "Examples:"
+        opts.separator "  cosy2midi -e 'c4 d e f g a b c5' output.mid"
+        opts.separator "  cosy2midi -e 'c4 d e f g a b c5'"
+        opts.separator ""
+        opts.separator "  On OS X, try the dls_synth driver for direct output:"
+        opts.separator "  cosy2midi -d dls_synth -e 'c4 d e f g a b c5'"
+        opts.separator "  otherwise a separate program like SimpleSynth is needed to hear something."
+        opts.separator ""
+      end
+
+      rest = parser.parse(args)        
+      return options, rest
+    end
+  end
 end
 
-if ARGV[0] == '-e'
-  usage if ARGV.length != 3
-  cosy_syntax = ARGV[1]
-  output_path = ARGV[2]
+options, files = Cosy::CommandLineArgs.parse(File.basename($0), ARGV)
+
+if options.input
+  output_path = files[0]
+  cosy_syntax = options.input
 else
-  usage if ARGV.length != 2
+  input_path  = files[0]
+  output_path = files[1]
   cosy_syntax = ""
-  File.open(ARGV[0]) do |file| 
+  File.open(input_path) do |file| 
     file.each_line do |line| 
       if not line[0..1] == "--" # a comment
         cosy_syntax += line
       end
     end
   end 
-  output_path = ARGV[1]  
 end
 
-Cosy::MidiRenderer.new.render(cosy_syntax, output_path)
+if output_path
+  require cosy_root+'/renderer/midi_file_renderer.rb'
+  Cosy::MidiFileRenderer.new.render(cosy_syntax, output_path)
+else
+  require cosy_root+'/renderer/midi_renderer.rb'
+  Cosy::MidiRenderer.new(options.driver).render(cosy_syntax)
+end
