@@ -12,8 +12,7 @@ class TestRenderer < Test::Unit::TestCase
   end
    
   def assert_sequence(expected, input)
-    renderer = AbstractRenderer.new
-    renderer.parse(input)
+    renderer = AbstractRenderer.new({:input => input})
     actual = []
     count = 0
     while event=renderer.next_event and count < SEQUENCE_COUNT_LIMIT
@@ -105,8 +104,7 @@ class TestRenderer < Test::Unit::TestCase
   end
   
   def test_choice
-    renderer = AbstractRenderer.new
-    renderer.parse('( (C4 | E4 | G4)  (C5 | E5 | G5) )*8')
+    renderer = AbstractRenderer.new({:input => '( (C4 | E4 | G4)  (C5 | E5 | G5) )*8'})
     actual = []
     count = 0
     while event=renderer.next_event and count < SEQUENCE_COUNT_LIMIT

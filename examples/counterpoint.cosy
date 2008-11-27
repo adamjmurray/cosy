@@ -1,0 +1,21 @@
+-- 'Air' by Henry Purcell
+-- Demonstrates counterpoint with the parallel sequencing operator ==
+
+#tempo:90;
+
+$r = q ei*2 q;
+$melody_fragment =
+(d5 c# d a4):$r (a5 g a e):$r      f e:ei f;
+
+-- right hand
+$melody_fragment                            d5:q  (e:h a4:q)
+$melody_fragment                           c#5:q  (d:h.)	
+(a4 g a  f):$r  (c5 bb4 c5 a4):$r  (f5 e f d):$r  (g:h a:q)
+(bb a bb g):$r  (a  g   a  d ):$r  (e d e c#):$r  (d:ei.)
+==
+-- left hand
+(d3:q a d4)     (c# b3 a)          (d4 c  bb3)    (a c#4 g3) 
+(f e d )        (c# b2 a)          (d3 g2 a  )    (d3 a2 d)		
+(f c3 f)        (e    c f )        (d a d4)       (bb3 d4 a3)
+(g:h c4:q)      (f3:h bb:q)        (g a a2)       (d3  a2 d)
+	

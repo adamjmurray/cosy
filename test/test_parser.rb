@@ -321,6 +321,10 @@ class TestParser < Test::Unit::TestCase
     parse '#1:c:mf'
     parse '#env:[1 250 1 500 0 250]'
   end
+  
+  def test_parallel
+    parse 'a == b'
+  end
 
   def test_invalid_syntax
     assert_failure '1.'

@@ -56,7 +56,7 @@ end
 module Cosy
   
   # The base class for Cosy sequencing nodes
-  # TODO: rename to Node!
+  # TODO: rename to CosyNode and rename existing CosyNode to StatementNode
   class SequencingNode < Treetop::Runtime::SyntaxNode
     
     # Evaluate the current node under the given context.
@@ -131,6 +131,10 @@ module Cosy
         return nil
       end
     end
+  end
+  
+  
+  class ParallelNode < ContainerNode
   end
   
   

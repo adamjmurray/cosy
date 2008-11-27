@@ -11,7 +11,7 @@ module MIDI
       events << event
       return event
     end
-    
+
     # Redefine recalc method to use a stable mergesort instead of the default sort
     # (otherwise this method should be the same as the original source,
     #  which was true as of Midilib 1.0.0)
@@ -27,7 +27,7 @@ module MIDI
       }
     end
   end
-  
+
   class Sequence
     def create_track(name=nil)
       track = MIDI::Track.new(self)
@@ -44,29 +44,55 @@ module Cosy
 
   class MidiFileRenderer < AbstractRenderer
     attr_reader :midi_sequence
-    
-    def initialize
-      super
-      @midi_sequence = MIDI::Sequence.new()
-      @channel = 1
-      @time = 0
-      
-      @meta_track = @midi_sequence.create_track 'Cosy Sequence'
-      @track = @midi_sequence.create_track 'Track 1'
-      
-      tempo(120)
-      program(0)
+
+    def initialize(options)
+      super(options)
+
+      @channel = options[:channel] || 1
+      @time = options[:time] || 0
+
+      @parent = options[:parent]
+      if @parent
+        @meta_track = @parent.meta_track
+        @track = @parent.track
+      else
+        @output = options[:output]
+        raise ':output must be specified in constructor options' if not @output
+        @midi_sequence = MIDI::Sequence.new() 
+        @meta_track = @midi_sequence.create_track('Cosy Sequence')
+        @track = @midi_sequence.create_track('Track 1')
+        tempo(120)
+        program(0)
+      end
     end
 
-    def render(input, output_filename)
-      parse input
-      
+    def clone_state(input)
+      {
+        :input => input,
+        :parent => self,
+        :time => @time,
+        :channel => @channel,
+        :tempo => @tempo
+      }
+    end
+
+    def render()
       while event = next_event
         case event
 
-        # Maybe these 2 cases are obsolete now?
+          # Maybe these 2 cases are obsolete now?
         when Tempo then tempo(event.value)
         when Program then program(event.value)
+
+        when ParallelSequencer
+          stop_time = @time
+          event.each do |sequencer|
+            renderer = MidiFileRenderer.new(clone_state(sequencer))
+            renderer.render
+            stop_time = renderer.time if renderer.time > stop_time
+          end
+          @time = stop_time
+          next  
 
         when NoteEvent
           pitches, velocity, duration = event.pitches, event.velocity, event.duration
@@ -75,7 +101,7 @@ module Cosy
           else            
             rest(-duration)
           end
-          
+
         else 
           if event.is_a? Chain
             if label = event.find{|e| e.is_a? Label}
@@ -86,43 +112,45 @@ module Cosy
                 if TEMPO_LABELS.include? label
                   tempo(value)
                   next
-                  
+
                 elsif PROGRAM_LABELS.include? label
                   program(value)
                   next
-                  
+
                 elsif CHANNEL_LABELS.include? label
                   @channel = value
                   next
-                  
+
                 elsif CC_LABELS.include? label and values.length >= 2
                   cc(values[0],values[1])
                   next
-                  
+
                 elsif PITCH_BEND_LABELS.include? label
                   pitch_bend(value)
                   next
                 end
-                
+
               end
             end
           end
-          
+
           raise "Unsupported Event: #{event.inspect}"
         end
       end
-      
-      # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
-      @time += 480
-      note_off(0, 0) 
-      
-      @meta_track.recalc_delta_from_times
-      @track.recalc_delta_from_times
-      
-      #print_midi
-      File.open(output_filename, 'wb') { |file| @midi_sequence.write(file) }
+
+      if not @parent
+        # pad the end a bit, otherwise seems to cut off (TODO: make this optional)  
+        @time += 480
+        note_off(0, 0) 
+
+        @meta_track.recalc_delta_from_times
+        @track.recalc_delta_from_times
+
+        print_midi if $DEBUG
+        File.open(@output, 'wb') { |file| @midi_sequence.write(file) }
+      end
     end
-    
+
     def print_midi
       @midi_sequence.each do |track|
         puts "\n*** track name \"#{track.name}\""
@@ -135,47 +163,66 @@ module Cosy
         end
       end
     end
+    
+    ############
+    protected
+    
+    def time
+      @time
+    end
+    
+    def meta_track
+      @meta_track
+    end
+    
+    def track
+      @track
+    end
+    
 
     ############
     private  
-    
+
     # Set tempo in terms of Quarter Notes per Minute (aka BPM)
     def tempo(qnpm)
-       ms_per_quarter_note = MIDI::Tempo.bpm_to_mpq(qnpm)
-       event = MIDI::Tempo.new(ms_per_quarter_note)
-       @meta_track.insert(event, @time)
-     end
+      # if @parent then this is a child sequence and we should respect
+      # the parent tempo and adjust the qnpm accordingly
+      @tempo = qnpm
+      ms_per_quarter_note = MIDI::Tempo.bpm_to_mpq(qnpm)
+      event = MIDI::Tempo.new(ms_per_quarter_note)
+      @meta_track.insert(event, @time)
+    end
 
-     def program(program_number)
-       event = MIDI::ProgramChange.new(@channel, program_number)
-       @track.insert(event, @time)
-     end
-    
+    def program(program_number)
+      event = MIDI::ProgramChange.new(@channel, program_number)
+      @track.insert(event, @time)
+    end
+
     def note_on(pitch, velocity)
       event = MIDI::NoteOnEvent.new(@channel, pitch.to_i, velocity.to_i)
       @track.insert(event, @time)
     end
-    
+
     def note_off(pitch, velocity)
       event = MIDI::NoteOffEvent.new(@channel, pitch.to_i, velocity.to_i)
       @track.insert(event, @time)
     end
-    
+
     def notes(pitches, velocity, duration)
       pitches.each { |pitch| note_on(pitch, velocity) }
       @time += duration.to_i
       pitches.each { |pitch| note_off(pitch, velocity) }
     end
-    
+
     def rest(duration)
       @time += duration.to_i
     end
-    
+
     def cc(controller, value)
       event = MIDI::Controller.new(@channel, controller.to_i, value.to_i)
       @track.insert(event, @time)
     end
-    
+
     def pitch_bend(value)
       if value.is_a? Float
         # assume range -1.0 to 1.0
@@ -191,10 +238,11 @@ module Cosy
 
 end
 
-#Cosy::MidiRenderer.new.render 'c #cc:1:0 c #cc:0:127', 'test.mid'
-#Cosy::MidiRenderer.new.render 'c #pb:1.0 c #pb:-1.0 c #pb:0.0 c', 'test.mid'
-#Cosy::MidiRenderer.new.render '#tempo:60 e*4 120:#tempo d*8 #tempo:240 c4*16', 'test.mid'
-#Cosy::MidiRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
-# Cosy::MidiRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
-#Cosy::MidiRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
-#Cosy::MidiRenderer.new.render 'c -i d', 'test.mid'
+#Cosy::MidiFileRenderer.new({:input=>'c d e == e f g', :output=>'test.mid'}).render
+#Cosy::MidiFileRenderer.new.render 'c #cc:1:0 c #cc:0:127', 'test.mid'
+#Cosy::MidiFileRenderer.new.render 'c #pb:1.0 c #pb:-1.0 c #pb:0.0 c', 'test.mid'
+#Cosy::MidiFileRenderer.new.render '#tempo:60 e*4 120:#tempo d*8 #tempo:240 c4*16', 'test.mid'
+#Cosy::MidiFileRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
+# Cosy::MidiFileRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
+#Cosy::MidiFileRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
+#Cosy::MidiFileRenderer.new.render 'c -i d', 'test.mid'

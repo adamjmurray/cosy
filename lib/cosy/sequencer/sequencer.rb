@@ -17,7 +17,7 @@ module Cosy
       # TODO: test this case, and create a copy of the symbol
       # table if needed
       
-      if sequence.is_a? Treetop::Runtime::SyntaxNode
+      if sequence.is_a? SequencingNode
         @parser = nil
         @sequence = sequence
       else
@@ -45,6 +45,7 @@ module Cosy
       loop do
         if not @chained_sequencers
           node = @context.node
+          puts "Sequencing: #{node.inspect}" if $DEBUG_LEVEL and $DEBUG_LEVEL > 0
           case node
           when nil 
             return nil # nothing left to do
@@ -52,11 +53,18 @@ module Cosy
           when ChainNode
             begin_chain(node)
             next
-
+            
+          when ParallelNode
+            sequencers = node.children.collect do |subsequence|
+              Sequencer.new(subsequence, @context.symbol_table)
+            end
+            @context.exit
+            return ParallelSequencer.new(sequencers)
+                        
           else
             result = node.evaluate(@context)
-            #puts "RESULTS == #{result}"
-            case result
+            puts "Evaluated: #{result}" if $DEBUG_LEVEL and $DEBUG_LEVEL > 5
+            case result  
             when SequencingNode
               @context.enter(result)
               next
@@ -75,8 +83,7 @@ module Cosy
             end
           end
           
-        else
-          # chained_sequencers
+        else # chained_sequencers
           chain = next_chain
           if not @chain_end.all? and context.increment_count
             return chain
@@ -116,9 +123,11 @@ module Cosy
       end
       return chain
     end
-    
   end
-
+  
+  class ParallelSequencer < Array
+  end
+    
 end
 
 
@@ -160,13 +169,12 @@ end
 
 # s = Cosy::Sequencer.new '(c e)@(2 3)@(4 $ $$ 5)'
 # 
-# s = Cosy::Sequencer.new '(1 2 3)*1.3'
+# s = Cosy::Sequencer.new 'c:ei d e'
+# 
+# 
 #    
 # max = 100
 # while v=s.next and max > 0
 #   max -= 1
-#   puts "==> #{v.inspect} (#{v.class})"
+#   puts "==> #{v.inspect}"
 # end
-
-
-

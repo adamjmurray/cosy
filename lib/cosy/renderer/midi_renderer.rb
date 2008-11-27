@@ -4,26 +4,27 @@ cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 require cosy_root
 
 module Cosy
-  
+
   class MidiRenderer < AbstractRenderer  
 
     # TODO: time for some refactoring with the MidiFileRenderer
     # too much duplicated logic here
-    
+
     # Time to wait in seconds, before starting playback
     # It's a good idea to have a buffer so the first note doesn't start late.
-    def self.DEFAULT_PLAYBACK_BUFFER; 1 end
-    
+    def self.DEFAULT_PLAYBACK_BUFFER; 0.5 end
+
     # Default sleep time in between the scheduler servicing events.
     def self.DEFAULT_SCHEDULER_RATE; 0.005 end # 5 milliseconds
 
     attr_accessor :playback_buffer, :scheduler_rate
 
-    def initialize(driver=nil)
-      super()
-      
+    def initialize(options)
+      super(options)
+
       if not defined? @@midi
         @@midi = MIDIator::Interface.new
+        driver = options[:driver]
         if driver
           @@midi.use(driver)
         else
@@ -31,13 +32,31 @@ module Cosy
         end
         at_exit { @@midi.close }
       end
+
+      @parent = options[:parent]
+      if @parent
+        @scheduler = @parent.scheduler
+        @start_time = @parent.start_time
+      else
+        # don't need to inherit these from the parent since
+        # the schedulerer is inherited
+        @playback_buffer = MidiRenderer.DEFAULT_PLAYBACK_BUFFER
+        @scheduler_rate = MidiRenderer.DEFAULT_SCHEDULER_RATE
+      end
       
-      @channel = 0
-      @time = 0
-      tempo(120)
-      
-      @playback_buffer = MidiRenderer.DEFAULT_PLAYBACK_BUFFER
-      @scheduler_rate = MidiRenderer.DEFAULT_SCHEDULER_RATE
+      @time = options[:time] || 0
+      @channel = options[:channel] || 0
+      self.tempo = options[:tempo] || 120
+    end
+
+    def clone_state(input)
+      {
+        :input => input,
+        :parent => self,
+        :time => @time,
+        :channel => @channel,
+        :tempo => @tempo
+      }
     end
 
     def start_scheduler
@@ -46,19 +65,31 @@ module Cosy
         Signal.trap("INT"){ stop_scheduler }
       end
     end
-      
+
     def stop_scheduler
       @scheduler.thread.exit! if @scheduler
-      @cheduler = nil
+      @scheduler = nil
     end
 
-    def render(input)    
-      parse input
+    def render()    
       start_scheduler
-
-      @start_time = Time.now.to_f + @playback_buffer
-      while event = next_event
+      @start_time = Time.now.to_f + @playback_buffer if not @start_time
+      
+      loop do
+        event = next_event
         case event
+        when nil
+          break
+
+        when ParallelSequencer
+          stop_time = @time
+          event.each do |sequencer|
+            renderer = MidiRenderer.new(clone_state(sequencer))
+            renderer.render
+            stop_time = renderer.time if renderer.time > stop_time
+          end
+          @time = stop_time
+          next
 
         when NoteEvent
           pitches, velocity, duration = event.pitches, event.velocity, event.duration
@@ -68,56 +99,76 @@ module Cosy
             rest(-duration)
           end
 
-        else 
-          if event.is_a? Chain
-            if label = event.find{|e| e.is_a? Label}
-              label = label.value.downcase
-              values = event.find_all{|e| e.is_a? Numeric}
-              value = values[0]
-              if(not values.empty?)
-                if TEMPO_LABELS.include? label
-                  tempo(value)
-                  next
+        when Chain
+          if label = event.find{|e| e.is_a? Label}
+            label = label.value.downcase
+            values = event.find_all{|e| e.is_a? Numeric}
+            value = values[0]
+            if(not values.empty?)
+              if TEMPO_LABELS.include? label
+                self.tempo = value
+                next
 
-                elsif PROGRAM_LABELS.include? label
-                  program(value)
-                  next
+              elsif PROGRAM_LABELS.include? label
+                program(value)
+                next
 
-                elsif CHANNEL_LABELS.include? label
-                  @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
-                  next
+              elsif CHANNEL_LABELS.include? label
+                @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
+                next
 
-                elsif CC_LABELS.include? label and values.length >= 2
-                  cc(values[0],values[1])
-                  next
+              elsif CC_LABELS.include? label and values.length >= 2
+                cc(values[0],values[1])
+                next
 
-                elsif PITCH_BEND_LABELS.include? label
-                  pitch_bend(value)
-                  next
-                end
-
+              elsif PITCH_BEND_LABELS.include? label
+                pitch_bend(value)
+                next
               end
-            end
-          end
 
-          raise "Unsupported Event: #{event.inspect}"
+            end
+          else
+            raise "Unsupported Event: #{event.inspect}"
+          end
         end
       end
-      rest(960) # pad the end a bit (make configurable?)
-      add_event { stop_scheduler }
-      @scheduler.thread.join
+
+      if not @parent # else we're in a child sequence and this code should not run
+        rest(960) # pad the end a bit (make configurable?)
+        add_event { stop_scheduler }
+        @scheduler.thread.join
+      end
     end
+    
     alias play render
     
+    
+    #################
+    protected
+
+    def time
+      @time
+    end
+    
+    def scheduler
+      @scheduler
+    end
+    
+    def start_time
+      @start_time
+    end
+    
+
     #################
     private
-    
+
     def add_event(&block)
       @scheduler.at(@start_time + @time/@ticks_per_sec, &block)
     end
 
     # Set tempo in terms of Quarter Notes per Minute (aka BPM)
-    def tempo(qnpm)
+    def tempo=(qnpm)
+      @tempo = qnpm
       @ticks_per_sec = qnpm/60.0 * DURATION['quarter']
     end
 
@@ -161,4 +212,3 @@ module Cosy
 
   end
 end
-

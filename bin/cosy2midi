@@ -76,8 +76,14 @@ end
 
 if output_path
   require cosy_root+'/renderer/midi_file_renderer.rb'
-  Cosy::MidiFileRenderer.new.render(cosy_syntax, output_path)
+  Cosy::MidiFileRenderer.new({
+    :input  => cosy_syntax, 
+    :output => output_path
+  }).render
 else
   require cosy_root+'/renderer/midi_renderer.rb'
-  Cosy::MidiRenderer.new(options.driver).render(cosy_syntax)
+  Cosy::MidiRenderer.new({
+    :input  => cosy_syntax, 
+    :driver => options.driver
+  }).render
 end

@@ -26,7 +26,12 @@ module Cosy
 
 
     rule sequence_root
-      choice
+      parallel_sequence
+    end
+    
+    
+    rule parallel_sequence
+      space? choice (space? '==' space? choice)* space? <ParallelNode>
     end
 
 
