@@ -21,16 +21,18 @@ end
 require 'tempfile'
 require 'cgi'
 cgi = CGI.new 
-$input = cgi['i'][0]
-raise 'Input is required' if $input.nil? or $input.strip.length==0
+input = cgi['i'][0]
+raise 'Input is required' if input.nil? or input.strip.length==0
 $output_type = cgi['o'][0]
 
 tempfile = Tempfile.new("ajm_cosy_temp") 
 outfile =  tempfile.path 
 tempfile.close
 
-renderer = Cosy::MidiRenderer.new
-renderer.render $input, outfile
+renderer = Cosy::MidiFileRenderer.new({
+  :input => input,
+  :output => outfile
+}).render
 
 if $output_type=='embed'
   print "Content-type: audio/midi\r\n" 

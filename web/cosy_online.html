@@ -21,15 +21,15 @@ var examples = {
     description: 'a pitch symbol consists of:<ul><li>the note name: <b>A-G</b> (or <b>a-g</b>)</li><li>zero or more accidentals: <b>#</b> (sharp) or <b>b</b> (flat)</li><li>an optional octave number <b>0-9</b></li></ul><br/> C4 is middle C (MIDI pitch 60) and A4 is A440, the standard reference pitch for tuning. -1 is also a valid octave number. C-1 is the lowest note, G9 is the highest.<br/><br/>If an octave number is not given, the previous pitch\'s octave will be used. The initial octave is 4.<br/><br/>List a series of pitches to play them in sequence. '
   },
   duration: {
-    cosy: 'C:w h qt qt qt q. i q. i 8s r r r r r r r x x x x x x x x x x x x x x x x w',
-    description: 'Durations determine rhythm. By default, Cosy plays all notes legato, so the next note plays when the previous note ends. A duration symbol consists of:<ul><li>an optional number that multiplies the base duration (the "multiplier")</li><li>a base duration, which is one of the following letters:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>i</b> (e<u>i</u>ghth note)  see <a href="/web/cosy/symbol-mapping">symbol mapping discussion</a> for why this is \'i\'</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>x</b> (sixty-fourth note)</li></ul></li><li>zero or more modifiers, which is one of the following symbols:<ul><li><b>.</b> (dotted note, 150% base duration)</li><li><b>t</b> (triplet, 66.67% base duration)</li></ul></li></ul><br/>For example, \'<b>q</b>\' is a quarter note, \'<b>3q</b>\' is a duration of 3 quarter notes, \'<b>qt</b>\' is a triplet quarter note, and \'<b>q..</b>\' is a double-dotted quarter note.'
+    cosy: 'C:w h qt qt qt q. ei q. ei 8s r r r r r r r x x x x x x x x x x x x x x x x w',
+    description: 'Durations determine rhythm. By default, Cosy plays all notes legato, so the next note plays when the previous note ends. A duration symbol consists of:<ul><li>an optional number that multiplies the base duration (the "multiplier")</li><li>a base duration, which is one of the following letters:<ul><li><b>w</b> (whole note)</li><li><b>h</b> (half note)</li><li><b>q</b> (quarter note)</li><li><b>ei</b> (<u>ei</u>ghth note)  see <a href="/web/cosy/symbol-mapping">symbol mapping discussion</a> for why this is \'ei\'</li><li><b>s</b> (sixteenth note)</li><li><b>r</b> (thirty-second note)</li><li><b>x</b> (sixty-fourth note)</li></ul></li><li>zero or more modifiers, which is one of the following symbols:<ul><li><b>.</b> (dotted note, 150% base duration)</li><li><b>t</b> (triplet, 66.67% base duration)</li></ul></li></ul><br/>For example, \'<b>q</b>\' is a quarter note, \'<b>3q</b>\' is a duration of 3 quarter notes, \'<b>qt</b>\' is a triplet quarter note, and \'<b>q..</b>\' is a double-dotted quarter note.'
   },
   velocity: {
-    cosy: 'C:ppp pp p mp mf o ff fff',
-    description: 'Velocity determines the intensity (loudness) of a note. Velocity symbols are the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>o</b> (f<u>o</u>rte, loud) see <a href="/web/cosy/symbol-mapping">symbol mapping discussion</a> for why this is \'o\'</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
+    cosy: 'C:ppp pp p mp mf fo ff fff',
+    description: 'Velocity determines the intensity (loudness) of a note. Velocity symbols are the standard music notation for dynamics: <ul><li><b>ppp</b> (pianississimo, extremely soft)</li><li><b>pp</b> (pianissimo, very soft)</li><li><b>p</b> (piano, soft)</li><li><b>mp</b> (mezzo-piano, medium soft)</li><li><b>mf</b> (mezzo-forte, medium loud)</li><li><b>fo</b> (<u>fo</u>rte, loud) see <a href="/web/cosy/symbol-mapping">symbol mapping discussion</a> for why this is \'fo\'</li><li><b>ff</b> (fortissimo, very loud)</li><li><b>fff</b> (fortississimo, extremely loud)</li></ul>'	
   },
   note: {
-    cosy: 'C:i:mf  D  E:q:mp  F:i  G:h\nA:i:p  F  E:mp  D:q.:mf  C:w:ff',
+    cosy: 'C:ei:mf  D  E:q:mp  F:ei  G:h\nA:ei:p  F  E:mp  D:q.:mf  C:w:ff',
     description: 'A single note has many parameters. Pitch, velocity, and duration are the basic parameters needed for working with MIDI. Cosy understands symbols that represent these 3 basic parameter types. See the pitch, rhythm, and velocity examples for details.<br/><br/>Multiple parameters are chained together with <b>:</b> (colon) to form a note. If some parameters are not specified, the previous note\'s parameter will be used. The initial default is C4:q:mf, that is pitch=C4 (middle C), duration=q (quarter note), velocity=mf (medium loud).'	
   },
   chords: {
@@ -37,11 +37,11 @@ var examples = {
 	description: 'Chords are a group of pitches in <b>[</b>square brackets<b>]</b>. All pitches in a chord sound simultaneously.'	
   },
   rests: {	
-	cosy: 'E4:i D C  -i  E:s  -i.  F:i G  -q  B3:q  -q  E:w',
-	description: 'Rests are a duration with a \'<b>-</b>\' (negative sign) in front. For example, \'<b>-q</b>\' is a quarter rest. Pitch and velocity have no effect when a rest is played. Remember that notes use the previous parameter value if none is specified, so the duration must be set to a non-rest to play a note after a rest.'
+	cosy: 'E4:ei D C  -ei  E:s  -ei.  F:ei G  -q  B3  -q  E:w',
+	description: 'Rests are a duration with a \'<b>-</b>\' (negative sign) in front. For example, \'<b>-q</b>\' is a quarter rest. Pitch and velocity have no effect when a rest is played. Remember that notes use the previous parameter value if none is specified, so any note after a rest will use the rest\'s duration by default.'
   },
   repetition: {
-    cosy: '( (G:i F)*3  E  D )*2  C*5',
+    cosy: '( (G:ei F)*3  E  D )*2  C*5',
     description: 'To repeat a note, follow the note with <b>*N</b> where N is the number of repetitions. To repeat a portion of a sequence, wrap the subsequence in <b>(</b>parentheses<b>)</b> and then follow it with <b>*N</b>.'	
   },
   'note-limit': {
@@ -57,7 +57,7 @@ var examples = {
     description: 'Variables may be defined to reduce redundancy in the sequence or to make a sequence "self documenting". Variable names start with a \'<b>$</b>\', followed by an alphabetic character (<b>A-Z</b>, <b>a-z</b>) followed by any number of alphanumeric characters or underscores  (<b>A-Z</b>, <b>a-z</b>, <b>0-9</b>, <b>_</b>) .<br/><br/>Before a sequence, a list of variable declarations can appear. These look like:<br/><b>$VARIABLE = {sequence};</b><br/>where {sequence} is any normal sequence. The variable names may then appear in the actual performed sequence to insert the variable\'s value.'
   },
   'chaining': {
-    cosy: '((G F E D)*4 C):(q. i):(mp mf ff)',
+    cosy: '((G F E D)*4 C):(q. ei):(mp mf ff)',
     description: 'Now things start to get interesting. Not only can Cosy chain individual parameters together to form a note, it can also chain together sequences of parameters. This is a form of <a href="/web/articles/musical-decoupling">musical decoupling</a>.<br/><br/>If the sequences are not the same length, Cosy will loop the shorter sequences until the longest sequence completes. Chain modifiers are in the works that will allow more flexible control over how this all works.<br/><br/>In this example, the descending melodic phrase plays while cycling through two durations (q. i) and three velocities (p mf ff)'	
   },
 	'ratios': {
@@ -72,10 +72,18 @@ var examples = {
 	  cosy: '(C6 G5 C5)@(E4 G4 Bb4)@([C2 G2 C3] $ $$)',
 	  description: 'Nested "for each" constructs are supported. A single $ accesses the nearest "for each" variable. Two $$ accesses the next nearest, and so on. This is not a good explanation, so check out the example.'
   },
-  'tempo': {
+  'labels/tempo': {
 	  cosy: '(60 120 240)@(#tempo:$ C D E F)',
-	  description: 'The tempo can be changed by assigning a value to the special TEMPO variable. Tempo is defined in terms of <em>quarter notes</em> per beat, which is standard for MIDI. MIDI tempo is sometimes erroneous referred to as beats per minute (BPM), but that\'s not accurate for  time signatures like 6/8.<br/><br/>The tempo can be changed in the middle of a sequence. Stop the sequence with a semicolon (;) and assign a new tempo.<br/><br/>QPM and QNPM (quarter notes per minute) are alternate names for the TEMPO variable.'
-  }
+	  description: 'Labels start with a <b>#</b>. Various parameters can be controlled with labels, like the tempo, continuous controller values, and arbitrary synthesis parameters. The tempo can be changed by using the #tempo label in a chain with the number (or variable) indicating the new tempo. Tempo is defined in terms of <em>quarter notes</em> per beat, which is standard for MIDI. MIDI tempo is sometimes erroneous referred to as beats per minute (BPM), but that\'s not accurate for  time signatures like 6/8.<br/><br/>The tempo can be changed in the middle of a sequence. #qnp, #qnpm (quarter notes per minute), and #bpm are alternate names for the #tempo label.'
+  },
+	'intervals': {
+		cosy: '(C4:ei F4 G4 C4)@($ M2 m2 p5 -M2 -m2)',
+		description: 'Intervals consist of:<ul><li>an optional direction <b>+</b> or <b>-</b>, which indicates up or down respectively (up is the default)</li><li>the interval quality, one of:<ul><li><b>M</b> (Major)</li><li><b>m</b> (minor)</li><li><b>p</b> or <b>P</b> (perfect)</li><li><b>aug</b> (augmented)</li><li><b>dim</b> (diminished)</li></ul></li><li>the interval degree, an integer 1 or higher (1=unison, 2=second, ..., 8=octave, etc)</li></ul><br/>Intervals indicate a pitch change relative to the previous pitch. The can be used with a foreach loop to create <a href="http://en.wikipedia.org/wiki/Sequence_(music)">non-diatonic sequences</a>.'
+	},
+	'parallel sequences (counterpoint)': {
+		cosy: 'E4:q F E D C D C B3 C4:w\n==\nC3:h G E D C:w',
+		description: '<b>==</b> splits a sequence into parallel sequences. Parallel sequences start playing at the same time but are otherwise rhythmically independent.'
+	}
 
 }
 
@@ -103,7 +111,7 @@ function submit_cosy_form() {
 function doSubmit() {
 	i = document.forms.cosy.i.value
 	o = document.forms.cosy.o.value
-	frames.results.location.href = "http://compusition.com/ruby/cosy2midi.rb?i=" + encodeURIComponent(i) + "&o=" + encodeURIComponent(o)
+	frames.results.location.href = "http://compusition.com/ruby/cosy_cgi.rb?i=" + encodeURIComponent(i) + "&o=" + encodeURIComponent(o)
 }
 </script>
 </ol></td>
