@@ -54,7 +54,7 @@ Currently there are three main use cases for Cosy:
 
 An executable is provided to live playback and generation of MIDI files:
 
-	bin/cosy2midi
+	bin/cosy
 	
 Run this script with no arguments for usage instructions.
 Some example input files are provided in the examples folder. 

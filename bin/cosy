@@ -41,16 +41,20 @@ module Cosy
         opts.separator ""    
         
         opts.separator "Examples:"
-        opts.separator "  cosy2midi -e 'c4 d e f g a b c5' output.mid"
-        opts.separator "  cosy2midi -e 'c4 d e f g a b c5'"
+        opts.separator "  #{command} -e 'c4 d e f g a b c5' output.mid"
+        opts.separator "  #{command} -e 'c4 d e f g a b c5'"
         opts.separator ""
         opts.separator "  On OS X, try the dls_synth driver for direct output:"
-        opts.separator "  cosy2midi -d dls_synth -e 'c4 d e f g a b c5'"
+        opts.separator "  #{command} -d dls_synth -e 'c4 d e f g a b c5'"
         opts.separator "  otherwise a separate program like SimpleSynth is needed to hear something."
         opts.separator ""
       end
 
-      rest = parser.parse(args)        
+      rest = parser.parse(args) 
+      if not options.input and rest.empty?
+        puts parser.to_s
+        exit 1
+      end       
       return options, rest
     end
   end
