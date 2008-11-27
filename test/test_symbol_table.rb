@@ -1,6 +1,6 @@
 require 'test/unit'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
-require File.join(cosy_root, 'sequencer/symbol_table')
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 class TestSymbolTable < Test::Unit::TestCase
   include Cosy

@@ -1,8 +1,3 @@
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/..'))
-require File.join(cosy_root, 'parser/parser')
-require File.join(cosy_root, 'sequencer/symbol_table')
-require File.join(cosy_root, 'sequencer/context')
-
 module Cosy
 
   # A Sequencer traverses a Cosy sequence and emits values one at a time.

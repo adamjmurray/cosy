@@ -107,7 +107,9 @@ module Cosy
       return NoteEvent.new(pitch_values,velocity,duration)
     end
     
+    ############
     private
+    
     def get_sequencer(cosy_syntax) 
       sequencer = Sequencer.new(cosy_syntax)
       if !sequencer.parsed?
@@ -119,4 +121,5 @@ module Cosy
     end
         
   end
+  
 end

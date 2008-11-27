@@ -1,6 +1,6 @@
 require 'test/unit'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
-require File.join(cosy_root, 'parser/parser')
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 # These tests check that the grammar and parser accept 
 # the input that they was designed to accept.

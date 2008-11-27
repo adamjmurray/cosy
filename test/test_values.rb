@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'set'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
-require cosy_root
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 class TestParser < Test::Unit::TestCase
   include Cosy

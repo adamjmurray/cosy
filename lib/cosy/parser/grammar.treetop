@@ -1,4 +1,5 @@
 module Cosy
+  
   grammar Sequence
 
     rule root
@@ -181,4 +182,5 @@ module Cosy
     end	
 
   end
+  
 end

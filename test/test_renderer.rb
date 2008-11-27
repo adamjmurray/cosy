@@ -1,5 +1,6 @@
 require 'test/unit'
-require File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 class TestRenderer < Test::Unit::TestCase
   include Cosy

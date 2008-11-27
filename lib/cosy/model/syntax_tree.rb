@@ -1,5 +1,3 @@
-require File.expand_path(File.join(File.dirname(__FILE__), 'values'))
-
 class Treetop::Runtime::SyntaxNode
 
   alias syntax_parent parent # the post parsing step will "compress" the tree and redefine parent

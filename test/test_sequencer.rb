@@ -1,8 +1,7 @@
 require 'test/unit'
 require 'set'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '/../lib/cosy'))
-require File.join(cosy_root, 'sequencer/sequencer')
-
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 class TestSequencer < Test::Unit::TestCase
   include Cosy

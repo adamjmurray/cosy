@@ -1,7 +1,4 @@
-require 'rubygems'
 require 'midiator'
-cosy_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-require cosy_root
 
 module Cosy
 

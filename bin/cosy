@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 require 'optparse' 
 require 'ostruct'
-cosy_root = File.expand_path(File.dirname(__FILE__)+'/../lib/cosy')
+$:.unshift File.dirname(__FILE__)+'/../lib'
+require 'cosy'
 
 module Cosy
   class CommandLineArgs
@@ -79,13 +80,13 @@ else
 end
 
 if output_path
-  require cosy_root+'/renderer/midi_file_renderer.rb'
+  require 'cosy/renderer/midi_file_renderer'
   Cosy::MidiFileRenderer.new({
     :input  => cosy_syntax, 
     :output => output_path
   }).render
 else
-  require cosy_root+'/renderer/midi_renderer.rb'
+  require 'cosy/renderer/midi_renderer'
   Cosy::MidiRenderer.new({
     :input  => cosy_syntax, 
     :driver => options.driver
