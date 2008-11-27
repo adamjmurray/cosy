@@ -163,7 +163,15 @@ module Cosy
     private
 
     def add_event(&block)
-      @scheduler.at(@start_time + @time/@ticks_per_sec, &block)
+      @scheduler.at(absolute_time, &block)
+    end
+    
+    def absolute_time
+      @start_time + @time
+    end
+    
+    def advance_time(duration_in_ticks)
+      @time += duration_in_ticks/@ticks_per_sec
     end
 
     # Set tempo in terms of Quarter Notes per Minute (aka BPM)
@@ -186,12 +194,12 @@ module Cosy
 
     def notes(pitches, velocity, duration)
       pitches.each { |pitch| note_on(pitch, velocity) }
-      @time += duration
+      advance_time duration
       pitches.each { |pitch| note_off(pitch, velocity) }
     end
 
     def rest(duration)
-      @time += duration
+      advance_time duration
     end
 
     def cc(controller, value)
