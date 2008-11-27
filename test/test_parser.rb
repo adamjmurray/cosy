@@ -311,11 +311,6 @@ class TestParser < Test::Unit::TestCase
     parse '$X=1 2 3 4; $Y=5; $X $Y'   
   end
   
-  def test_assign_property
-    parse 'TEMPO=1;QNPM=2.3; QPM=155/4'
-    parse 'PROGRAM=1;PGM={2+3}'
-  end
-  
   def test_label
     parse '#label:5'
     parse '#1:c:mf'

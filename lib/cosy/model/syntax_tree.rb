@@ -154,18 +154,9 @@ module Cosy
     end
 
     def evaluate(context)
-      if lhs.is_a? VariableNode
-        name = lhs.value
-        context.symbol_table[name] = rhs
-        return nil
-      else  
-        # deprecate this in favor of labelled chain nodes
-        return case lhs
-        when TempoNode then Tempo.new(rhs.value(context))
-        when ProgramNode then Program.new(rhs.value(context))
-        else rhs
-        end
-      end
+      name = lhs.value
+      context.symbol_table[name] = rhs
+      return nil
     end
   end
   
@@ -524,14 +515,6 @@ module Cosy
       end
       return @value
     end
-  end
-
-  
-  class TempoNode < TerminalNode
-  end
-
-  
-  class ProgramNode < TerminalNode
   end
   
 

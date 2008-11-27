@@ -1,0 +1,3 @@
+-- Using a foreach loop to control tempo changes
+
+(60 120 240)@(#tempo:$ C D E F)

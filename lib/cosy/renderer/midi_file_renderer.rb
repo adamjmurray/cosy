@@ -80,10 +80,6 @@ module Cosy
       while event = next_event
         case event
 
-          # Maybe these 2 cases are obsolete now?
-        when Tempo then tempo(event.value)
-        when Program then program(event.value)
-
         when ParallelSequencer
           stop_time = @time
           event.each do |sequencer|

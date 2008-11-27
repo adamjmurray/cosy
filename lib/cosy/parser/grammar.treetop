@@ -12,16 +12,7 @@ module Cosy
 
 
     rule assignment
-      property space? '=' space? (number/ruby) <AssignmentNode>
-      /
       var space? '=' sequence_root <AssignmentNode>
-    end
-
-
-    rule property
-      ('TEMPO'/ 'QPM' / 'QNPM') '' <TempoNode>
-      /
-      ('PROGRAM' / 'PGM') '' <ProgramNode>
     end
 
 

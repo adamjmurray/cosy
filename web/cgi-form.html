@@ -73,7 +73,7 @@ var examples = {
 	  description: 'Nested "for each" constructs are supported. A single $ accesses the nearest "for each" variable. Two $$ accesses the next nearest, and so on. This is not a good explanation, so check out the example.'
   },
   'tempo': {
-	  cosy: '$sequence = C D E F;\nTEMPO=60; $sequence;\nTEMPO=120; $sequence;\nTEMPO=240; $sequence',
+	  cosy: '(60 120 240)@(#tempo:$ C D E F)',
 	  description: 'The tempo can be changed by assigning a value to the special TEMPO variable. Tempo is defined in terms of <em>quarter notes</em> per beat, which is standard for MIDI. MIDI tempo is sometimes erroneous referred to as beats per minute (BPM), but that\'s not accurate for  time signatures like 6/8.<br/><br/>The tempo can be changed in the middle of a sequence. Stop the sequence with a semicolon (;) and assign a new tempo.<br/><br/>QPM and QNPM (quarter notes per minute) are alternate names for the TEMPO variable.'
   }
 

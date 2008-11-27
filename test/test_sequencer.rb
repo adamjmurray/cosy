@@ -368,15 +368,6 @@ class TestSequencer < Test::Unit::TestCase
     assert_sequence [1,3,2,3,1,3,2,3], '((1 2)@($ 3))*2'
     assert_sequence [1,3,2,3,1,3,2], '((1 2)@($ 3))&7'
   end
-
-  def test_tempo  
-    assert_sequence [1,2,3], 'TEMPO=1; QNPM=2; QPM=3'
-  end
-  
-  def test_program  
-    assert_sequence [1,2], 'PROGRAM=1; PGM=2'
-    assert_sequence [1,2], 'PROGRAM=1; PGM=2;'
-  end
   
   def test_ruby
     assert_sequence [1,7,2], '1 {3+4} 2'
