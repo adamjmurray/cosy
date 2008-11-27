@@ -68,7 +68,7 @@ Check back soon.
 
 The closest thing to documentation right now is the online preview at: 
 
-<http:/compusition.com/web/software/cosy/online>
+<http://compusition.com/web/software/cosy/online>
 
 
 # Future
