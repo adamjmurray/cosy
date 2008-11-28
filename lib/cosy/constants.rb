@@ -4,13 +4,30 @@ module Cosy
 # Musical Symbols
 
   PITCH_CLASS = {
-    'C'=>0, 'C#'=>1, 'D'=>2, 'D#'=>3, 'E'=>4, 'F'=>5,'F#'=>6, 
-    'G'=>7, 'G#'=>8, 'A'=>9, 'A#'=>10, 'B'=>11
+    'C'  => 0, 
+    'C#' => 1, 
+    'D'  => 2, 
+    'D#' => 3, 
+    'E'  => 4,
+    'F'  => 5,
+    'F#' => 6, 
+    'G'  => 7, 
+    'G#' => 8, 
+    'A'  => 9,
+    'A#' => 10,
+    'B'  => 11
   }
   $OCTAVE_OFFSET = 1  # this is a global instead of a constant so it can be altered if desired
 
+  ACCIDENTAL = {
+    '#' =>  1, 
+    'b' => -1, 
+    '+' =>  0.5,
+    '_' => -0.5
+  }
+
   INTENSITY = {
-    'ppp'=>15, 
+    'ppp'=>15,
     'pp' =>31,  'pianissimo'=>31,
     'p'  =>47,  'piano'=>47,
     'mp' =>63,  'mezzopiano'=>63, 'mezzo-piano'=>63,
@@ -29,6 +46,11 @@ module Cosy
     's'=>120,  'sixteenth'=>120,
     'r'=>60,   'thirtysecond'=>60, 'thirty-second'=>60,
     'x'=>30,   'sixtyfourth'=>30,  'sixty-fourth'=>30
+  }
+  
+  DURATION_MODIFIER = {
+    '.' => 1.5,
+    't' => 2/3.0
   }
   
   INTERVAL_QUALITY = {

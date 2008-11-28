@@ -13,12 +13,7 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def sequence input
-    sequencer = Sequencer.new(input)
-    p = sequencer.parser
-    flunk("Failed to parse: #{input}\n" + 
-      "(#{p.failure_line},#{p.failure_column}): #{p.failure_reason}"
-    ) if sequencer.sequence.nil?
-    return sequencer
+    return Sequencer.new(input)
   end
   
   def assert_done seq

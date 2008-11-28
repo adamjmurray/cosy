@@ -117,7 +117,7 @@ module Cosy
 
 
     rule metrical_duration
-      'whole' / 'half' / 'quarter' / 'eighth' / 'ei' / 'sixteenth' /
+      'whole' / 'half' / 'quarter' / 'eighth' / 'ei' / 'EI' / 'sixteenth' /
       'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
       [WwHhQqIiSsRrXx] 
     end

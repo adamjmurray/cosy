@@ -344,41 +344,23 @@ module Cosy
 
   
   class ChordNode < ContainerNode 
-
     def atom?
       true
     end
-
-    def value(context)
+    def value(context=nil)
       Chord.new(@children.collect{|child| child.value(context)})
     end
-    
-    def evaluate(context)
+    def evaluate(context=nil)
       return value(context)
-    end
-    
+    end  
   end
   
 
   class PitchNode < TerminalNode
     def value(context=nil)
       if not @value then
-        pitch_class_value = PITCH_CLASS[note_name.text_value.upcase]
-        if accidentals.text_value.empty?
-          accidental_value = nil
-        else
-          accidental_value = 0
-          accidentals.text_value.each_byte do |byte|
-            case byte.chr
-            when '#' then accidental_value += 1
-            when 'b' then accidental_value -= 1
-            when '+' then accidental_value += 0.5
-            when '_' then accidental_value -= 0.5 
-            end
-          end
-        end
         octave_value = octave.value if not octave.text_value.empty?
-        @value = Pitch.new(pitch_class_value, accidental_value, octave_value)
+        @value = Pitch.new(note_name.text_value, accidentals.text_value, octave_value)
       end
       return @value
     end
@@ -400,8 +382,7 @@ module Cosy
       if not @value
         deg = degree.text_value.to_i
         deg *= -1 if sign.text_value=='-'
-        qual = INTERVAL_QUALITY[quality.text_value]
-        @value = Interval.new(qual,deg)
+        @value = Interval.new(quality.text_value, deg)
       end
       return @value
     end
@@ -411,24 +392,16 @@ module Cosy
   class DurationNode < TerminalNode
     def value(context=nil)
       if not @value
-        @value = DURATION[metrical_duration.text_value.downcase]
-        if multiplier.text_value != ''
-          if multiplier.text_value == '-'
-            @value *= -1
-          else
-            @value *= multiplier.value
-          end
+        if multiplier.text_value.empty?
+          mult = 1
+        elsif multiplier.text_value == '-'
+          mult = -1
+        else
+          mult = multiplier.value
         end
-        modifier.text_value.each_byte do |byte|
-          case byte.chr
-          when 't'
-            @value *= TWO_THIRDS
-          when '.'
-            @value *= 1.5
-          end
-        end
+        @value = Duration.new(mult, metrical_duration.text_value, modifier.text_value)
       end
-      return Duration.new(@value, text_value)
+      return @value
     end  
   end
   
@@ -436,7 +409,7 @@ module Cosy
   class NumericDurationNode < DurationNode
     def value(context=nil)
       if not @value
-        @value = Duration.new(number.value, number.text_value)
+        @value = Duration.new(number.value)
       end
       return @value
     end
@@ -446,7 +419,7 @@ module Cosy
   class VelocityNode < TerminalNode
     def value(context=nil)
       if not @value
-        @value = Velocity.new(INTENSITY[text_value.downcase], text_value)
+        @value = Velocity.new(text_value,text_value)
       end
       return @value
     end

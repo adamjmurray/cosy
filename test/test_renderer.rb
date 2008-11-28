@@ -31,10 +31,7 @@ class TestRenderer < Test::Unit::TestCase
     duration ||= RendererDefaults.DEFAULT_DURATION
     NoteEvent.new(pitches,velocity,duration)
   end
-  
-  def n(pitches,duration=nil,velocity=nil)
-    note(pitches,duration,velocity)
-  end
+  alias n note
   
   def test_use_previous_octave
     assert_sequence [note(60),note(60),note(62),note(71)], 'C C D B'
@@ -55,14 +52,14 @@ class TestRenderer < Test::Unit::TestCase
       r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(30),
       r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(30),r(1920)
     ],
-    'C4:w h qt qt qt q. ei q. i 8s r r r r r r r r x x x x x x x x x x x x x x x x w'
+    'C4:w h qt qt qt q. ei q. ei 8s r r r r r r r r x x x x x x x x x x x x x x x x w'
   end
   
   def test_velocity
     def v(vel)
       n(60,nil,vel)
     end
-    assert_sequence [v(PPP),v(PP),v(P),v(MP),v(MF),v(O),v(FF),v(FFF)], 'C4:ppp pp p mp mf o ff fff'
+    assert_sequence [v(PPP),v(PP),v(P),v(MP),v(MF),v(FO),v(FF),v(FFF)], 'C4:ppp pp p mp mf fo ff fff'
   end
   
   def test_notes
@@ -70,7 +67,7 @@ class TestRenderer < Test::Unit::TestCase
       n(60,240,MF),n(62,240,MF),n(64,480,MP),n(65,240,MP),n(67,960,MP),
       n(69,240,P),n(65,240,P),n(64,240,MP),n(62,720.0,MF),n(60,1920,FF)
     ], 
-    'C4:i:mf  D4  E4:q:mp  F4:i  G4:h A4:i:p  F4  E4:mp  D4:q.:mf  C4:w:ff'
+    'C4:ei:mf  D4  E4:q:mp  F4:ei  G4:h A4:ei:p  F4  E4:mp  D4:q.:mf  C4:w:ff'
   end
   
   def test_chords
@@ -85,7 +82,7 @@ class TestRenderer < Test::Unit::TestCase
     assert_sequence [
       n(64,240),n(62,240),n(60,240),n(60,-240),n(64,120),n(64,-360),
       n(65,240),n(67,240),n(67,-480),n(59,480),n(59,-480),n(52,1920)],
-    'E4:i D4 C4 -i E4:s -i. F4:i G4 -q B3:q -q E3:w'
+    'E4:ei D4 C4 -ei E4:s -ei. F4:ei G4 -q B3 -q E3:w'
   end
   
   def test_reptitions
@@ -94,7 +91,7 @@ class TestRenderer < Test::Unit::TestCase
       n(67,240),n(65,240),n(67,240),n(65,240),n(67,240),n(65,240),n(64,240),n(62,240),
       n(60,240),n(60,240),n(60,240),n(60,240),n(60,240)
       ], 
-      '((G4:i F4)*3 E4 D4)*2 C4*5'
+      '((G4:ei F4)*3 E4 D4)*2 C4*5'
   end
   
   def test_count_limit
@@ -142,7 +139,7 @@ class TestRenderer < Test::Unit::TestCase
       n(67,720,P),n(65,240,MF),n(64,720,FF),n(62,240,P),
       n(60,720,MF)
     ],
-    '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)'
+    '((G4 F4 E4 D4)*4 C4):(q. ei):(p mf ff)'
   end
   
   def test_repeated_numeric_pitches
