@@ -41,11 +41,11 @@ module Cosy
     end
     
     def parse(cosy_syntax)
-       @sequencer = get_sequencer(cosy_syntax)
+       @sequencer = Sequencer.new(cosy_syntax)
     end
     
     def define_sequence(name, cosy_syntax)
-      @sequences[name] = get_sequencer(cosy_syntax)
+      @sequences[name] = Sequencer.new(cosy_syntax)
     end
 
     def load_sequence(name)
@@ -105,19 +105,6 @@ module Cosy
       @prev_duration = duration.abs
 
       return NoteEvent.new(pitch_values,velocity,duration)
-    end
-    
-    ############
-    private
-    
-    def get_sequencer(cosy_syntax) 
-      sequencer = Sequencer.new(cosy_syntax)
-      if !sequencer.parsed?
-        parser = sequencer.parser
-        raise "Failed to parse: #{cosy_syntax}\n" + 
-        "(#{parser.failure_line},#{parser.failure_column}): #{parser.failure_reason}"
-      end
-      return sequencer
     end
         
   end

@@ -3,7 +3,7 @@ module Cosy
   # A Sequencer traverses a Cosy sequence and emits values one at a time.
   class Sequencer
 
-    attr_accessor :parser, :sequence, :context
+    attr_accessor :sequence, :context
 
     def initialize(sequence, symbol_table=SymbolTable.new)
       # Careful! Passing in a symbol_table is probably
@@ -13,12 +13,10 @@ module Cosy
       # table if needed
       
       if sequence.is_a? SequencingNode
-        @parser = nil
         @sequence = sequence
       else
-        # we need a local parser so we can retreive parse failure info
-        @parser = SequenceParser.new 
-        @sequence = @parser.parse(sequence)
+        @@parser = SequenceParser.new if not defined? @@parser
+        @sequence = @@parser.parse(sequence)
       end
       @context = Context.new(self, symbol_table, @sequence)
     end

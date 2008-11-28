@@ -18,9 +18,7 @@ class TestParser < Test::Unit::TestCase
   end
   
   def assert_failure invalid_syntax
-    output = PARSER.parse(invalid_syntax)
-    assert_nil(output, "Successfully parsed invalid syntax: #{invalid_syntax}")
-    return nil
+    assert_raises(RuntimeError) { PARSER.parse(invalid_syntax) }
   end
 
   def parse_numbers(numbers, &block)

@@ -5,8 +5,17 @@ module Cosy
 
     # define a post-parsing step (compress):
     alias parse_sequence parse
-    def parse *args
-      compress parse_sequence(*args)
+    def parse(input, options={})
+      input = input.to_s
+      tree = compress parse_sequence(input, options)
+      if tree.nil?
+        raise "Failed to parse: #{input}\n#{parser_error}"
+      end
+      return tree
+    end
+    
+    def parser_error
+      "(#{failure_line},#{failure_column}): #{failure_reason}"
     end
 
     def verbose_parse input

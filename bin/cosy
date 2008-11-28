@@ -79,16 +79,20 @@ else
   end 
 end
 
-if output_path
-  require 'cosy/renderer/midi_file_renderer'
-  Cosy::MidiFileRenderer.new({
-    :input  => cosy_syntax, 
-    :output => output_path
-  }).render
-else
-  require 'cosy/renderer/midi_renderer'
-  Cosy::MidiRenderer.new({
-    :input  => cosy_syntax, 
-    :driver => options.driver
-  }).render
+begin
+  if output_path
+    require 'cosy/renderer/midi_file_renderer'
+    Cosy::MidiFileRenderer.new({
+      :input  => cosy_syntax, 
+      :output => output_path
+    }).render
+  else
+    require 'cosy/renderer/midi_renderer'
+    Cosy::MidiRenderer.new({
+      :input  => cosy_syntax, 
+      :driver => options.driver
+    }).render
+  end
+rescue Exception 
+  STDERR.puts $!
 end

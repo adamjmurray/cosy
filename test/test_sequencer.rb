@@ -45,9 +45,7 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def assert_failure(input)
-    sequencer = Sequencer.new(input)
-    assert_nil(sequencer.sequence, 
-      "Successfully parsed invalid syntax: #{input}")
+    assert_raises(RuntimeError) { Sequencer.new(input) }
   end
   
   def test_infinite_loop_prevention
