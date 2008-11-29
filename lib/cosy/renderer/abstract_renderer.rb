@@ -21,12 +21,11 @@ module Cosy
 
   class AbstractRenderer
     
-    def initialize(options)
+    def initialize(options={})
       input = options[:input]
-      raise ':input is required in construtor options' if not input
       if input.is_a? Sequencer
         @sequencer = input
-      else
+      elsif input
         parse(input)
       end
       @sequences = {}
