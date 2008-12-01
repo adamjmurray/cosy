@@ -34,6 +34,7 @@ Cosy depends on the following Ruby libraries:
 *  treetop (which depends on polyglot)
 *  midilib 
 *  midiator
+*  osc (optional)
 
 To run Cosy you will need to install the gems for those libraries:
 
@@ -43,7 +44,11 @@ To run Cosy you will need to install the gems for those libraries:
 
 midiator-0.3.0 or higher is needed for direct output on OS X
 
+Optionally, if you want to use OSC support, you will also need to:
 
+	gem install osc
+	
+	
 ## Running Cosy ##
 
 Currently there are three main use cases for Cosy:
@@ -78,6 +83,7 @@ Near-term TODOs:
 * Allow independent control over the note duration and the inter-note-onset intervals
   (i.e. support staccato vs. legato)
 * Numeric intervals (allow something like i2 and i7 instead of m2 and P5)
+* More convenient syntax for OSC messages
 * A way to change the current octave, pitch, velocity, and duration without
   outputting anything
 * Allow chains to be formed across scopes. For example, support:<br/>
@@ -89,7 +95,6 @@ Long-term TODOs:
 
 * tick-rate generators, output faster than the sequencing rate, for doing things like CC LFOs
   and pitch bend envelopes
-* OSC support
 * a clean API for manipulating the sequencing tree on-the-fly as the sequencer is running, for
   interactive control and a clean syntax for self-modifying sequences
 * arpeggiators

@@ -122,9 +122,25 @@ module Cosy
                 pitch_bend(value)
                 next
               end
-
             end
-          else
+            
+            if label == 'osc_host'
+              osc_host(event[1])
+              next
+                
+            elsif label == 'osc_port'
+              osc_port(event[1])
+              next
+                
+            # elsif label =~ /^osc(\/.*)/
+            elsif label == 'osc'
+              address = event[1]
+              args = event[2..-1]
+              osc(address, args)
+              next
+                
+            end
+
             raise "Unsupported Event: #{event.inspect}"
           end
         end
@@ -214,6 +230,24 @@ module Cosy
       end
       add_event { @@midi.pitch_bend(@channel, value) }
     end
+    
+    def osc_host(hostname)
+      osc_warning
+    end
+    
+    def osc_port(port)
+      osc_warning
+    end
+    
+    def osc(address, args) 
+      osc_warning
+    end
 
+    def osc_warning
+      STDERR.puts "OSC not supported by this renderer" if not @warned_about_osc
+      @warned_about_osc = true      
+    end
+    
   end
+  
 end
