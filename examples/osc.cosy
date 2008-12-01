@@ -8,9 +8,9 @@
 
 #tempo:60
 
-#osc:'/path/int':127
+/path/int:127
 -q
-#osc:'/path/floats':55.78:-0.000123
+/path/floats:55.78:-0.000123
 -q
-#osc:'/path/string':'blah blah blah'
+/path/string:'blah blah blah'
 

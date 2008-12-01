@@ -42,7 +42,7 @@ To run Cosy you will need to install the gems for those libraries:
 	gem install midilib
 	gem install midiator
 
-midiator-0.3.0 or higher is needed for direct output on OS X
+Note that midiator-0.3.0 or higher is needed for direct output on OS X
 
 Optionally, if you want to use OSC support, you will also need to:
 
@@ -78,25 +78,21 @@ The closest thing to documentation right now is the online preview at:
 
 # Future
 
-Near-term TODOs:
+TODOs:
 
 * Allow independent control over the note duration and the inter-note-onset intervals
   (i.e. support staccato vs. legato)
 * Numeric intervals (allow something like i2 and i7 instead of m2 and P5)
-* More convenient syntax for OSC messages
 * A way to change the current octave, pitch, velocity, and duration without
   outputting anything
 * Allow chains to be formed across scopes. For example, support:<br/>
   $melody=e:q d c:h; $melody:mp
 * Documentation! And more examples.
 * Release updated version of ajm.ruby and the Cosy Max/MSP object
-
-Long-term TODOs:
-
 * tick-rate generators, output faster than the sequencing rate, for doing things like CC LFOs
   and pitch bend envelopes
-* a clean API for manipulating the sequencing tree on-the-fly as the sequencer is running, for
-  interactive control and a clean syntax for self-modifying sequences
+* a clean API for manipulating the sequencing tree on-the-fly as the sequencer is running
+  (interactive control as well as self-modifying sequences)
 * arpeggiators
 * new node traversal behaviors, for example loops that go up/down instead of starting over when the
   last note is reached

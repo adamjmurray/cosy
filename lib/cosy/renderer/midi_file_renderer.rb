@@ -267,12 +267,3 @@ module Cosy
   end
 
 end
-
-#Cosy::MidiFileRenderer.new({:input=>'c d e == e f g', :output=>'test.mid'}).render
-#Cosy::MidiFileRenderer.new.render 'c #cc:1:0 c #cc:0:127', 'test.mid'
-#Cosy::MidiFileRenderer.new.render 'c #pb:1.0 c #pb:-1.0 c #pb:0.0 c', 'test.mid'
-#Cosy::MidiFileRenderer.new.render '#tempo:60 e*4 120:#tempo d*8 #tempo:240 c4*16', 'test.mid'
-#Cosy::MidiFileRenderer.new.render 'TEMPO=60; e*4; TEMPO=120; d*8; TEMPO=240; c*16', 'test.mid'
-# Cosy::MidiFileRenderer.new.render 'TEMPO=60; c4:q c c c:1/5q*5 c4:w', 'test.mid'
-#Cosy::MidiFileRenderer.new.render '((G4 F4 E4 D4)*4 C4):(q. i):(p mf ff)', 'test.mid'
-#Cosy::MidiFileRenderer.new.render 'c -i d', 'test.mid'

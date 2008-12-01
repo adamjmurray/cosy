@@ -1,5 +1,4 @@
 require 'osc'
-include  OSC
 
 module Cosy
 
@@ -7,7 +6,9 @@ module Cosy
 
     def initialize(options)
       super(options)
-      @host = 'localhost'
+      @host   = options[:host] || 'localhost'
+      @port   = options[:port]
+      @client = options[:client]
     end
 
     ##########
@@ -18,17 +19,26 @@ module Cosy
     end
     
     def osc_port(port)
-      puts "starting client for #@host:#{port}" if $DEBUG and not @client
-      @client = SimpleClient.new(@host, port) if not @client
+      @port = port
+      puts "starting client for #@host:#{port}" if $COSY_DEBUG
+      @client = OSC::SimpleClient.new(@host, port)
     end
     
     def osc(address, args) 
       if @client
-        msg = Message.new(address, nil, *args)
+        msg = OSC::Message.new(address, nil, *args)
         add_event { @client.send(msg) } 
       else
         STDERR.puts 'OSC client not started'
       end
+    end
+    
+    def clone_state(input)
+      super(input).merge({
+        :host => @host,
+        :port => @port,
+        :client => @client
+      })
     end
     
   end

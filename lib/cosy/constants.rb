@@ -91,10 +91,10 @@ module Cosy
   OP_COUNT_LIMIT = '&'
   OP_ITER_LIMIT  = '*' # iteration (repeat) limit
 
-  
 #######################################
-# Miscellaneous Contants
-  
-  TWO_THIRDS = 2/3.0
+# Open Sound Control
 
+  OSC_PORT_LABEL = 'osc_port'
+  OSC_HOST_LABEL = 'osc_host'
+  
 end

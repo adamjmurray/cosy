@@ -7,7 +7,7 @@ describe Cosy::SequenceParser do
   end
   
 
-  describe '(atomic values)' do
+  describe 'Atomic Values' do
     
     it 'should parse whitespace' do
       ['', ' ', '   ', "\t", "\n", "\r\f", "\n \t"].each do |whitespace|
@@ -131,6 +131,59 @@ describe Cosy::SequenceParser do
       end
     end
     
+    it 'should parse osc addresses' do
+      ['/basic', '/1', '/1/a', '/a/1', '/nested/path/to/somewhere'].each do |osc_address|
+        value = @parser.parse(osc_address).value
+        value.should == osc_address
+        value.should be_instance_of(OscAddress)
+      end
+    end
+    
   end # describing primitive value behaviors
+  
+  
+  describe 'OSC Support' do
+    
+    it 'should parse osc message chains with one value' do
+      [100, -5.5, 'foo'].each do |value|
+        osc_address = '/osc/addr'
+        node = @parser.parse("#{osc_address}:#{value.inspect}")
+        node.should be_instance_of(ChainNode)
+        node.children.length.should == 2
+
+        addr = node.children[0]
+        addr.should be_instance_of(OscAddressNode)
+        addr.value.should == osc_address
+
+        arg = node.children[1]
+        node_should_match_value arg,value
+      end
+    end
+    
+    it 'should parse osc message chains with multiple values' do
+      [[100, -5.5], [1, 'foo'], ['a','b','c','d']].each do |values|
+        osc_address = '/osc/addr'
+        chain = osc_address + ':' + values.map{|v|v.inspect}.join(':')
+        node = @parser.parse(chain)
+        node.should be_instance_of(ChainNode)
+        node.children.length.should == values.length + 1   # plus one for address
+
+        addr = node.children[0]
+        addr.should be_instance_of(OscAddressNode)
+        addr.value.should == osc_address
+        values.each_with_index{ |val,i| node_should_match_value node.children[i+1],val }
+      end
+    end
+    
+  end
+  
+  def node_should_match_value node,value
+    case value
+      when Fixnum then node.should be_instance_of(IntNode)
+      when Float  then node.should be_instance_of(FloatNode)
+      when String then node.should be_instance_of(StringNode)
+    end
+    node.value.should == value
+  end
   
 end

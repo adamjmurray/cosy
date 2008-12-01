@@ -511,5 +511,12 @@ module Cosy
       return nil
     end
   end
+  
+  
+  class OscAddressNode < TerminalNode
+    def value(context=nil)
+      return OscAddress.new(text_value)
+    end
+  end
 
 end

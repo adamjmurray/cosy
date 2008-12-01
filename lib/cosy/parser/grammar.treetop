@@ -78,7 +78,7 @@ module Cosy
 
 
     rule primitive
-      interval / pitch / velocity / duration  / number / string / label / var / ruby
+      interval / pitch / velocity / duration  / number / string / label / var / ruby / osc_address
     end
 
 
@@ -174,6 +174,11 @@ module Cosy
 
     rule command
       '{' ruby:ruby '}' <CommandNode>
+    end
+    
+    
+    rule osc_address
+      '/' [A-Za-z0-9_/.]* <OscAddressNode>
     end
 
 

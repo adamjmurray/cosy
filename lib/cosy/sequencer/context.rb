@@ -94,37 +94,6 @@ module Cosy
         return true
       end
     end
-    # 
-    # def start_foreach(foreach_sequences)
-    #   @foreach_sequencers = foreach_sequences.collect do |sequence|              
-    #     Sequencer.new(sequence, @symbol_table)
-    #   end
-    #   @foreach_sequencers.each do |sequencer| 
-    #     magic_value = sequencer.next
-    #     @symbol_table.push_magic_variable(magic_value)
-    #   end
-    # end
-    # 
-    # def next_foreach(index=nil)
-    #   return false if not @foreach_sequencers
-    #   index ||= @foreach_sequencers.length-1
-    #   return false if index < 0
-    #   
-    #   @symbol_table.pop_magic_variable
-    #   sequencer = @foreach_sequencers[index]
-    #   magic_value = sequencer.next
-    #   if magic_value
-    #     @symbol_table.push_magic_variable(magic_value)
-    #     return true
-    #   elsif advance_foreach(index-1)
-    #     sequencer.restart
-    #     magic_value = sequencer.next
-    #     @symbol_table.push_magic_variable(magic_value) 
-    #     return true
-    #   else
-    #     return false 
-    #   end
-    # end  
   
     def get_binding
       return binding()

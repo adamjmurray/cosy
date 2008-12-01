@@ -46,16 +46,6 @@ module Cosy
       self.tempo = options[:tempo] || 120
     end
 
-    def clone_state(input)
-      {
-        :input => input,
-        :parent => self,
-        :time => @time,
-        :channel => @channel,
-        :tempo => @tempo
-      }
-    end
-
     def start_scheduler
       if not @scheduler
         @scheduler = MIDIator::Timer.new(@scheduler_rate) 
@@ -81,7 +71,7 @@ module Cosy
         when ParallelSequencer
           stop_time = @time
           event.each do |sequencer|
-            renderer = MidiRenderer.new(clone_state(sequencer))
+            renderer = self.class.new(clone_state(sequencer))
             renderer.render
             stop_time = renderer.time if renderer.time > stop_time
           end
@@ -95,55 +85,45 @@ module Cosy
           else            
             rest(-duration)
           end
+          next
 
         when Chain
-          if label = event.find{|e| e.is_a? Label}
-            label = label.value.downcase
-            values = event.find_all{|e| e.is_a? Numeric}
+          first_value = event.first
+          values = event[1..-1]
+          case first_value
+          when Label
+            label = first_value.value.downcase            
             value = values[0]
-            if(not values.empty?)
-              if TEMPO_LABELS.include? label
-                self.tempo = value
-                next
-
-              elsif PROGRAM_LABELS.include? label
-                program(value)
-                next
-
-              elsif CHANNEL_LABELS.include? label
-                @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
-                next
-
-              elsif CC_LABELS.include? label and values.length >= 2
-                cc(values[0],values[1])
-                next
-
-              elsif PITCH_BEND_LABELS.include? label
-                pitch_bend(value)
-                next
-              end
+            if TEMPO_LABELS.include? label and value
+              self.tempo = value
+              next
+            elsif PROGRAM_LABELS.include? label and value
+              program value
+              next
+            elsif CHANNEL_LABELS.include? label and value
+              @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
+              next
+            elsif CC_LABELS.include? label and values.length >= 2
+              cc(values[0],values[1])
+              next
+            elsif PITCH_BEND_LABELS.include? label and value
+              pitch_bend value
+              next
+            elsif label == OSC_HOST_LABEL and value
+              osc_host value
+              next  
+            elsif label == OSC_PORT_LABEL and value
+              osc_port value
+              next
             end
             
-            if label == 'osc_host'
-              osc_host(event[1])
-              next
-                
-            elsif label == 'osc_port'
-              osc_port(event[1])
-              next
-                
-            # elsif label =~ /^osc(\/.*)/
-            elsif label == 'osc'
-              address = event[1]
-              args = event[2..-1]
-              osc(address, args)
-              next
-                
-            end
-
-            raise "Unsupported Event: #{event.inspect}"
+          when OscAddress
+            osc(first_value, values)
+            next    
           end
-        end
+        end # Chain case
+        
+        raise "Unsupported Event: #{event.inspect}"
       end
 
       if not @parent # else we're in a child sequence and this code should not run
@@ -174,6 +154,16 @@ module Cosy
 
     #################
     private
+    
+    def clone_state(input)
+      {
+        :input => input,
+        :parent => self,
+        :time => @time,
+        :channel => @channel,
+        :tempo => @tempo
+      }
+    end
 
     def add_event(&block)
       @scheduler.at(absolute_time, &block)
