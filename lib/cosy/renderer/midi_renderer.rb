@@ -27,7 +27,16 @@ module Cosy
         else
           @@midi.autodetect_driver
         end
-        at_exit { @@midi.close }
+        @@held_notes = Hash.new do |hash,key| hash[key] = {} end
+        
+        at_exit do
+          @@held_notes.each do |channel,note_hash|
+            note_hash.each do |pitch,velocity|
+              @@midi.note_off(pitch, channel, velocity)
+            end
+          end
+          @@midi.close 
+        end
       end
 
       @parent = options[:parent]
@@ -188,11 +197,17 @@ module Cosy
     end
 
     def note_on(pitch, velocity)
-      add_event { @@midi.note_on(pitch.to_i, @channel, velocity.to_i) }
+      add_event do
+        @@midi.note_on(pitch.to_i, @channel, velocity.to_i)
+        @@held_notes[@channel][pitch] = velocity
+      end
     end
 
     def note_off(pitch, velocity)
-      add_event { @@midi.note_off(pitch.to_i, @channel, velocity.to_i) }
+      add_event do
+        @@midi.note_off(pitch.to_i, @channel, velocity.to_i)
+        @@held_notes[@channel].delete pitch
+      end
     end
 
     def notes(pitches, velocity, duration)

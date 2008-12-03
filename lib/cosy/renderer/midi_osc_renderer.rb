@@ -10,7 +10,8 @@ module Cosy
       @port   = options[:port]
       @client = options[:client]
     end
-
+    
+    
     ##########
     private
     
@@ -27,7 +28,14 @@ module Cosy
     def osc(address, args) 
       if @client
         msg = OSC::Message.new(address, nil, *args)
-        add_event { @client.send(msg) } 
+        add_event do
+          begin
+            @client.send(msg) 
+          rescue => exception
+            STDERR.puts "OSC to #@host:#@port failed to send: #{address} #{args}"
+            STDERR.puts "#{exception.message}"            
+          end
+        end
       else
         STDERR.puts 'OSC client not started'
       end

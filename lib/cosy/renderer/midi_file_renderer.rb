@@ -100,16 +100,6 @@ module Cosy
       end
     end
 
-    def clone_state(input)
-      {
-        :input => input,
-        :parent => self,
-        :time => @time,
-        :channel => @channel,
-        :tempo => @tempo
-      }
-    end
-
     def render()
       while event = next_event
         case event
@@ -208,7 +198,7 @@ module Cosy
     def track
       @track
     end
-    
+
 
     ############
     private  
@@ -264,6 +254,17 @@ module Cosy
       event = MIDI::PitchBend.new(@channel, value)
       @track.insert(event, @time)
     end
-  end
+    
+    def clone_state(input)
+      {
+        :input => input,
+        :parent => self,
+        :time => @time,
+        :channel => @channel,
+        :tempo => @tempo
+      }
+    end
 
+  end
+ 
 end
