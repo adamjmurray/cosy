@@ -80,13 +80,19 @@ The closest thing to documentation right now is the online preview at:
 
 TODOs:
 
+* Support a mode where octave selection is based on proximity to the previous note
+  (instead of always using the previous note's octave, stay within a perfect fourth
+  of the previous note)
 * Allow independent control over the note duration and the inter-note-onset intervals
   (i.e. support staccato vs. legato)
-* Numeric intervals (allow something like i2 and i7 instead of m2 and P5)
 * A way to change the current octave, pitch, velocity, and duration without
   outputting anything
 * Allow chains to be formed across scopes. For example, support:<br/>
   $melody=e:q d c:h; $melody:mp
+* When chaining, I don't always want the pitch to advance when the
+  rhythm advances (especially when rests are involved). 
+  Introduce ^ as the mechanism for indicating that a chain should not advance 
+  (c d e):(^h. -q)
 * Documentation! And more examples.
 * Release updated version of ajm.ruby and the Cosy Max/MSP object
 * tick-rate generators, output faster than the sequencing rate, for doing things like CC LFOs
