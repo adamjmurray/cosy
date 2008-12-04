@@ -149,10 +149,10 @@ class TestSequencer < Test::Unit::TestCase
   end
 
   def test_numeric_pitches
-    assert_sequence [60,65,67,68], 'y60 y65 y67 y68'      
-    assert_sequence [60.0,65.5], 'y60.0 y65.5'
-    assert_sequence [25.0], 'y100/4'
-    assert_sequence [16], 'y{4**2}'          
+    assert_sequence [60,65,67,68], 'pit60 pit65 pit67 pit68'      
+    assert_sequence [60.0,65.5], 'pit60.0 pit65.5'
+    assert_sequence [25.0], 'pit100/4'
+    assert_sequence [16], 'pit{4**2}'          
   end
   
   def test_repeated_pitches
@@ -292,7 +292,7 @@ class TestSequencer < Test::Unit::TestCase
       2.0/3 * 1.5 => 't.',
       1.5 * 2.0/3 => '.t',
       1.5 * 2.0/3 => '.t',
-      4.0/5 => ['4/5','']  # quintuplets!
+      4.0/5 => ['4/5','']  # quintuplets
     }
     tests.each_pair do |multiplier,modifier|
       premod = ''
@@ -307,10 +307,10 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_rhythm_numeric
-    assert_sequence [100, 200, 300], 'u100 u200 u300'
-    assert_sequence [100.5, 200.33, -30.0], 'u100.5 u200.33 u-30.0'
-    assert_sequence [5.0/4], 'u5/4'
-    assert_sequence [20], 'u{5*4}'
+    assert_sequence [100, 200, 300], 'dur100 dur200 dur300'
+    assert_sequence [100.5, 200.33, -30.0], 'dur100.5 dur200.33 dur-30.0'
+    assert_sequence [5.0/4], 'dur5/4'
+    assert_sequence [20], 'dur{5*4}'
   end
   
   def test_velocity

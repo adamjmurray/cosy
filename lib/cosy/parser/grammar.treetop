@@ -85,7 +85,7 @@ module Cosy
     rule pitch
       note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
       /
-      'y' number:(number/ruby) <NumericPitchNode>
+      ('pitch'/'pit'/'PIT') number:(number/ruby) <NumericPitchNode>
     end
     
     
@@ -93,9 +93,11 @@ module Cosy
       sign:[+-]? 
       quality:(
         'major' / 'maj' / 'minor' / 'min' / 'perfect' / 'per' / 'augmented' / 'aug' / 'diminished' / 'dim' /
-        'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM'
-        / [MmpP])
+        'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM' /
+        [MmpP] )
       degree:[0-9]+ <IntervalNode>
+      /
+      ('interval'/[Ii]) number:(number/ruby) <NumericIntervalNode>
     end
 
 
@@ -105,14 +107,14 @@ module Cosy
       'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'FO'
       ) ![\w] <VelocityNode>
       /
-      'v' number:(number/ruby) <NumericVelocityNode>
+      ('velocity'/'vel'/'VEL'/[Vv]) number:(number/ruby) <NumericVelocityNode>
     end
 
 
     rule duration
       multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
       /
-      'u' number:(number/ruby) <NumericDurationNode>
+      ('duration'/'dur'/'DUR') number:(number/ruby) <NumericDurationNode>
     end
 
 

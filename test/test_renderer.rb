@@ -143,7 +143,7 @@ class TestRenderer < Test::Unit::TestCase
   end
   
   def test_repeated_numeric_pitches
-    assert_sequence [n(60)]*4, 'y60*4'
+    assert_sequence [n(60)]*4, 'pit60*4'
   end
   
   def test_intervals

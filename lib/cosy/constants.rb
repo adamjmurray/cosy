@@ -66,7 +66,7 @@ module Cosy
   # Maps unison, second, third, fourth, etc to number of semitones
   # in the perfect/major interval.
   INTERVAL_DEGREE = {
-    0 => 11, # under mod 7 arithmetic, the 0 degree is a 7th
+    0 => 11, # under mod 7 arithmetic, the 0 degree is a 7th (unison is a special case)
     1 => 0,
     2 => 2,
     3 => 4,
@@ -74,6 +74,22 @@ module Cosy
     5 => 7,
     6 => 9,
     7 => 11
+  }
+  
+  # Maps semitones to interval quality and degree
+  INTERVAL_VALUES = {
+    0  => [:perfect, 0],
+    1  => [:minor, 2],
+    2  => [:major, 2],
+    3  => [:minor, 3],
+    4  => [:major, 3],
+    5  => [:perfect, 4],
+    6  => [:diminished, 5],
+    7  => [:perfect, 5],
+    8  => [:minor, 6],
+    9  => [:major, 6],
+    10 => [:minor, 7],
+    11 => [:major, 7]
   }
 
 #######################################

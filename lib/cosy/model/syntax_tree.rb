@@ -370,7 +370,12 @@ module Cosy
   class NumericPitchNode < PitchNode
     def value(context=nil)
       if not @value
-        @value = Pitch.new(number.value)
+        value = Pitch.new(number.value(context))
+        if number.is_a? RubyNode
+          # don't cache, allow re-evaluation
+          return value
+        end
+        @value = value
       end
       return @value
     end
@@ -383,6 +388,21 @@ module Cosy
         deg = degree.text_value.to_i
         deg *= -1 if sign.text_value=='-'
         @value = Interval.new(quality.text_value, deg)
+      end
+      return @value
+    end
+  end
+  
+  
+  class NumericIntervalNode < IntervalNode
+    def value(context=nil)
+      if not @value
+        value = Interval.new(number.value(context))
+        if number.is_a? RubyNode
+          # don't cache, allow re-evaluation
+          return value
+        end
+        @value = value
       end
       return @value
     end
@@ -409,7 +429,12 @@ module Cosy
   class NumericDurationNode < DurationNode
     def value(context=nil)
       if not @value
-        @value = Duration.new(number.value)
+        value = Duration.new(number.value(context))
+        if number.is_a? RubyNode
+          # don't cache, allow re-evaluation
+          return value
+        end
+        @value = value
       end
       return @value
     end
@@ -419,7 +444,7 @@ module Cosy
   class VelocityNode < TerminalNode
     def value(context=nil)
       if not @value
-        @value = Velocity.new(text_value,text_value)
+        @value = Velocity.new(text_value)
       end
       return @value
     end
@@ -429,7 +454,12 @@ module Cosy
   class NumericVelocityNode < TerminalNode
     def value(context=nil)
       if not @value
-        @value = Velocity.new(number.value, number.text_value)
+        value = Velocity.new(number.value(context))
+        if number.is_a? RubyNode
+          # don't cache, allow re-evaluation
+          return value
+        end
+        @value = value
       end
       return @value
     end    

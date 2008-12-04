@@ -71,6 +71,8 @@ describe Cosy::SequenceParser do
       end
     end
     
+    # TODO: numeric pitches
+    
     it 'should parse pitch chords' do
       @parser.parse('[C E G]').value.should == [Pitch.new('C'), Pitch.new('E'), Pitch.new('G')]
     end
@@ -95,6 +97,14 @@ describe Cosy::SequenceParser do
       end
     end
     
+    it 'should parse numeric intervals' do
+      for semitones in -12..12 do
+        interval = Interval.new(semitones)
+        @parser.parse("i#{semitones}").value.should == interval
+        @parser.parse("I#{semitones}").value.should == interval
+      end
+    end
+    
     it 'should parse velocity symbols' do
       for intensity in [
         'ppp','pp','p','mp','mf','fo','ff','fff',
@@ -105,6 +115,8 @@ describe Cosy::SequenceParser do
         @parser.parse(intensity).value.should == Velocity.new(intensity)
       end
     end
+    
+    # TODO: numeric velocities
     
     it 'should parse duration symbols' do
       for base_duration in [
@@ -124,6 +136,8 @@ describe Cosy::SequenceParser do
         end
       end
     end
+    
+    # TODO: numeric durations
 
     it 'should parse ruby expressions' do
       ['1 + 2', "'}'", '"}"'].each do |ruby_expression|
@@ -139,7 +153,7 @@ describe Cosy::SequenceParser do
       end
     end
     
-  end # describing primitive value behaviors
+  end # describing atomic values
   
   
   describe 'OSC Support' do
@@ -175,7 +189,7 @@ describe Cosy::SequenceParser do
       end
     end
     
-  end
+  end # described OSC support
   
   def node_should_match_value node,value
     case value

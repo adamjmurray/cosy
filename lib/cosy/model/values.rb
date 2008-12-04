@@ -48,10 +48,12 @@ module Cosy
     attr_reader :pitch_class, :accidental, :octave
     
     def initialize(*args)
+      need_to_recalc_value = true
       case args.length
       when 1
         if args[0].is_a? Numeric
           self.value = args[0]
+          need_to_recalc_value = false
         else
           self.pitch_class = args[0]
         end
@@ -62,10 +64,9 @@ module Cosy
         self.pitch_class = args[0]
         self.accidental = args[1]
         @octave = args[2]
-        @initialized = true
       end
       @initialized = true
-      recalc_value
+      recalc_value if need_to_recalc_value
     end
     
     def pitch_class=(pitch_class)
@@ -165,14 +166,18 @@ module Cosy
   
   
   class Interval < Value
-    
     attr_accessor :quality, :degree, :text_value
     
     def initialize(*args)
+      need_to_recalc_value = true
       case args.length
       when 1
         @text_value = args[0]
-        if @text_value =~ /(-?)([A-Za-z]*)(\d*)/
+        if @text_value.is_a? Numeric
+          self.value = @text_value
+          @text_value = @text_value.to_s
+          need_to_recalc_value = false
+        elsif @text_value =~ /(-?)([A-Za-z]*)(\d*)/
           sign = $1
           self.quality = $2
           @degree = $3.to_i
@@ -187,7 +192,7 @@ module Cosy
         raise "Bad arguments #{args.inspect}"
       end
       @initialized = true
-      recalc_value
+      recalc_value if need_to_recalc_value
     end
     
     def quality=(quality)
@@ -208,13 +213,25 @@ module Cosy
       recalc_value
     end
     
+    def value=(value)
+      @value = value
+      negative = value < 0
+      semitones = value.abs
+      @quality,@degree = INTERVAL_VALUES[semitones % 12]
+      @degree += 8*semitones/12
+    end
+    
     # TODO text_value
     
     private
     def recalc_value
       if @initialized
-        deg = @degree.abs % 7
-        @value = INTERVAL_DEGREE[deg]
+        if @degrees == 0
+          @value = deg = 0
+        else
+          deg = @degree.abs % 7
+          @value = INTERVAL_DEGREE[deg]
+        end
         # now value is set to a perfect/major interval, so
         # adjust if needed for the other possible interval qualities
         case @quality

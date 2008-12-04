@@ -257,15 +257,19 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_numeric_pitch
-    parse 'y60'
+    parse 'pit60'
+    parse 'pitch60'
   end
 
   def test_numeric_velocity
     parse 'v60'
+    parse 'vel60'
+    parse 'velocity60'
   end
   
   def test_numeric_duration
-    parse 'u60'
+    parse 'dur60'
+    parse 'duration60'    
   end
   
   def test_interval
