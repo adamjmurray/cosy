@@ -247,7 +247,7 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_chain_secondary_list
-    assert_sequence [[60,120],[60,240],65], 'c4:(s i) f4'
+    assert_sequence [[60,120],[60,240],65], 'c4:(s ei) f4'
   end
   
   def test_complex_chain_same_length
@@ -273,11 +273,11 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_rhythm_basic
-    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'w h q i s r x'
-    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'W H Q I S R X'
+    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'w h q ei s r x'
+    assert_sequence [1920,  960, 480, 240, 120, 60, 30], 'W H Q EI S R X'
     assert_sequence [1920,  960, 480, 240, 120, 60, 60, 30, 30], 
         'whole half quarter eighth sixteenth thirtysecond thirty-second sixtyfourth sixty-fourth'
-    assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. i. s. r. x.'
+    assert_sequence [2880, 1440, 720, 360, 180, 90, 45], 'w. h. q. ei. s. r. x.'
   end
   
   def test_rhythm_comprehensive
@@ -314,8 +314,8 @@ class TestSequencer < Test::Unit::TestCase
   end
   
   def test_velocity
-    assert_sequence [PPP, PP, P, MP, MF, O, FF, FFF], 'ppp pp p mp mf o ff fff'
-    assert_sequence [PP, P, MP, MP, MF, MF, O, FF], 
+    assert_sequence [PPP, PP, P, MP, MF, FO, FF, FFF], 'ppp pp p mp mf fo ff fff'
+    assert_sequence [PP, P, MP, MP, MF, MF, FO, FF], 
       'pianissimo piano mezzopiano mezzo-piano mezzoforte mezzo-forte forte fortissimo'
   end
   

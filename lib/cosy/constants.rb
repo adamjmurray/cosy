@@ -32,7 +32,7 @@ module Cosy
     'p'  =>47,  'piano'=>47,
     'mp' =>63,  'mezzopiano'=>63, 'mezzo-piano'=>63,
     'mf' =>79,  'mezzoforte'=>79, 'mezzo-forte'=>79,
-    'fo' =>95,  'forte'=>95,      'o'=>95,
+    'fo' =>95,  'forte'=>95,
     'ff' =>111, 'fortissimo'=>111,
     'fff'=>127    
   }
@@ -42,7 +42,7 @@ module Cosy
     'w'=>1920, 'whole'=>1920,
     'h'=>960,  'half'=>960,
     'q'=>480,  'quarter'=>480, 
-    'ei'=>240, 'eighth'=>240,      'i'=>240, 
+    'ei'=>240, 'eighth'=>240,
     's'=>120,  'sixteenth'=>120,
     'r'=>60,   'thirtysecond'=>60, 'thirty-second'=>60,
     'x'=>30,   'sixtyfourth'=>30,  'sixty-fourth'=>30
@@ -56,11 +56,11 @@ module Cosy
   INTERVAL_QUALITY = {
     # This is case insensitive except when there is only one letter (m != M)
     # So call downcase() when looking up in this map, unless the string length is 1
-    'M'=>:major,                        'maj'=>:major,      'major'=>:major,
-    'm'=>:minor,                        'min'=>:minor,      'minor'=>:minor,
-    'p'=>:perfect,    'P'=>:perfect,    'per'=>:perfect,    'perfect'=>:perfect,
-                                        'aug'=>:augmented,  'augmented'=>:augmented,
-                                        'dim'=>:diminished, 'diminished'=>:diminished
+    'M'=>:major,    'maj'=>:major,      'major'=>:major,
+    'm'=>:minor,    'min'=>:minor,      'minor'=>:minor,
+    'p'=>:perfect,  'per'=>:perfect,    'perfect'=>:perfect,
+    'P'=>:perfect,  'aug'=>:augmented,  'augmented'=>:augmented,
+                    'dim'=>:diminished, 'diminished'=>:diminished
   }
   
   # Maps unison, second, third, fourth, etc to number of semitones

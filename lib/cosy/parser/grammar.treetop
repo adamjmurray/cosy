@@ -101,8 +101,8 @@ module Cosy
 
     rule velocity
       ( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
-      'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'o' / 'fo' /
-      'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'O' / 'FO'
+      'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'fo' /
+      'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'FO'
       ) ![\w] <VelocityNode>
       /
       'v' number:(number/ruby) <NumericVelocityNode>
