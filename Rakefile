@@ -1,6 +1,13 @@
-task :default => :test
+require 'spec/rake/spectask'
 
-task :test do 
-  require 'rake/runtest'
-  Rake.run_tests 
+task :default => :spec
+
+Spec::Rake::SpecTask.new do |t|
+  t.ruby_opts = ['-rtest/unit']
+  t.spec_files = FileList['spec/*_spec.rb','test/test*.rb']
 end
+
+# task :test do 
+#   require 'rake/runtest'
+#   Rake.run_tests 
+# end
