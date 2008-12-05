@@ -32,12 +32,7 @@ class TestRenderer < Test::Unit::TestCase
     NoteEvent.new(pitches,velocity,duration)
   end
   alias n note
-  
-  def test_use_previous_octave
-    assert_sequence [note(60),note(60),note(62),note(71)], 'C C D B'
-    assert_sequence [note(72),note(72),note(74),note(83)], 'C5 C D B'
-  end
-  
+
   def test_pitches
     assert_sequence [n(60),n(62),n(63),n(56),n(55),n(48),n(36)], 'C4 D4 Eb4 g#3 g3 c3 c2'
   end

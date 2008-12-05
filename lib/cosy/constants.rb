@@ -125,4 +125,11 @@ module Cosy
   DEFAULT_VELOCITY = INTENSITY['mf']
   DEFAULT_DURATION = DURATION['quarter']
   
+  OCTAVE_MODE_LABEL = 'octave_mode'
+  OCTAVE_MODE_VALUES = {
+    'previous' => :previous, 'prev' => :previous, 'p' => :previous,
+    'nearest'  => :nearest,  'near' => :nearest,  'n' => :nearest
+  }
+  DEFAULT_OCTAVE_MODE = :previous
+  
 end

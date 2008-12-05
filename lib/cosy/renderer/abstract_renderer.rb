@@ -18,7 +18,8 @@ module Cosy
       @prev_pitches  = [Pitch.new(DEFAULT_PITCH_CLASS, DEFAULT_OCTAVE)]
       @prev_octave   = DEFAULT_OCTAVE
       @prev_velocity = DEFAULT_VELOCITY
-      @prev_duration = DEFAULT_DURATION 
+      @prev_duration = DEFAULT_DURATION
+      @octave_mode   = @options[:octave_mode] || DEFAULT_OCTAVE_MODE
     end
     
     def parse(cosy_syntax)
@@ -58,7 +59,19 @@ module Cosy
           when Chord    then pitches  = param
           when Velocity then velocity = param.value
           when Duration then duration = param.value
-          else             
+          else      
+            first_value = event.first
+            if first_value.is_a? Label
+              label = first_value.value.downcase
+              if label == OCTAVE_MODE_LABEL
+                octave_mode = event[1]
+                octave_mode = octave_mode.value if octave_mode.respond_to? :value # allow for labels as values
+                octave_mode = octave_mode.downcase if octave_mode.respond_to? :downcase
+                octave_mode = OCTAVE_MODE_VALUES[octave_mode]
+                @octave_mode = octave_mode if octave_mode
+                return next_event
+              end
+            end
             return event 
           end
         end
@@ -78,7 +91,21 @@ module Cosy
 
       pitch_values = []
       pitches.each do |pitch|
-        pitch.octave = @prev_octave if not pitch.has_octave?
+        if not pitch.has_octave?
+          # TODO: I think there is a bug here due to Pitch value caching,
+          # consider C4 (C B3)*2
+          # test this and find out!
+          pitch.octave = @prev_octave
+          if @octave_mode == :nearest
+            prevval = @prev_pitches.first.value  # not sure what is reasonable for a chord, TODO match indexes?
+            interval = prevval - pitch.value
+            if interval >= 6
+              pitch.octave += 1
+            elsif interval < -6
+              pitch.octave -= 1
+            end
+          end
+        end
         @prev_octave = pitch.octave
         pitch_values << pitch.value
       end
