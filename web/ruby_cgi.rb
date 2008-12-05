@@ -7,12 +7,18 @@ $LOAD_PATH[0,0] = File.join(File.dirname(__FILE__), 'lib')
 require 'cosy/renderer/midi_file_renderer.rb'
 module Cosy
   class RubyNode
-    def value(context)
+    def value(context=nil)
+      raise 'embedded Ruby not allowed online'
+    end
+    def evaluate(context=nil)
       raise 'embedded Ruby not allowed online'
     end
   end
   class CommandNode
-    def value(context)
+    def value(context=nil)
+      raise 'embedded Ruby not allowed online'
+    end
+    def evaluate(context=nil)
       raise 'embedded Ruby not allowed online'
     end
   end

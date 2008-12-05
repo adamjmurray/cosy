@@ -175,7 +175,7 @@ module Cosy
 
 
     rule command
-      '{' ruby:ruby '}' <CommandNode>
+      '{{' script:( string / !('}}'/'"'/"'") . )* '}}' <CommandNode>
     end
     
     

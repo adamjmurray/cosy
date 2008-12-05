@@ -532,12 +532,12 @@ module Cosy
   # to override them and raise in error for the online version
 
 
-  class CommandNode < TerminalNode
+  class CommandNode < RubyNode
     def atom?
       false
     end    
-    def evaluate(context=nil)
-      ruby.value(context)
+    def value(context=nil)
+      super
       return nil
     end
   end
