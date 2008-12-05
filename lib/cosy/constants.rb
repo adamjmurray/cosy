@@ -17,7 +17,6 @@ module Cosy
     'A#' => 10,
     'B'  => 11
   }
-  $OCTAVE_OFFSET = 1  # this is a global instead of a constant so it can be altered if desired
 
   ACCIDENTAL = {
     '#' =>  1, 
@@ -112,5 +111,18 @@ module Cosy
 
   OSC_PORT_LABEL = 'osc_port'
   OSC_HOST_LABEL = 'osc_host'
+  
+#######################################
+# Interpreter behaviors
+
+  $OCTAVE_OFFSET = 1  # this is a global instead of a constant so it can be altered at runtime if desired
+  
+#######################################
+# Rendering options
+
+  DEFAULT_OCTAVE = 4
+  DEFAULT_PITCH_CLASS = PITCH_CLASS['C']
+  DEFAULT_VELOCITY = INTENSITY['mf']
+  DEFAULT_DURATION = DURATION['quarter']
   
 end

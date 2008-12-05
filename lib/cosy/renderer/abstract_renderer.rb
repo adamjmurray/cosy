@@ -1,27 +1,9 @@
 module Cosy    
 
-  class RendererDefaults  
-    def self.DEFAULT_PITCHES
-      [Pitch.new(0, 0, self.DEFAULT_OCTAVE)]
-    end
-
-    def self.DEFAULT_OCTAVE
-      4 # the middle C octave
-    end
-
-    def self.DEFAULT_VELOCITY
-      INTENSITY['mf']
-    end
-
-    def self.DEFAULT_DURATION
-      DURATION['quarter']
-    end
-  end
-
-
   class AbstractRenderer
     
     def initialize(options={})
+      @options = options
       input = options[:input]
       if input.is_a? Sequencer
         @sequencer = input
@@ -33,10 +15,10 @@ module Cosy
     end
     
     def init
-      @prev_pitches  = RendererDefaults.DEFAULT_PITCHES
-      @prev_octave   = RendererDefaults.DEFAULT_OCTAVE
-      @prev_velocity = RendererDefaults.DEFAULT_VELOCITY
-      @prev_duration = RendererDefaults.DEFAULT_DURATION      
+      @prev_pitches  = [Pitch.new(DEFAULT_PITCH_CLASS, DEFAULT_OCTAVE)]
+      @prev_octave   = DEFAULT_OCTAVE
+      @prev_velocity = DEFAULT_VELOCITY
+      @prev_duration = DEFAULT_DURATION 
     end
     
     def parse(cosy_syntax)
@@ -76,7 +58,9 @@ module Cosy
           when Chord    then pitches  = param
           when Velocity then velocity = param.value
           when Duration then duration = param.value
-          else return event end
+          else             
+            return event 
+          end
         end
 
       elsif event.is_a? Pitch

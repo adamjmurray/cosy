@@ -27,8 +27,8 @@ class TestRenderer < Test::Unit::TestCase
   end
   
   def note(pitches,duration=nil,velocity=nil)
-    velocity ||= RendererDefaults.DEFAULT_VELOCITY
-    duration ||= RendererDefaults.DEFAULT_DURATION
+    velocity ||= DEFAULT_VELOCITY
+    duration ||= DEFAULT_DURATION
     NoteEvent.new(pitches,velocity,duration)
   end
   alias n note
