@@ -52,7 +52,7 @@ module Cosy
       
       @time = options[:time] || 0
       @channel = options[:channel] || 0
-      self.tempo = options[:tempo] || 120
+      tempo(options[:tempo] || 120)
     end
 
     def start_scheduler
@@ -104,10 +104,10 @@ module Cosy
             label = first_value.value.downcase            
             value = values[0]
             if TEMPO_LABELS.include? label and value
-              self.tempo = value
+              tempo(value)
               next
             elsif PROGRAM_LABELS.include? label and value
-              program value
+              program(value)
               next
             elsif CHANNEL_LABELS.include? label and value
               @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
@@ -116,13 +116,13 @@ module Cosy
               cc(values[0],values[1])
               next
             elsif PITCH_BEND_LABELS.include? label and value
-              pitch_bend value
+              pitch_bend(value)
               next
             elsif label == OSC_HOST_LABEL and value
-              osc_host value
+              osc_host(value)
               next  
             elsif label == OSC_PORT_LABEL and value
-              osc_port value
+              osc_port(value)
               next
             end
             
@@ -132,7 +132,7 @@ module Cosy
           end
         end # Chain case
         
-        raise "Unsupported Event: #{event.inspect}"
+        STDERR.puts "Unsupported Event: #{event.inspect}"
       end
 
       if not @parent # else we're in a child sequence and this code should not run
@@ -187,7 +187,7 @@ module Cosy
     end
 
     # Set tempo in terms of Quarter Notes per Minute (aka BPM)
-    def tempo=(qnpm)
+    def tempo(qnpm)
       @tempo = qnpm
       @ticks_per_sec = qnpm/60.0 * DURATION['quarter']
     end

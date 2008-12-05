@@ -154,7 +154,7 @@ module Cosy
             end
           end
 
-          raise "Unsupported Event: #{event.inspect}"
+          STDERR.puts "Unsupported Event: #{event.inspect}"
         end
       end
 
