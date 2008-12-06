@@ -360,7 +360,12 @@ module Cosy
     def value(context=nil)
       if not @value then
         octave_value = octave.value if not octave.text_value.empty?
-        @value = Pitch.new(note_name.text_value, accidentals.text_value, octave_value)
+        value = Pitch.new(note_name.text_value, accidentals.text_value, octave_value)
+        if not octave_value
+          # can't cache pitches with implicit octave
+          return value
+        end
+        @value = value
       end
       return @value
     end

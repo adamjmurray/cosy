@@ -12,24 +12,29 @@ describe Cosy::Sequencer do
       end
     end
 
+    # TODO: it breaks backwards compatibility, but I'd rather have nearest be the default
     it 'should use the previous octave for implicit octaves by default' do
-      render('C4 C D# Bb').should == [note(60),note(60),note(63),note(70)]
-      render('C5 C D# Bb').should == [note(72),note(72),note(75),note(82)]
+      render('C4 C D# Bb').should == pitches(60,60,63,70)
+      render('C5 C D# Bb').should == pitches(72,72,75,82)
     end
     
     it 'should minimize the interval for implicit octaves when the octave_mode is :nearest' do
-      render('#octave_mode:"nearest" C4 C D# Bb').should == [n(60),n(60),n(63),n(58)]
-      render('#octave_mode:#nearest C5 C D# Bb').should == [n(72),n(72),n(75),n(70)]
+      render('#octave_mode:"nearest" C4 C D# Bb').should == pitches(60,60,63,58)
+      render('#octave_mode:#nearest C5 C D# Bb').should == pitches(72,72,75,70)
     end
     
     it 'should ascend for implicit octaves when the interval is a tritone and octave_mode is :nearest' do
-      render('#octave_mode:"nearest" C4 F# C4 Gb').should == [n(60),n(66),n(60),n(66)]
-      render('#octave_mode:#nearest G4 C# G4 Db').should == [n(67),n(73),n(67),n(73)]
+      render('#octave_mode:"nearest" C4 F# C4 Gb').should == pitches(60,66,60,66)
+      render('#octave_mode:#nearest G4 C# G4 Db').should == pitches(67,73,67,73)
     end
     
     it 'should use the previous octave for implicit octaves when the octave_mode is :previous' do
-      render('#octave_mode:"nearest" C4 C #octave_mode:"previous" D# Bb').should == [n(60),n(60),n(63),n(70)]
-      render('#octave_mode:#nearest G4 C# #octave_mode:#previous G4 Db').should == [n(67),n(73),n(67),n(61)]
+      render('#octave_mode:"nearest" C4 Bb D# #octave_mode:"previous" Bb').should == pitches(60,58,63,70)
+      render('#octave_mode:#nearest G4 C# #octave_mode:#previous G4 Db').should == pitches(67,73,67,61)
+    end
+    
+    it 'should not persist the value selected for an implicit octave' do
+      render('C4 (C B3)*2').should == pitches(60,60,59,48,59)
     end
     
   end # described Ruby support
@@ -69,6 +74,10 @@ describe Cosy::Sequencer do
     NoteEvent.new(pitches,velocity,duration)
   end
   alias n note
+  
+  def pitches(*args)
+    args.map{ |pitch| note(pitch) }
+  end
   
 end
 

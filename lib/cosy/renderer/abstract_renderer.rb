@@ -92,9 +92,6 @@ module Cosy
       pitch_values = []
       pitches.each do |pitch|
         if not pitch.has_octave?
-          # TODO: I think there is a bug here due to Pitch value caching,
-          # consider C4 (C B3)*2
-          # test this and find out!
           pitch.octave = @prev_octave
           if @octave_mode == :nearest
             prevval = @prev_pitches.first.value  # not sure what is reasonable for a chord, TODO match indexes?
