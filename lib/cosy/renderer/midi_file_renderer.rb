@@ -111,8 +111,7 @@ module Cosy
             renderer.render
             stop_time = renderer.time if renderer.time > stop_time
           end
-          @time = stop_time
-          next  
+          @time = stop_time 
 
         when NoteEvent
           pitches, velocity, duration = event.pitches, event.velocity, event.duration
@@ -153,9 +152,9 @@ module Cosy
               end
             end
           end
-
           STDERR.puts "Unsupported Event: #{event.inspect}"
         end
+        
       end
 
       if not @parent

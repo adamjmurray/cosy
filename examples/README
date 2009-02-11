@@ -3,6 +3,8 @@ These examples can be converted to a MIDI file with the bin/cosy command.
 Run bin/cosy with no arguments for usage instructions.
 
 -- Cosy input files can have comments by starting a line with two hyphens,
--- like this line.
+## or two hash marks, like these lines.
 
+### I like to use 3 or more hash marks to avoid any chance of confusion with
+### Cosy's #label syntax.
 

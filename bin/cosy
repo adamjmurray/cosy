@@ -40,6 +40,11 @@ module Cosy
         ) { |val| options.osc=true }
 
         opts.separator ""
+        opts.on("--gamelan", 
+          "Use the gamelan scheduler."
+        ) { |val| options.gamelan=true }
+
+        opts.separator ""
         opts.on("-h", "--help", 
           "Display this help and exit."
         ) { |val| puts opts.to_s; exit }
@@ -83,7 +88,8 @@ else
   cosy_syntax = ""
   File.open(input_path) do |file| 
     file.each_line do |line| 
-      if not line[0..1] == "--" # a comment
+      first_two = line[0..1]
+      if first_two != "--" and first_two != "##"  # a comment
         cosy_syntax += line
       end
     end
@@ -98,12 +104,20 @@ begin
       :output => output_path
     }).render
   else
-    require 'cosy/renderer/midi_renderer'
-    if options.osc
-      require 'cosy/renderer/midi_osc_renderer'    
-      clazz = Cosy::MidiOscRenderer
+    if options.gamelan
+      require 'cosy/renderer/midi_gamelan_renderer'
+      clazz = Cosy::MidiGamelanRenderer
+      # TODO: this won't work with OSC
+      # I think I should merge all of these options into one renderer that uses
+      # the gamelan scheduler and supports OSC
     else
-      clazz = Cosy::MidiRenderer
+      require 'cosy/renderer/midi_renderer'
+      if options.osc
+        require 'cosy/renderer/midi_osc_renderer'    
+        clazz = Cosy::MidiOscRenderer
+      else
+        clazz = Cosy::MidiRenderer
+      end
     end
     clazz.new({
       :input  => cosy_syntax, 

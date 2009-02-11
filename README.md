@@ -35,6 +35,7 @@ Cosy depends on the following Ruby libraries:
 *  midilib 
 *  midiator
 *  osc (optional)
+*  gamelan (optional)
 
 To run Cosy you will need to install the gems for those libraries:
 
@@ -47,6 +48,11 @@ Note that midiator-0.3.0 or higher is needed for direct output on OS X
 Optionally, if you want to use OSC support, you will also need to:
 
 	gem install osc
+	
+Optionally, if you want to use the <a href="http://github.com/jvoorhis/gamelan">Gamelan</a> 
+scheduler you also need:
+
+	gem install gamelan	
 	
 	
 ## Running Cosy ##
@@ -80,13 +86,12 @@ The closest thing to documentation right now is the online preview at:
 
 TODOs:
 
-* Support a mode where octave selection is based on proximity to the previous note
-  (instead of always using the previous note's octave, stay within a perfect fourth
-  of the previous note)
 * Allow independent control over the note duration and the inter-note-onset intervals
   (i.e. support staccato vs. legato)
 * A way to change the current octave, pitch, velocity, and duration without
   outputting anything
+* Pre-render to a Timeline object to make rendering and embedding Cosy easier
+* Methods for transposition, inversion, retrograde, inverting chords, etc
 * Allow chains to be formed across scopes. For example, support:<br/>
   $melody=e:q d c:h; $melody:mp
 * When chaining, I don't always want the pitch to advance when the
@@ -100,6 +105,7 @@ TODOs:
 * a clean API for manipulating the sequencing tree on-the-fly as the sequencer is running
   (interactive control as well as self-modifying sequences)
 * arpeggiators
+* pitches from summed intervals across independent parallel sequences a la Numerology
 * new node traversal behaviors, for example loops that go up/down instead of starting over when the
   last note is reached
 
