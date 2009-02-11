@@ -1,7 +1,5 @@
 require File.dirname(__FILE__)+'/spec_helper'
 
-SEQUENCE_COUNT_LIMIT = 1000
-
 describe Cosy::Sequencer do
       
   describe 'Implicit Values' do
