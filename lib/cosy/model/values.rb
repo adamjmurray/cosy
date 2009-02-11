@@ -1,3 +1,9 @@
+if not Hash.method_defined? :key then 
+  class Hash
+    alias key index # Ruby 1.8 compatibility for the Ruby 1.9 API
+  end
+end
+  
 module Cosy
 
   class Chord < Array
@@ -59,11 +65,11 @@ module Cosy
         end
       when 2
         self.pitch_class = args[0]
-        @octave = args[1]
+        self.octave = args[1]
       when 3
         self.pitch_class = args[0]
         self.accidental = args[1]
-        @octave = args[2]
+        self.octave = args[2]
       end
       @initialized = true
       recalc_value if need_to_recalc_value
@@ -153,7 +159,7 @@ module Cosy
     end
     
     def recalc_text_value
-      @text_value = PITCH_CLASS.index(@pitch_class)
+      @text_value = PITCH_CLASS.key(@pitch_class)
       if @text_value
         # TODO: this doesn't handle fractional pitch values properly
         @accidental.to_i.abs.times{|i| @text_value += if @accidental > 0 then '#' else 'b' end} if @accidental
@@ -273,10 +279,10 @@ module Cosy
       when 1
         self.base_duration = args[0]
       when 2
-        @multiplier = args[0]
+        self.multiplier = args[0]
         self.base_duration = args[1]  
       when 3
-        @multiplier = args[0]
+        self.multiplier = args[0]
         self.base_duration = args[1]
         self.modifier = args[2]
       end
