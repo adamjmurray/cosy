@@ -1,6 +1,6 @@
 require File.dirname(__FILE__)+'/spec_helper'
 
-describe Cosy::Sequencer do
+describe Cosy::TimelineSequencer do
       
   describe 'Implicit Values' do
     
@@ -14,6 +14,7 @@ describe Cosy::Sequencer do
     it 'should use the previous octave for implicit octaves by default' do
       render('C4 C D# Bb').should == pitches(60,60,63,70)
       render('C5 C D# Bb').should == pitches(72,72,75,82)
+      render('C4 (C B3)*2').should == pitches(60,60,59,48,59)
     end
     
     it 'should minimize the interval for implicit octaves when the octave_mode is :nearest' do
@@ -31,19 +32,15 @@ describe Cosy::Sequencer do
       render('#octave_mode:#nearest G4 C# #octave_mode:#previous G4 Db').should == pitches(67,73,67,61)
     end
     
-    it 'should not persist the value selected for an implicit octave' do
-      render('C4 (C B3)*2').should == pitches(60,60,59,48,59)
-    end
-    
   end # described Ruby support
   
   
   def renderer(input)
-    AbstractRenderer.new({:input => input})
+    TimelineSequencer.new({:input => input})
   end
   
   def render(input)
-    if input.is_a? AbstractRenderer
+    if input.is_a? TimelineSequencer
       renderer = input
     else
       renderer = renderer(input)
