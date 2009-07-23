@@ -6,10 +6,10 @@ module Cosy
                   :node, :root, :node_stack,
                   :states, :count_limits, :looped
       
-    def initialize(sequencer, symbol_table, node)
+    def initialize(sequencer, symbol_table, root_node)
       @sequencer = sequencer
       @symbol_table = symbol_table
-      @root = @node = node
+      @root = @node = root_node
       @node_stack = []
       @states = Hash.new do |hash,key| hash[key] = {} end
       @count_limits = []
@@ -33,7 +33,7 @@ module Cosy
     end
     
     def exit
-      @states.delete(node)
+      @states.delete(@node)
       @node = @node_stack.pop
     end
     
