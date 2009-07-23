@@ -34,15 +34,15 @@ module Cosy
           "must be specified."       
         ) { |input| options.input = input }
 
-        opts.separator ""
-        opts.on("--osc", 
-          "Enable OSC support."
-        ) { |val| options.osc=true }
+        # opts.separator ""
+        #         opts.on("--osc", 
+        #           "Enable OSC support."
+        #         ) { |val| options.osc=true }
 
-        opts.separator ""
-        opts.on("--gamelan", 
-          "Use the gamelan scheduler."
-        ) { |val| options.gamelan=true }
+        # opts.separator ""
+        #         opts.on("--gamelan", 
+        #           "Use the gamelan scheduler."
+        #         ) { |val| options.gamelan=true }
 
         opts.separator ""
         opts.on("-h", "--help", 
@@ -99,30 +99,16 @@ end
 begin
   if output_path
     require 'cosy/renderer/midi_file_renderer'
-    Cosy::MidiFileRenderer.new({
+    Cosy::MidiFileRenderer.new(
       :input  => cosy_syntax, 
       :output => output_path
-    }).render
+    ).render
   else
-    if options.gamelan
-      require 'cosy/renderer/midi_gamelan_renderer'
-      clazz = Cosy::MidiGamelanRenderer
-      # TODO: this won't work with OSC
-      # I think I should merge all of these options into one renderer that uses
-      # the gamelan scheduler and supports OSC
-    else
-      require 'cosy/renderer/midi_renderer'
-      if options.osc
-        require 'cosy/renderer/midi_osc_renderer'    
-        clazz = Cosy::MidiOscRenderer
-      else
-        clazz = Cosy::MidiRenderer
-      end
-    end
-    clazz.new({
+    require 'cosy/renderer/midi_renderer'
+    Cosy::MidiRenderer.new(
       :input  => cosy_syntax, 
       :driver => options.driver
-    }).render
+    ).render
   end
 rescue => exception
   STDERR.puts "#{exception.class}: #{exception.message}"
