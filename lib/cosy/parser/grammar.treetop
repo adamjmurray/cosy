@@ -1,107 +1,107 @@
 module Cosy
-  
-  grammar Sequence
 
-    rule root
+  grammar Sequence do
+
+    rule root do
       space? (statement ';' space?)* statement? space? <CosyNode>
     end
 
 
-    rule statement
+    rule statement do
       assignment / sequence_root
     end
 
 
-    rule assignment
+    rule assignment do
       var space? '=' sequence_root <AssignmentNode>
     end
 
 
-    rule sequence_root
+    rule sequence_root do
       parallel_sequence
     end
-    
-    
-    rule parallel_sequence
+
+
+    rule parallel_sequence do
       space? choice (space? '==' space? choice)* space? <ParallelNode>
     end
 
 
-    rule choice
+    rule choice do
       space? sequence (space? '|' space? sequence)* space? <ChoiceNode>
     end
 
 
-    rule sequence
+    rule sequence do
       space? sequence_element (space sequence_element)* space? <SequenceNode>
     end
 
 
-    rule sequence_element
+    rule sequence_element do
       command / chain modifier:modifier <ModifiedNode> / chain / foreach
     end
 
 
-    rule chain
+    rule chain do
       chain_element (':' chain_element)* <ChainNode>
     end
 
 
-    rule chain_element
+    rule chain_element do
       element modifier:modifier <ModifiedNode> / element
     end
 
 
-    rule foreach
+    rule foreach do
       '(' sequence_root ')@(' sequence_root ')' ('@(' sequence_root ')')* <ForEachNode>
     end
 
 
-    rule element
+    rule element do
       '(' subsequence:sequence_root ')' !'@' / chord / primitive
     end
 
 
-    rule modifier
+    rule modifier do
       operator:operator operand:element <BehaviorNode>
     end
 
 
-    rule operator
+    rule operator do
       space? ('*'/'&') space? <OperatorNode>
     end
 
 
-    rule chord
+    rule chord do
       '[' space? primitive (space primitive)* space? ']' <ChordNode>
     end
 
 
-    rule primitive
+    rule primitive do
       interval / pitch / velocity / duration  / number / string / label / var / ruby / osc_address
     end
 
 
-    rule pitch
+    rule pitch do
       note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
       /
       ('pitch'/'pit'/'PIT') number:(number/ruby) <NumericPitchNode>
     end
-    
-    
-    rule interval
+
+
+    rule interval do
       sign:[+-]? 
       quality:(
-        'major' / 'maj' / 'minor' / 'min' / 'perfect' / 'per' / 'augmented' / 'aug' / 'diminished' / 'dim' /
-        'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM' /
-        [MmpP] )
+      'major' / 'maj' / 'minor' / 'min' / 'perfect' / 'per' / 'augmented' / 'aug' / 'diminished' / 'dim' /
+      'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM' /
+      [MmpP] )
       degree:[0-9]+ <IntervalNode>
       /
       ('interval'/[Ii]) number:(number/ruby) <NumericIntervalNode>
     end
 
 
-    rule velocity
+    rule velocity do
       ( ('mezzo' '-'?)? ('piano'/'forte') / 'fortissimo' / 'pianissimo' /
       'mp' / 'ppp' / 'pp' / 'p' / 'mf' / 'fff' / 'ff' / 'fo' /
       'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'FO'
@@ -111,83 +111,83 @@ module Cosy
     end
 
 
-    rule duration
+    rule duration do
       multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
       /
       ('duration'/'dur'/'DUR') number:(number/ruby) <NumericDurationNode>
     end
 
 
-    rule metrical_duration
+    rule metrical_duration do
       'whole' / 'half' / 'quarter' / 'eighth' / 'ei' / 'EI' / 'sixteenth' /
       'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
       [WwHhQqIiSsRrXx] 
     end
 
 
-    rule duration_modifier
+    rule duration_modifier do
       't' / '.'
     end
 
 
-    rule number
+    rule number do
       ratio / float / int
     end
 
 
-    rule ratio
+    rule ratio do
       int '/' int <RatioNode>
     end
 
 
-    rule float
+    rule float do
       '-'? [0-9]+ '.' [0-9]+ <FloatNode>
     end
 
 
-    rule int
+    rule int do
       '-'? [0-9]+ <IntNode>
     end
 
 
-    rule string
+    rule string do
       "'" ("\\'" / !"'" .)* "'" <StringNode>
       /
       '"' ('\"' / !'"' .)* '"' <StringNode>
     end
 
 
-    rule label
+    rule label do
       '#' [\w-]+ <LabelNode>
     end
 
 
-    rule var
+    rule var do
       '$' [A-Za-z] [\w-]*  <VariableNode>
       / 
       '$'+ <VariableNode>
     end
 
 
-    rule ruby
+    rule ruby do
       '{' script:( string / !('}'/'"'/"'") . )* '}' <RubyNode>
     end
 
 
-    rule command
+    rule command do
       '{{' script:( string / !('}}'/'"'/"'") . )* '}}' <CommandNode>
     end
-    
-    
-    rule osc_address
+
+
+    rule osc_address do
       '/' [A-Za-z0-9_/.]* <OscAddressNode>
     end
 
 
-    rule space
+    rule space do
       [\s]+
     end	
 
   end
-  
+
 end
