@@ -60,6 +60,15 @@ describe Cosy::Timeline do
     end
   end
   
+  it 'should support find_all' do
+    @timeline[0] << "a"
+    @timeline[0] << "b"
+    @timeline[1] << 0
+    @timeline[100] << "c"
+    @timeline[50] << :sym
+    @timeline.find_all{|event| event.is_a? String }.should == ["a", "b", "c"]
+  end
+  
   it 'should have a string representation' do
     @timeline[0] << :zero
     @timeline[3] << :three

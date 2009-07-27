@@ -40,6 +40,14 @@ module Cosy
         end
       end
     end
+    
+    def find_all(&matcher)
+      found = []
+      each_event do |time,event|
+        found << event if matcher[event]
+      end
+      return found
+    end
       
     def to_s
       s = nil
