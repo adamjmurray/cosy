@@ -35,7 +35,7 @@ Cosy depends on the following Ruby libraries:
 *  midilib (for outputting midi files)
 *  midiator (for interfacing with the midi driver)
 *  gamelan (for scheduling live midi playback)
-*  osc (for open sound control support [optional])
+*  osc (for open sound control support)
 
 To run Cosy you will need to install the gems for those libraries:
 
@@ -43,9 +43,6 @@ To run Cosy you will need to install the gems for those libraries:
 	gem install midilib
 	gem install midiator
 	gem install gamelan
-
-Optionally, if you want to use OSC support, you will also need to:
-
 	gem install osc	
 	
 	
