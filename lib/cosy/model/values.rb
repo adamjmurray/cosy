@@ -387,7 +387,7 @@ module Cosy
 
 
   class OscAddress
-    attr_accessor :host, :port, :path, :args
+    attr_accessor :host, :port, :path
     def initialize(host,port,path)
       @host,@port,@path = host,port,path
       @host = nil if @host == ''

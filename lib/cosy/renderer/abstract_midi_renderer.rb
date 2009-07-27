@@ -38,6 +38,9 @@ module Cosy
         when Event::Tempo
           schedule(time) { tempo(event.bpm) }    
         
+        when Event::OscMessage
+          schedule(time) { osc(event) }
+        
         else
           unhandled_event(time,event)
         end

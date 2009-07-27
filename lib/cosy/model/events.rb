@@ -90,10 +90,14 @@ module Cosy
     end
    
     
-    class OSCMessage
+    class OscMessage
       attr_accessor :host, :port, :path, :args
       def initialize(host,port,path,*args)
         @host,@port,@path,@args = host,port,path,args
+      end
+      
+      def to_s
+        "osc://#{host}:#{port}#{path} #{args}"
       end
     end
   end

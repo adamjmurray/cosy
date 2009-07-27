@@ -21,7 +21,9 @@ module Cosy
       @prev_octave   = DEFAULT_OCTAVE
       @prev_velocity = DEFAULT_VELOCITY
       @prev_duration = DEFAULT_DURATION
-      @octave_mode   = @options[:octave_mode] || DEFAULT_OCTAVE_MODE
+      @octave_mode   = @options.fetch :octave_mode, DEFAULT_OCTAVE_MODE #deprecated
+      @osc_host = @options.fetch :osc_host, 'localhost'
+      @osc_port = @options.fetch :osc_port, 23456
     end
 
     def parse(cosy_syntax)
@@ -51,6 +53,10 @@ module Cosy
             rest(-duration)
           end
           next
+          
+        when OscAddress
+          osc(event)
+          next    
 
         when Chain
           first_value = event.first
@@ -74,12 +80,6 @@ module Cosy
             elsif PITCH_BEND_LABELS.include? label and value
               pitch_bend(value)
               next
-            elsif label == OSC_HOST_LABEL and value
-              osc_host(value)
-              next  
-            elsif label == OSC_PORT_LABEL and value
-              osc_port(value)
-              next
             end
 
           when OscAddress
@@ -87,7 +87,7 @@ module Cosy
             next    
           end
         end # Chain case
-
+        
         STDERR.puts "Unsupported Event: #{event.inspect}"
       end
 
@@ -206,7 +206,9 @@ module Cosy
         :parent => self,
         :time => @time,
         :channel => @channel,
-        :tempo => @tempo
+        :tempo => @tempo,
+        :osc_host => @osc_host,
+        :osc_port => @osc_port
       }
     end
 
@@ -238,29 +240,20 @@ module Cosy
     end
 
     def cc(controller_number, value)
-      add_event Event::ControlChange(controller_number, value, @channel)
+      add_event Event::ControlChange.new(controller_number, value, @channel)
     end
 
     def pitch_bend(value)
-      add_event Event::PitchBend(value, @channel)
+      add_event Event::PitchBend.new(value, @channel)
     end
 
-    def osc_host(hostname)
-      osc_warning
+    def osc(address, args)
+      host = address.host || @osc_host
+      port = address.port || @osc_port
+      @osc_host, @osc_port = host, port
+      add_event Event::OscMessage.new(host, port, address.path, *args)
     end
 
-    def osc_port(port)
-      osc_warning
-    end
-
-    def osc(address, args) 
-      osc_warning
-    end
-
-    def osc_warning
-      STDERR.puts "OSC not supported by this renderer" if not @warned_about_osc
-      @warned_about_osc = true      
-    end
 
 
     #   def osc_host(hostname)

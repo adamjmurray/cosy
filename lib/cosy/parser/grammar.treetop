@@ -191,9 +191,11 @@ module Cosy
       host:'' port:'' path:osc_path <OscAddressNode>
     end
     
+    
     rule hostname do
       [-.\w]+ 
     end
+    
     
     rule osc_path do
       '/' [-./\w]*

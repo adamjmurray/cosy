@@ -1,14 +1,11 @@
 -- To use this example you must run the cosy command with the --osc argument
 -- This requires that you've installed the osc gem
 
-#osc_host:'localhost'
-#osc_port:10000
-
 -- Send three OSC messages, waiting one second in between each message
 
 #tempo:60
 
-/path/int:127
+osc://localhost:10000/path/int:127
 -q
 /path/floats:55.78:-0.000123
 -q
