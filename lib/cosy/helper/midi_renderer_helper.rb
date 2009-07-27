@@ -28,30 +28,18 @@ end
 
 # Make MIDIator cleanup at program termination:
 class MIDIator::Driver
+  
   alias orig_init initialize
-  alias orig_note_on note_on
-  alias orig_note_off note_off
-
+  
   def initialize(*params)
     orig_init(*params)
-    @held_notes = Hash.new {|hash,key| hash[key]={} }
     at_exit do
-      @held_notes.each do |channel,notes|
-        notes.each do |note,velocity|
-          orig_note_off(note, channel, velocity)
+      for channel in 0..15 do
+        for note in 0..127 do
+          note_off(note, channel, 100)
         end
       end
-      close
     end
-  end  
-
-  def note_on( note, channel, velocity )
-    orig_note_on( note, channel, velocity )
-    @held_notes[channel][note] = velocity
   end
-
-  def note_off( note, channel, velocity = 0 )
-    orig_note_off( note, channel, velocity )
-    @held_notes[channel].delete(note)
-  end
+    
 end
