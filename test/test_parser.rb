@@ -21,41 +21,7 @@ class TestParser < Test::Unit::TestCase
     assert_raises(RuntimeError) { PARSER.parse(invalid_syntax) }
   end
 
-  def parse_numbers(numbers, &block)
-    numbers.each do |n|
-      tree = parse(n.to_s)
-      assert_equal(n, tree.value)
-    end
-  end
-  
-  def test_ints
-    parse_numbers [0, 2, 789, -1]
-  end
-  
-  def test_float
-    parse_numbers [0.0, 2.5, 789.654321, -1.0001]
-  end
-  
-  def test_whitespace
-    ['', ' ', '   ', "\t", "\n"].each do |str|
-      parse str
-    end
-  end
-  
-  def test_string
-    parse '"a b c"'
-    parse '"a b\" c"'
-    parse '"a b\\" c"' # equivalent with previous line
-    parse '"a b c" "a b\\" c"'
-    parse "'a b c'"  
-    parse "'a b\\' c'"  
-    parse "'a b c' 'a b\\' c'"  
-    parse '"foo bar" \'baz\''
-  end
-  
-  def test_ruby
-    parse "{1 + 2} {'}'} {\"}\"}"
-  end
+
   
   def test_sequence
     seq = parse '0 1 2 3'
@@ -99,22 +65,7 @@ class TestParser < Test::Unit::TestCase
     parse '  ( 1 2  3 )   ( 4  5  6 ) '
   end
   
-  def test_chord
-    parse '[1]'
-    parse '[1 2 3]'
-    parse '[1.1]'
-    parse '[1.1 2.2 3.3]'
-    parse '[-1]'
-    parse '[-1 -2 -3]'
-    parse '[-1.1]'
-    parse '[-1.1 -2.2 -3.3]'
-    parse '[1.1 -2.2 3.33333]'
-    parse '[C4]'
-    parse '[C4 D4 E4]'
-    parse '[C#4]'
-    parse '[Cb7 D#+-1 Eb_5]'
-    parse "['asdf' 'foo']"
-  end
+ 
   
   def test_repeated_sequence
     parse '1*2'
@@ -174,64 +125,7 @@ class TestParser < Test::Unit::TestCase
     parse '[2 c#+4] 3 (4.0 6*3)*2'
   end
   
-  def test_velocities
-    INTENSITY.keys.each do |vel| 
-      parse vel
-    end
-  end
-  
-  def test_velocities_upcase
-    INTENSITY.keys.each do |vel| 
-      # Only try this with p, pp, ppp, etc
-      parse vel.upcase if vel.length <= 3
-    end
-  end
 
-  def test_base_durations
-    DURATION.keys.each do |dur|
-      parse dur
-    end
-  end
-  
-  def test_base_durations_upcase
-    DURATION.keys.each do |dur|
-      parse dur.upcase if dur.length == 1
-    end
-  end
-
-  def test_triplet_durations
-    %w{ t  tt  ttt  tttt }.each do |mod|
-      DURATION.keys.each do |dur|
-        parse dur + mod
-        parse dur.upcase + mod if dur.length == 1
-      end
-    end
-  end
-
-  def test_dotted_durations
-    %w{ .  ..  ...  .... }.each do |mod|
-      DURATION.keys.each do |dur|
-        parse dur + mod
-        parse dur.upcase + mod if dur.length == 1
-      end
-    end
-  end
-
-  def test_triplet_dotted_durations
-    %w{ .t  t. ..t .t. t.. tt. t.t .tt ..t.tt...t.t }.each do |mod|
-      DURATION.keys.each do |dur|
-        parse dur + mod
-        parse dur.upcase + mod if dur.length == 1
-      end
-    end
-  end
-
-  def test_duration_multiplier
-    DURATION.keys.each_with_index do |dur,index|
-      parse index.to_s + dur
-      parse index.to_s + dur.upcase if dur.length == 1
-    end
-  end
 
   def test_negative_duration_multiplier
     DURATION.keys.each_with_index do |dur,index|
@@ -256,21 +150,7 @@ class TestParser < Test::Unit::TestCase
     end    
   end
 
-  def test_numeric_pitch
-    parse 'pit60'
-    parse 'pitch60'
-  end
-
-  def test_numeric_velocity
-    parse 'v60'
-    parse 'vel60'
-    parse 'velocity60'
-  end
-  
-  def test_numeric_duration
-    parse 'dur60'
-    parse 'duration60'    
-  end
+ 
   
   def test_interval
     INTERVAL_QUALITY.keys.each do |quality|

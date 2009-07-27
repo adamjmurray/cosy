@@ -34,15 +34,23 @@ describe Cosy::SequenceParser do
     end
 
     it 'should parse single-quoted strings' do
-      ['a', 'a b', '1'].each do |unquoted_string|
+      ['a', 'a b c', '1'].each do |unquoted_string|
         @parser.parse("'#{unquoted_string}'").value.should == unquoted_string
       end
     end
 
     it 'should parse double-quoted strings' do
-      ['a', 'a b', '1'].each do |unquoted_string|
+      ['a', 'a b c', '1'].each do |unquoted_string|
         @parser.parse('"' + unquoted_string + '"').value.should == unquoted_string
       end
+    end
+    
+    it 'should parse strings with escaped quotes' do
+      @parser.parse("'a b\\' c'").value.should == "a b' c"
+      @parser.parse('"a b\\" c"').value.should == 'a b" c'
+      # TODO: test this in sequenced values tests:
+      # '"a b c" "a b\\" c"'
+      # "'a b c' 'a b\\' c'"  
     end
 
     it 'should parse labels' do
@@ -65,20 +73,41 @@ describe Cosy::SequenceParser do
             note_name = note_name.downcase
             pitch = Pitch.new(note_name, accidental, octave)
             @parser.parse("#{note_name}#{accidental}#{octave}").value.should == pitch
-            
           end
         end
       end
     end
     
-    # TODO: numeric pitches
+    it 'should parse numeric pitches' do
+      for note_number in [0, 50, 100, 127] do
+        expected = Pitch.new(note_number)
+        for pitch_prefix in %w{pit PIT pitch} do
+          @parser.parse("#{pitch_prefix}#{note_number}").value.should == expected
+        end
+      end
+    end
     
     it 'should parse pitch chords' do
+      @parser.parse('[C]').value.should == [Pitch.new('C')]
       @parser.parse('[C E G]').value.should == [Pitch.new('C'), Pitch.new('E'), Pitch.new('G')]
+      @parser.parse('[C4 E4 G4]').value.should == [Pitch.new('C',4), Pitch.new('E',4), Pitch.new('G',4)]
+      @parser.parse('[C# Db4]').value.should == [Pitch.new('C#'), Pitch.new('C#',4)]
     end
     
     it 'should parse numeric chords' do
+      @parser.parse('[1]').value.should == [1] 
+      @parser.parse('[1 2 3]').value.should == [1,2,3]
+      @parser.parse('[1.1]').value.should == [1.1]
+      @parser.parse('[1.1 2.2 3.3]').value.should == [1.1, 2.2, 3.3] 
+      @parser.parse('[-1]').value.should == [-1]
+      @parser.parse('[-1 -2 -3]').value.should == [-1,-2,-3]
+      @parser.parse('[-1.1]').value.should == [-1.1]
+      @parser.parse('[1.1 -2.2 3.33333]').value.should == [1.1, -2.2, 3.33333] 
       @parser.parse('[1 2.2 -3 4/5]').value.should == [1, 2.2, -3, 4.0/5]
+    end
+    
+    it 'should parser string chords' do
+      @parser.parse('["abc" \'foo\']').value.should == ['abc','foo'] 
     end
     
     it 'should parse interval symbols' do
@@ -116,7 +145,14 @@ describe Cosy::SequenceParser do
       end
     end
     
-    # TODO: numeric velocities
+    it 'should parse numeric velocities' do
+      for velocity in [0, 50, 100, 127] do
+        expected = Velocity.new(velocity)
+        for velocity_prefix in %w{v V vel VEL velocity} do      
+          @parser.parse("#{velocity_prefix}#{velocity}").value.should == expected
+        end
+      end
+    end
     
     it 'should parse duration symbols' do
       for base_duration in [
@@ -131,14 +167,23 @@ describe Cosy::SequenceParser do
             @parser.parse("#{multiplier}#{base_duration}#{modifier}").value.should == duration
             if multiplier == 1 then
               @parser.parse("#{base_duration}#{modifier}").value.should == duration
-            end  
+            elsif multiplier == -1 then
+              @parser.parse("-#{base_duration}#{modifier}").value.should == duration
+            end
           end
         end
       end
     end
     
-    # TODO: numeric durations
-
+    it 'should parse numerical durations' do
+      for duration in [0, 50, 100, 5000, -25] do
+        expected = Duration.new(duration)
+        for duration_prefix in %w{dur DUR duration} do
+          @parser.parse("#{duration_prefix}#{duration}").value.should == expected
+        end
+      end
+    end
+    
     it 'should parse ruby expressions' do
       ['1 + 2', "'}'", '"}"'].each do |ruby_expression|
         @parser.parse('{' + ruby_expression + '}').value.should == eval(ruby_expression)
