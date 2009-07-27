@@ -97,7 +97,7 @@ module Cosy
         @children = []
         visit_parse_tree(lambda do |node|
           #puts node.inspect
-          if node != self and node.is_a? SequencingNode and (node.atom? or node.children.size > 1) then
+          if node != self and node.is_a? SequencingNode and (node.atom? or node.terminal? or node.children.size > 1) then
             @children << node
             return false
           end

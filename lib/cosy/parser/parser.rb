@@ -34,7 +34,7 @@ module Cosy
     def compress tree
       return nil if tree.nil?
       # strip off unnecessary container nodes
-      while not tree.atom? and tree.children.size == 1
+      while (not (tree.atom? or tree.terminal?)) and tree.children.size == 1
         tree = tree.children[0]
       end
       # construct parent-children relationships
