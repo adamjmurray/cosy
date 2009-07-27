@@ -4,16 +4,23 @@ digraph g {
 	Grammar [shape=rectangle]
 	Treetop [style=filled fillcolor="#f0f0f0"]
 	Parser
-	Model [shape=box3d]
+	ParseTree [label="Parse Tree\n(syntactic model)" shape=box3d]
+	Interpreter
+	Events [label="Event Stream\n(state machine's states)" shape=box3d]
 	Sequencer
+	Timeline [label="Event Timeline\n(semantic model)" shape=box3d]
 	Renderer
 	Output [shape=note]
 	
-	Input -> Parser	
-	Grammar -> Treetop [label=" defines syntax for"]
-	Treetop -> Parser [label="generates"]
-	Parser -> Model [label=" converts input into"]
-	Model -> Sequencer [label=" traversed by"]
-	Sequencer -> Renderer [label=" transformed by"]
+	Input -> Parser
+	Grammar -> Treetop [label=" defines Cosy syntax" arrowhead=vee]
+	Treetop -> Parser [label="generates" arrowhead=vee]
+	Parser -> ParseTree
+	ParseTree -> Interpreter
+	Interpreter -> Events  [label="on-demand,\niterative traversal\ninterprets parse tree\nas a state machine"]
+	Events -> Sequencer
+	Sequencer -> Interpreter
+	Sequencer -> Timeline
+	Timeline -> Renderer
 	Renderer -> Output
 }

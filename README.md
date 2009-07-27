@@ -31,28 +31,22 @@ Use at your own risk!
 
 Cosy depends on the following Ruby libraries:
 
-*  treetop (which depends on polyglot)
-*  midilib 
-*  midiator
-*  osc (optional)
-*  gamelan (optional)
+*  treetop (for generating the parser)
+*  midilib (for outputting midi files)
+*  midiator (for interfacing with the midi driver)
+*  gamelan (for scheduling live midi playback)
+*  osc (for open sound control support [optional])
 
 To run Cosy you will need to install the gems for those libraries:
 
 	gem install treetop
 	gem install midilib
 	gem install midiator
-
-Note that midiator-0.3.0 or higher is needed for direct output on OS X
+	gem install gamelan
 
 Optionally, if you want to use OSC support, you will also need to:
 
-	gem install osc
-	
-Optionally, if you want to use the <a href="http://github.com/jvoorhis/gamelan">Gamelan</a> 
-scheduler you also need:
-
-	gem install gamelan	
+	gem install osc	
 	
 	
 ## Running Cosy ##
@@ -90,7 +84,6 @@ TODOs:
   (i.e. support staccato vs. legato)
 * A way to change the current octave, pitch, velocity, and duration without
   outputting anything
-* Pre-render to a Timeline object to make rendering and embedding Cosy easier
 * Methods for transposition, inversion, retrograde, inverting chords, etc
 * Allow chains to be formed across scopes. For example, support:<br/>
   $melody=e:q d c:h; $melody:mp
@@ -100,8 +93,6 @@ TODOs:
   (c d e):(^h. -q)
 * Documentation! And more examples.
 * Release updated version of ajm.ruby and the Cosy Max/MSP object
-* tick-rate generators, output faster than the sequencing rate, for doing things like CC LFOs
-  and pitch bend envelopes
 * a clean API for manipulating the sequencing tree on-the-fly as the sequencer is running
   (interactive control as well as self-modifying sequences)
 * arpeggiators
