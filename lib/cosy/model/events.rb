@@ -91,9 +91,9 @@ module Cosy
    
     
     class OSCMessage
-      attr_accessor :host, :port, :address, :args
+      attr_accessor :host, :port, :path, :args
       def initialize(host,port,path,*args)
-       @host,@port,@path,@args = host,port,path,args
+        @host,@port,@path,@args = host,port,path,args
       end
     end
   end

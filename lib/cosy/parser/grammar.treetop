@@ -148,6 +148,10 @@ module Cosy
     rule int do
       '-'? [0-9]+ <IntNode>
     end
+    
+    rule positive_int do
+      [0-9]+ <IntNode>
+    end
 
 
     rule string do
@@ -179,8 +183,20 @@ module Cosy
     end
 
 
-    rule osc_address do
-      '/' [A-Za-z0-9_/.]* <OscAddressNode>
+   rule osc_address do
+      ('osc'/'OSC') '://' host:hostname ':' port:positive_int path:osc_path? <OscAddressNode>
+      /
+      ('osc'/'OSC') '://' host:hostname port:'' path:osc_path? <OscAddressNode>
+      /
+      host:'' port:'' path:osc_path <OscAddressNode>
+    end
+    
+    rule hostname do
+      [-.\w]+ 
+    end
+    
+    rule osc_path do
+      '/' [-./\w]*
     end
 
 

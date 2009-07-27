@@ -20,7 +20,7 @@ describe Cosy::SequenceParser do
         @parser.parse(int).value.should == int
       end
     end
-
+ 
     it 'should parse floats' do
       [0.0, 2.5, 789.654321, -1.0001].each do |float|
         @parser.parse(float).value.should == float
@@ -190,18 +190,31 @@ describe Cosy::SequenceParser do
       end
     end
     
-    it 'should parse osc addresses' do
-      ['/basic', '/1', '/1/a', '/a/1', '/nested/path/to/somewhere'].each do |osc_address|
-        value = @parser.parse(osc_address).value
-        value.should == osc_address
-        value.should be_instance_of(OscAddress)
-      end
-    end
-    
   end # describing atomic values
   
   
   describe 'OSC Support' do
+    
+    it 'should parse osc paths' do
+      ['/basic', '/1', '/1/a', '/a/1', '/nested/path/to/somewhere'].each do |path|
+        osc_address = @parser.parse(path).value
+        osc_address.path.should == path
+      end
+    end
+    
+    it 'should parse osc messages with a hostname' do
+      osc_address = @parser.parse('osc://hostname.com/path/a').value
+      osc_address.host.should == 'hostname.com'
+      osc_address.port.should == nil
+      osc_address.path.should == '/path/a'
+    end
+
+    it 'should parse osc messages with a hostname and port' do
+      osc_address = @parser.parse('osc://hostname.com:8080/path/a').value
+      osc_address.host.should == 'hostname.com'
+      osc_address.port.should == 8080
+      osc_address.path.should == '/path/a'
+    end    
     
     it 'should parse osc message chains with one value' do
       [100, -5.5, 'foo'].each do |value|
@@ -212,7 +225,7 @@ describe Cosy::SequenceParser do
 
         addr = node.children[0]
         addr.should be_instance_of(OscAddressNode)
-        addr.value.should == osc_address
+        addr.path.value.should == osc_address
 
         arg = node.children[1]
         node_should_match_value arg,value
@@ -221,15 +234,14 @@ describe Cosy::SequenceParser do
     
     it 'should parse osc message chains with multiple values' do
       [[100, -5.5], [1, 'foo'], ['a','b','c','d']].each do |values|
-        osc_address = '/osc/addr'
-        chain = osc_address + ':' + values.map{|v|v.inspect}.join(':')
+        osc_path = '/osc/addr'
+        chain = osc_path + ':' + values.map{|v|v.inspect}.join(':')
         node = @parser.parse(chain)
         node.should be_instance_of(ChainNode)
         node.children.length.should == values.length + 1   # plus one for address
 
         addr = node.children[0]
-        addr.should be_instance_of(OscAddressNode)
-        addr.value.should == osc_address
+        addr.value.path.should == osc_path
         values.each_with_index{ |val,i| node_should_match_value node.children[i+1],val }
       end
     end

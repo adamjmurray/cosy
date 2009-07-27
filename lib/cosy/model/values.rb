@@ -386,7 +386,13 @@ module Cosy
   end
 
 
-  class OscAddress < String
+  class OscAddress
+    attr_accessor :host, :port, :path, :args
+    def initialize(host,port,path)
+      @host,@port,@path = host,port,path
+      @host = nil if @host == ''
+      @port = nil if @port == ''
+    end
   end
 
 

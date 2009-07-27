@@ -550,7 +550,7 @@ module Cosy
   
   class OscAddressNode < TerminalNode
     def value(context=nil)
-      return OscAddress.new(text_value)
+      return OscAddress.new(host.value,port.value,path.value)
     end
   end
 
