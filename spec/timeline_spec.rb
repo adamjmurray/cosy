@@ -83,14 +83,4 @@ describe Cosy::Timeline do
 TIMELINE_STRING
   end
   
-  it 'should be able to render a basic sequence' do
-    @timeline = renderer('C4:q D4:h E4:h').timeline 
-    (@timeline.to_s + "\n").should ==
-<<TIMELINE_STRING
-0 => [{pitch:60,velocity:79,duration:480}]
-480 => [{pitch:62,velocity:79,duration:960}]
-1440 => [{pitch:64,velocity:79,duration:960}]
-TIMELINE_STRING
-  end
-  
 end

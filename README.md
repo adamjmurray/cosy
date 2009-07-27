@@ -77,10 +77,6 @@ The closest thing to documentation right now is the online preview at:
 
 TODOs:
 
-* Allow independent control over the note duration and the inter-note-onset intervals
-  (i.e. support staccato vs. legato)
-* A way to change the current octave, pitch, velocity, and duration without
-  outputting anything
 * Methods for transposition, inversion, retrograde, inverting chords, etc
 * Allow chains to be formed across scopes. For example, support:<br/>
   $melody=e:q d c:h; $melody:mp

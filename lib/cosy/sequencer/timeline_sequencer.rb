@@ -24,6 +24,7 @@ module Cosy
       @octave_mode   = @options.fetch :octave_mode, DEFAULT_OCTAVE_MODE #deprecated
       @osc_host = @options.fetch :osc_host, 'localhost'
       @osc_port = @options.fetch :osc_port, 23456
+      @duty = 0.99
     end
 
     def parse(cosy_syntax)
@@ -57,36 +58,43 @@ module Cosy
         when OscAddress
           osc(event)
           next    
-
+          
+        when TypedValue
+          value = event.value
+          case event.type
+          when :tempo
+            tempo(value)
+          when :program
+            program(value)
+          when :channel
+            @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
+          when :pitch_bend
+            pitch_bend(value)
+          when :cc
+            cc(value[0],value[1])
+          
+          when :pitch
+            @prev_pitches  = [value]
+          when :octave
+            @prev_octave   = value
+          when :velocity
+            @prev_velocity = value
+          when :duration
+            @prev_duration = value
+          when :duty
+            @duty = value
+          end
+          next
+          
         when Chain
           first_value = event.first
           values = event[1..-1]
           case first_value
-          when Label
-            label = first_value.value.downcase            
-            value = values[0]
-            if TEMPO_LABELS.include? label and value
-              tempo(value)
-              next
-            elsif PROGRAM_LABELS.include? label and value
-              program(value)
-              next
-            elsif CHANNEL_LABELS.include? label and value
-              @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
-              next
-            elsif CC_LABELS.include? label and values.length >= 2
-              cc(values[0],values[1])
-              next
-            elsif PITCH_BEND_LABELS.include? label and value
-              pitch_bend(value)
-              next
-            end
-
           when OscAddress
             osc(first_value, values)
             next    
           end
-        end # Chain case
+        end 
         
         STDERR.puts "Unsupported Event: #{event.inspect}"
       end
@@ -229,8 +237,9 @@ module Cosy
     end
 
     def notes(pitches, velocity, duration)
+      dur = duration * @duty
       pitches.each do |p|
-        add_event Event::Note.new(p, velocity, duration, @channel)
+        add_event Event::Note.new(p, velocity, dur, @channel)
       end
       @time += duration
     end
@@ -253,42 +262,6 @@ module Cosy
       @osc_host, @osc_port = host, port
       add_event Event::OscMessage.new(host, port, address.path, *args)
     end
-
-
-
-    #   def osc_host(hostname)
-    #     @host = hostname
-    #   end
-    #   
-    #   def osc_port(port)
-    #     @port = port
-    #     puts "starting client for #@host:#{port}" if $COSY_DEBUG
-    #     @client = OSC::SimpleClient.new(@host, port)
-    #   end
-    #   
-    #   def osc(address, args) 
-    #     if @client
-    #       msg = OSC::Message.new(address, nil, *args)
-    #       add_event do
-    #         begin
-    #           @client.send(msg) 
-    #         rescue => exception
-    #           STDERR.puts "OSC to #@host:#@port failed to send: #{address} #{args}"
-    #           STDERR.puts "#{exception.message}"            
-    #         end
-    #       end
-    #     else
-    #       STDERR.puts 'OSC client not started'
-    #     end
-    #   end
-    #   
-    #   def clone_state(input)
-    #     super(input).merge({
-    #       :host => @host,
-    #       :port => @port,
-    #       :client => @client
-    #     })
-    #   end
 
   end
 

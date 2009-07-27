@@ -27,6 +27,10 @@ module Cosy
       "#@text_value (#{self.class}=#@value)"
     end
     
+    def to_s
+      @text_value
+    end
+    
     def eql?(other)
       if other.respond_to? :value
         return @value.eql?(other.value)
@@ -45,6 +49,20 @@ module Cosy
     
     def hash
       @value.hash
+    end
+  end
+  
+  
+  class TypedValue < Value
+    attr_reader :type  
+  
+    def initialize(type, value, text_value=nil)
+      super(value, text_value)
+      @type = type
+    end
+  
+    def to_s
+      "#@type:#@text_value"
     end
   end
   
@@ -336,14 +354,6 @@ module Cosy
       end
     end
     
-  end
-  
-  
-  class Tempo < Value
-  end
-  
-  
-  class Program < Value
   end
 
 

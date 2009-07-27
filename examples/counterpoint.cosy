@@ -1,11 +1,11 @@
 -- 'Air' by Henry Purcell
 -- Demonstrates counterpoint with the parallel sequencing operator ==
 
-#tempo:90;
-
 $r = q ei*2 q;
 $melody_fragment =
 (d5 c# d a4):$r (a5 g a e):$r      f e:ei f;
+
+tempo=90
 
 -- right hand
 $melody_fragment                            d5:q  (e:h a4:q)

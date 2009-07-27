@@ -3,13 +3,16 @@
 -- First let's setup a convenience method
 -- The {{double braces}} is a command, which means the Ruby code
 -- is evaluated for side effects without returning a value.
-
-{{ def v(val); Velocity.new(val) end }}
+{{ 
+	def rand_vel
+		37 + rand(90)
+	end 
+}}
 
 
 -- Channel 10 is usually for drum sounds
 
-#channel:10
+channel=10
 
 
 -- Anything between {braces} is Ruby code that gets evaluated
@@ -17,4 +20,4 @@
 -- This will play c2 followed by a random number (0-4) of c#2 twenty times
 -- Every note has a random velocity between 37 and 127
 
-( (d2 c#2*{rand(5)}):{v(37+rand(90))}:s )*20
+( (d2 c#2*{rand(5)}):vel{rand_vel}:s )*20

@@ -82,7 +82,7 @@ module Cosy
       true
     end
     
-    def evaluate(context)
+    def evaluate(context=nil)
       return value(context)
     end
     
@@ -140,12 +140,12 @@ module Cosy
   end
   
   
-  class AssignmentNode < ContainerNode
+  class VariableAssignmentNode < ContainerNode
     # the left hand side of the assignment
     def lhs
       children[0]
     end
-    
+
     # the right hand side of the assignment
     def rhs
       children[1]
@@ -156,6 +156,22 @@ module Cosy
       context.symbol_table[name] = rhs
       return nil
     end
+  end
+  
+  
+  class KeywordAssignmentNode < TerminalNode
+    def value(context=nil)
+      # this only works with simple rhs...
+      TypedValue.new(keyword.value, rhs.value)
+    end
+    def rhs
+      elements.last
+    end
+  end
+  
+  
+  class CCNode < ContainerNode
+    
   end
   
   
@@ -496,8 +512,8 @@ module Cosy
       return @value
     end
   end
-
-
+  
+  
   class StringNode < TerminalNode
     def value(context=nil)
       if not @value
@@ -553,5 +569,57 @@ module Cosy
       return OscAddress.new(host.value,port.value,path.value)
     end
   end
+  
+  module TempoKeywordNode
+    def value
+      :tempo
+    end
+  end
+  module ProgramKeywordNode
+    def value
+      :program
+    end
+  end
+  module ChannelKeywordNode
+    def value
+      :channel
+    end
+  end
+  module CCKeywordNode
+    def value
+      :cc
+    end
+  end
+  module PitchBendKeywordNode
+    def value
+      :pitch_bend
+    end
+  end
+  module OctaveKeywordNode
+    def value
+      :octave
+    end
+  end
+  module PitchKeywordNode
+    def value
+      :pitch
+    end
+  end
+  module VelocityKeywordNode
+    def value
+      :velocity
+    end
+  end
+  module DurationKeywordNode
+    def value
+      :duration
+    end
+  end
+  module DutyKeywordNode
+    def value
+      :duty
+    end
+  end
+  
 
 end

@@ -8,12 +8,12 @@ module Cosy
 
 
     rule statement do
-      assignment / sequence_root
+      variable_definition / sequence_root
     end
 
 
-    rule assignment do
-      var space? '=' sequence_root <AssignmentNode>
+    rule variable_definition do
+      var space? '=' sequence_root <VariableAssignmentNode>
     end
 
 
@@ -58,7 +58,7 @@ module Cosy
 
 
     rule element do
-      '(' subsequence:sequence_root ')' !'@' / chord / primitive
+      '(' subsequence:sequence_root ')' !'@' / chord / keyword_assignment / primitive
     end
 
 
@@ -85,7 +85,7 @@ module Cosy
     rule pitch do
       note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
       /
-      ('pitch'/'pit'/'PIT') number:(number/ruby) <NumericPitchNode>
+      pitch_keyword number:(number/ruby) <NumericPitchNode>
     end
 
 
@@ -107,14 +107,14 @@ module Cosy
       'MP' / 'PPP' / 'PP' / 'P' / 'MF' / 'FFF' / 'FF' / 'FO'
       ) ![\w] <VelocityNode>
       /
-      ('velocity'/'vel'/'VEL'/[Vv]) number:(number/ruby) <NumericVelocityNode>
+      velocity_keyword number:(number/ruby) <NumericVelocityNode>
     end
 
 
     rule duration do
       multiplier:(number/'-')? metrical_duration:metrical_duration modifier:duration_modifier* <DurationNode>
       /
-      ('duration'/'dur'/'DUR') number:(number/ruby) <NumericDurationNode>
+      duration_keyword number:(number/ruby) <NumericDurationNode>
     end
 
 
@@ -205,6 +205,65 @@ module Cosy
     rule space do
       [\s]+
     end	
+        
+    
+    rule keyword_assignment do
+      keyword:(tempo_keyword / channel_keyword / program_keyword / pitchbend_keyword / 
+                octave_keyword / pitch_keyword /velocity_keyword / duration_keyword / duty_keyword)
+      '=' (number/ruby/var) <KeywordAssignmentNode>
+      / 
+      keyword:cc_keyword cc_number:[\d]+ '=' (int/ruby/var) <CCNode>
+    end
+    
+    
+    rule tempo_keyword do
+      ('tempo' / 'TEMPO' / 'bmp' / 'BPM') <TempoKeywordNode>
+    end
+      
+    
+    rule channel_keyword do
+      ('channel' / 'CHANNEL' / 'chan' / 'CHAN') <ChannelKeywordNode>
+    end
+    
+    
+    rule program_keyword do
+      ('program' / 'PROGRAM' / 'prog' / 'PROG') <ProgramKeywordNode>
+    end
+    
+    
+    rule cc_keyword do
+      ('cc' / 'CC' / 'control' / 'CONTROL') <CCKeywordNode>
+    end
+    
+    
+    rule pitchbend_keyword do
+      ('pitchbend' / 'PITCHBEND' / 'bend' / 'BEND') <PitchBendKeywordNode>
+    end
+    
+    
+    rule octave_keyword do
+      ('octave' / 'OCTAVE' / 'oct' / 'OCT') <OctaveKeywordNode>
+    end
+    
+    
+    rule pitch_keyword do
+      ('pitch' / 'PITCH' / 'pit' / 'PIT') <PitchKeywordNode>
+    end
+    
+    
+    rule velocity_keyword do
+      ('velocity' / 'VELOCITY' / 'vel' / 'VEL' / [vV]) <VelocityKeywordNode>
+    end
+    
+    
+    rule duration_keyword do
+      ('duration' / 'DURATION' / 'dur' / 'DUR') <DurationKeywordNode>
+    end
+    
+    
+    rule duty_keyword do
+      ('duty' / 'DUTY') <DutyKeywordNode>
+    end
 
   end
 

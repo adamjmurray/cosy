@@ -3,7 +3,7 @@
 
 -- Send three OSC messages, waiting one second in between each message
 
-#tempo:60
+tempo=60
 
 osc://localhost:10000/path/int:127
 -q

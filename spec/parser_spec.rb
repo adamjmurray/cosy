@@ -6,6 +6,10 @@ describe Cosy::SequenceParser do
     @parser = SequenceParser.new
   end
   
+  def parse(input)
+    @parser.parse(input).value
+  end
+  
 
   describe 'Atomic Values' do
     
@@ -191,6 +195,13 @@ describe Cosy::SequenceParser do
     end
     
   end # describing atomic values
+  
+  
+  describe 'Keyword Assignments' do
+    it 'should parse tempo assignments' do
+      parse('tempo=60').should == TypedValue.new(:tempo,60)
+    end
+  end
   
   
   describe 'OSC Support' do
