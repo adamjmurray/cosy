@@ -3,120 +3,105 @@ module Cosy
   class TimelineSequencer
 
     def initialize(options={})
-      @options = options
-      input = options[:input]
-      if input.is_a? Sequencer
-        @sequencer = input
-      elsif input
-        parse(input)
-      end
-      @sequences = {}
-      @time = options.fetch :time, 0
-
-      init()
-    end
-
-    def init
-      @prev_pitches  = [Pitch.new(DEFAULT_PITCH_CLASS, DEFAULT_OCTAVE)]
-      @prev_octave   = DEFAULT_OCTAVE
-      @prev_velocity = DEFAULT_VELOCITY
-      @prev_duration = DEFAULT_DURATION
-      @octave_mode   = @options.fetch :octave_mode, DEFAULT_OCTAVE_MODE #deprecated
-      @osc_host = @options.fetch :osc_host, 'localhost'
-      @osc_port = @options.fetch :osc_port, 23456
-      @duty = 0.99
-    end
-
-    def parse(cosy_syntax)
-      @sequencer = Sequencer.new(cosy_syntax)
+      @sequencer     = options.fetch :sequencer, Sequencer.new(options[:input])
+      @timeline      = options.fetch :timeline, Timeline.new
+      @time          = options.fetch :time, 0
+      @pitches       = options.fetch :pitches, [Pitch.new(DEFAULT_PITCH_CLASS, DEFAULT_OCTAVE)]
+      @octave        = options.fetch :octave, DEFAULT_OCTAVE
+      @velocity      = options.fetch :velocity, DEFAULT_VELOCITY
+      @duration      = options.fetch :duration, DEFAULT_DURATION
+      @duty          = options.fetch :duty, 0.99
+      @channel       = options.fetch :channel, 0
+      @octave_mode   = options.fetch :octave_mode, DEFAULT_OCTAVE_MODE #deprecated
+      @osc_host      = options.fetch :osc_host, 'localhost'
+      @osc_port      = options.fetch :osc_port, 23456
+      @parent        = options[:parent]
     end
 
     def render
-      @timeline = Timeline.new
-      while event = next_event
-        case event
+      if not @rendered
+        while event = next_event
+          case event
 
-        when ParallelSequencer
-          stop_time = @time
-          event.each do |sequencer|
-            renderer = self.class.new(clone_state(sequencer))
-            renderer.render
-            stop_time = renderer.time if renderer.time > stop_time
-          end
-          @time = stop_time
-          next
+          when ParallelSequencer
+            stop_time = @time
+            event.each do |subsequencer|
+              timeline_seq = clone(subsequencer)
+              timeline_seq.render
+              stop_time = timeline_seq.time if timeline_seq.time > stop_time
+            end
+            @time = stop_time
+            next
 
-        when NoteEvent
-          pitches, velocity, duration = event.pitches, event.velocity, event.duration
-          if duration >= 0
-            notes(pitches, velocity, duration)
-          else            
-            rest(-duration)
-          end
-          next
-          
-        when OscAddress
-          osc(event)
-          next    
-          
-        when TypedValue
-          value = event.value
-          case event.type
-          when :tempo
-            tempo(value)
-          when :program
-            program(value)
-          when :channel
-            @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
-          when :pitch_bend
-            pitch_bend(value)
-          when :cc
-            cc(value[0],value[1])
-          
-          when :pitch
-            @prev_pitches  = [value]
-          when :octave
-            @prev_octave   = value
-          when :velocity
-            @prev_velocity = value
-          when :duration
-            @prev_duration = value
-          when :duty
-            @duty = value
-          end
-          next
-          
-        when Chain
-          first_value = event.first
-          values = event[1..-1]
-          case first_value
+          when NoteEvent
+            pitches, velocity, duration = event.pitches, event.velocity, event.duration
+            if duration >= 0
+              notes(pitches, velocity, duration)
+            else            
+              rest(-duration)
+            end
+            next
+
           when OscAddress
-            osc(first_value, values)
+            osc(event)
             next    
-          end
-        end 
-        
-        STDERR.puts "Unsupported Event: #{event.inspect}"
-      end
 
-    end
+          when TypedValue
+            value = event.value
+            case event.type
+            when :tempo
+              tempo(value)
+            when :program
+              program(value)
+            when :channel
+              @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
+            when :pitch_bend
+              pitch_bend(value)
+            when :cc
+              cc(value[0],value[1])
+            when :pitch
+              @pitches  = [value]
+            when :octave
+              @octave   = value
+            when :velocity
+              @velocity = value
+            when :duration
+              @duration = value
+            when :duty
+              @duty = value
+            end
+            next
 
-    def timeline
-      render if not @timeline
+          when Chain
+            first_value = event.first
+            values = event[1..-1]
+            case first_value
+            when OscAddress
+              osc(first_value, values)
+              next    
+            end
+          end 
+
+          STDERR.puts "Unsupported Event: #{event.inspect}"
+        end
+        @rendered = true
+      end 
       return @timeline
     end
+
+    alias timeline render
 
 
     # converts sequencer states to events
     def next_event
       event = @sequencer.next
 
-      pitches  = @prev_pitches
-      velocity = @prev_velocity
-      duration = @prev_duration
+      pitches  = @pitches
+      velocity = @velocity
+      duration = @duration
 
       if event.is_a? Interval
-        pitches = @prev_pitches.map{|pitch| pitch+event}
+        pitches = @pitches.map{|pitch| pitch+event}
 
       elsif event.is_a? Chord and event.all?{|e| e.is_a? Pitch}
         pitches = event
@@ -161,9 +146,9 @@ module Cosy
       pitch_values = []
       pitches.each do |pitch|
         if not pitch.has_octave?
-          pitch.octave = @prev_octave
+          pitch.octave = @octave
           if @octave_mode == :nearest
-            prevval = @prev_pitches.first.value  # not sure what is reasonable for a chord, TODO match indexes?
+            prevval = @pitches.first.value  # not sure what is reasonable for a chord, TODO match indexes?
             interval = prevval - pitch.value
             if interval >= 6
               pitch.octave += 1
@@ -172,22 +157,18 @@ module Cosy
             end
           end
         end
-        @prev_octave = pitch.octave
+        @octave = pitch.octave
         pitch_values << pitch.value
       end
 
-      @prev_pitches = pitches
-      @prev_velocity = velocity
-      @prev_duration = duration.abs
+      @pitches = pitches
+      @velocity = velocity
+      @duration = duration.abs
 
       return NoteEvent.new(pitch_values,velocity,duration)
     end
 
-
-
-
     alias play render
-
 
     #################
     protected
@@ -196,28 +177,25 @@ module Cosy
       @time
     end
 
-    def scheduler
-      @scheduler
-    end
-
-    def start_time
-      @start_time
-    end
-
 
     #################
     private
 
-    def clone_state(input)
-      {
-        :input => input,
+    def clone(subsequencer)
+      self.class.new({
         :parent => self,
+        :sequencer => subsequencer,
+        :timeline => @timeline,
         :time => @time,
+        :pitches => @pitches,
+        :octave => @octave,
+        :velocity => @velocity,
+        :duration => @duration,
         :channel => @channel,
-        :tempo => @tempo,
+        :octave_mode => @octave_mode,
         :osc_host => @osc_host,
         :osc_port => @osc_port
-      }
+      })
     end
 
     def add_event(event)
