@@ -22,109 +22,6 @@ class TestParser < Test::Unit::TestCase
   end
 
 
-  
-  def test_sequence
-    seq = parse '0 1 2 3'
-    assert_equal(SequenceNode, seq.class)
-    assert_equal(4, seq.children.length)
-    seq.children.each_with_index do |item,index|
-      assert_equal(index, item.value)
-    end
-  end
-
-  def test_chain
-    seq = parse '0:1:2:3'
-    assert_equal(ChainNode, seq.class)
-    assert_equal(4, seq.children.length)    
-    seq.children.each_with_index do |item,index|
-      assert_equal(index, item.value)
-    end
-  end
-  
-  def test_parenthesized_sequence
-    parse '(1 2 3)'
-    parse '(1 2 3) '
-    parse ' (1 2 3)'
-    parse '(1 2 3 ) '
-    parse '( 1 2 3)'
-    parse ' ( 1   2  3 )    '
-  end
-
-  def test_parenthesized_sequence_then_unparen
-    parse '(1 2) 3'
-    parse ' ( 1  2 )   3 '
-  end
-  
-  def test_non_parenthesized_sequence_then_paren
-    parse '1 (2 3)'
-    parse ' 1   ( 2  3 )  '
-  end
-      
-  def test_seqeunce_of_parenthesized_sequences
-    parse '(1 2 3) (4 5 6)'
-    parse '  ( 1 2  3 )   ( 4  5  6 ) '
-  end
-  
- 
-  
-  def test_repeated_sequence
-    parse '1*2'
-    parse '(1)*2'
-    parse '(1 2)*2'
-    parse '(1 2)*0'
-    parse '(1 2)*-1'
-  end
-  
-  def test_repeated_sequence_with_eval_repetitions
-    parse '(1 2)*{8/4}'
-    end
-
-  def test_limited_repeat_sequence
-    parse '1&4'
-    parse '(1)&4'
-    parse '(1 2)&4'
-    parse '(1 2 3)&4'
-  end
-  
-  def test_fractional_repeated_sequence
-    parse '1*2.2'
-    parse '(1)*2.20'
-    parse '(1 2)*2.210'  
-  end
-  
-  def test_sequence_of_repeated_sequences
-    parse '(1 2)*2 (3 4)*2.5 (6 7 8)*20'
-  end
-  
-  def test_sequence_of_parenthesized_and_repeated_sequences
-    parse '(1 2)*2 (3 4) (6 7 8)*20'  
-  end
-  
-  def test_chord_sequence
-    parse '[1] [2] [3]'
-    parse '[1 2 3] [4 5 6] [7 8 9]'
-  end
-  
-  def test_repeated_chord
-    parse '[1]*2'
-    parse '[1 2]*2'
-  end
-  
-  def test_repeated_chord_sequence
-    parse '[1]*2 [3]'
-    parse '[1 2]*2 [3] [4 5 6]*3.2'
-  end
-
-  def test_heterogonous_sequence
-    parse '(c4 5)*1.5'
-    parse '[3 4]*3'
-    parse '(c4 5)*1.5 [3 4]*3'
-    parse '[fb3 c#+4]*3 (4.0*5 6*3)*2'
-    parse '[fb3 c#+4]*3 ((4.0 5*5)*5 6*3)*2'
-    parse '[2 c4] 3 (4.0 (6)*3)*2'
-    parse '[2 c#+4] 3 (4.0 6*3)*2'
-  end
-  
 
 
   def test_negative_duration_multiplier
@@ -150,15 +47,7 @@ class TestParser < Test::Unit::TestCase
     end    
   end
 
- 
-  
-  def test_interval
-    INTERVAL_QUALITY.keys.each do |quality|
-      for degree in 1..15 do
-        parse "#{quality}#{degree}"
-      end
-    end
-  end
+
 
   def test_element_chain
     parse '4:5:C4'
@@ -202,10 +91,5 @@ class TestParser < Test::Unit::TestCase
   def test_parallel
     parse 'a == b'
   end
-
-  def test_invalid_syntax
-    assert_failure '1.'
-    assert_failure '1 2)*3'
-    assert_failure 'asdf'
-  end   
+ 
 end
