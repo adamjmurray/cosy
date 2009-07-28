@@ -11,9 +11,9 @@ require 'cosy/model/timeline'
 require 'cosy/parser/grammar'
 require 'cosy/parser/parser'
 
-require 'cosy/sequencer/symbol_table'
-require 'cosy/sequencer/context'
-require 'cosy/sequencer/sequencer'
-require 'cosy/sequencer/timeline_sequencer'
+require 'cosy/interpreter/symbol_table'
+require 'cosy/interpreter/context'
+require 'cosy/interpreter/interpreter'
+require 'cosy/interpreter/timeline_sequencer'
 
 require 'cosy/renderer/abstract_renderer'

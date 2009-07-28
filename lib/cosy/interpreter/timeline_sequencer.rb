@@ -94,7 +94,7 @@ module Cosy
 
     # converts sequencer states to events
     def next_event
-      event = @sequencer.next
+      event = @interpreter.next
 
       pitches  = @pitches
       velocity = @velocity
