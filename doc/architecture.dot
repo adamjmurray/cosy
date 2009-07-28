@@ -4,23 +4,31 @@ digraph g {
 	Grammar [shape=rectangle]
 	Treetop [style=filled fillcolor="#f0f0f0"]
 	Parser
-	ParseTree [label="Parse Tree\n(syntactic model)" shape=box3d]
+	SyntaxTree [label="Syntax Tree" shape=box3d]
 	Interpreter
-	Events [label="Event Stream\n(state machine's states)" shape=box3d]
+	Events [label="Event Stream" shape=box3d]
 	Sequencer
-	Timeline [label="Event Timeline\n(semantic model)" shape=box3d]
-	Renderer
+	Timeline [label="Timeline" shape=box3d]
+	MidiRenderer [label="MIDI\nRenderer"]
+	MidiOutput [label="Realtime MIDI" shape=note]
+	MidiFileRenderer [label="File\nRenderer"]
+	MidiFileOutput [label="MIDI file" shape=note]
+	Renderer [label="Other\nRenderers"]
 	Output [shape=note]
 	
 	Input -> Parser
 	Grammar -> Treetop [label=" defines Cosy syntax" arrowhead=vee]
 	Treetop -> Parser [label="generates" arrowhead=vee]
-	Parser -> ParseTree
-	ParseTree -> Interpreter
-	Interpreter -> Events  [label="on-demand,\niterative traversal\ninterprets parse tree\nas a state machine"]
+	Parser -> SyntaxTree
+	SyntaxTree -> Interpreter
+	Interpreter -> Events  [label="iterative traversal\ninterprets parse tree\nas a state machine"]
 	Events -> Sequencer
 	Sequencer -> Interpreter
 	Sequencer -> Timeline
+	Timeline -> MidiRenderer
+	MidiRenderer -> MidiOutput
+	Timeline -> MidiFileRenderer
+	MidiFileRenderer -> MidiFileOutput
 	Timeline -> Renderer
-	Renderer -> Output
+	Renderer -> Output	
 }

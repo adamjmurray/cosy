@@ -87,8 +87,8 @@ module Cosy
         end
         # Now we're at the modified node that imposed the count limit.
         # To get to the proper state we need to exit one more time.
-        # We'll leave it to the Sequencer to do the final exit because
-        # it seems more consistent with the rest of the Sequencer logic.
+        # We'll leave it to the Interpreter to do the final exit because
+        # it seems more consistent with the rest of the Interpreter logic.
         return false
       else
         return true

@@ -1,7 +1,7 @@
 module Cosy
 
-  # A Sequencer traverses a Cosy sequence and emits values one at a time.
-  class Sequencer
+  # The Cosy Interpreter traverses a Cosy syntax tree and emits states one at a time.
+  class Interpreter
 
     attr_accessor :sequence, :context
 
@@ -48,11 +48,11 @@ module Cosy
             next
             
           when ParallelNode
-            sequencers = node.children.collect do |subsequence|
-              Sequencer.new(subsequence, @context.symbol_table)
+            interpreters = node.children.collect do |subsequence|
+              Interpreter.new(subsequence, @context.symbol_table)
             end
             @context.exit
-            return ParallelSequencer.new(sequencers)
+            return ParallelInterpreter.new(interpreters)
                         
           else
             result = node.evaluate(@context)
@@ -94,7 +94,7 @@ module Cosy
     
     def begin_chain(node)
       @chained_sequencers = node.children.collect do |subsequence|
-        Sequencer.new(subsequence, @context.symbol_table)
+        Interpreter.new(subsequence, @context.symbol_table)
       end
       @chain_end = Array.new(@chained_sequencers.length)
     end
@@ -118,7 +118,7 @@ module Cosy
     end
   end
   
-  class ParallelSequencer < Array
+  class ParallelInterpreter < Array
   end
     
 end

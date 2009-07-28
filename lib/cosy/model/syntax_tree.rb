@@ -282,7 +282,7 @@ module Cosy
       # TODO? should chains work this way too?
       
       foreach_sequencers = children[0...-1].collect do |sequence|              
-        Sequencer.new(sequence, symbol_table)
+        Interpreter.new(sequence, symbol_table)
       end
       foreach_sequencers.each do |sequencer| 
         magic_value = sequencer.next

@@ -3,7 +3,7 @@ module Cosy
   class TimelineSequencer
 
     def initialize(options={})
-      @sequencer     = options.fetch :sequencer, Sequencer.new(options[:input])
+      @interpreter   = options.fetch :interpreter, Interpreter.new(options[:input])
       @timeline      = options.fetch :timeline, Timeline.new
       @time          = options.fetch :time, 0
       @pitches       = options.fetch :pitches, [Pitch.new(DEFAULT_PITCH_CLASS, DEFAULT_OCTAVE)]
@@ -23,10 +23,10 @@ module Cosy
         while event = next_event
           case event
 
-          when ParallelSequencer
+          when ParallelInterpreter
             stop_time = @time
-            event.each do |subsequencer|
-              timeline_seq = clone(subsequencer)
+            event.each do |intepreter|
+              timeline_seq = clone(intepreter)
               timeline_seq.render
               stop_time = timeline_seq.time if timeline_seq.time > stop_time
             end
@@ -117,7 +117,7 @@ module Cosy
             first_value = event.first
             if first_value.is_a? Label
               label = first_value.value.downcase
-              if label == OCTAVE_MODE_LABEL
+              if label == OCTAVE_MODE_LABEL # DEPRECATED
                 octave_mode = event[1]
                 octave_mode = octave_mode.value if octave_mode.respond_to? :value # allow for labels as values
                 octave_mode = octave_mode.downcase if octave_mode.respond_to? :downcase
@@ -181,10 +181,10 @@ module Cosy
     #################
     private
 
-    def clone(subsequencer)
+    def clone(interpreter)
       self.class.new({
         :parent => self,
-        :sequencer => subsequencer,
+        :interpreter => interpreter,
         :timeline => @timeline,
         :time => @time,
         :pitches => @pitches,
