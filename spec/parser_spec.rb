@@ -176,7 +176,7 @@ describe Cosy::SequenceParser do
       durations += ['thirtysecond','thirty-second','sixtyfourth','sixty-fourth']
       for base_duration in durations do
         for multiplier in -2..2 do
-          for modifier in [nil, 't', '.', '.t', 't.', '..', '...'] do
+          for modifier in [nil, 't', '.', '.t', 't.', '..', '...', 't.t.t'] do
             duration = Duration.new(multiplier, base_duration, modifier)
             @parser.parse("#{multiplier}#{base_duration}#{modifier}").value.should == duration
             if multiplier == 1 then
@@ -187,7 +187,7 @@ describe Cosy::SequenceParser do
           end
         end
       end
-    end
+    end   
 
     it 'should parse numerical durations' do
       for duration in [0, 50, 100, 5000, -25] do
@@ -347,13 +347,60 @@ describe Cosy::SequenceParser do
 
 
   describe 'Chains' do
-    it 'should parse bare chains' do
+    it 'should parse simple chains' do
       tree = @parser.parse '0:1:2:3'
       tree.class.should == ChainNode
       tree.children.length.should == 4
       tree.children.each_with_index do |item,index|
         item.value.should == index
       end
+    end
+    
+    it 'should parse heterogenous chains' do
+      @parser.parse '4:5:C4'
+      @parser.parse 'C4:mf:q.'
+      @parser.parse '[C4 E4]:fff'
+      @parser.parse '(4 5):(6 7)'
+    end
+  end
+  
+  describe 'Other Constructs' do
+    
+    it 'should parse choices' do
+      @parser.parse '4|5 | C4'
+      @parser.parse 'C4|mf|q.'
+      @parser.parse '[C4 E4]|fff'
+      @parser.parse '(4 5)|(6 7)'
+    end
+
+    it 'should parse simple foreach loops' do
+      @parser.parse '(1 2)@(3 4)'
+      @parser.parse '(1 $ 2)@(3 4)'
+    end
+
+    it 'should parse chained foreach loops' do
+      @parser.parse '(1 2)@(3 4)@(5 6)'
+    end
+
+    it 'should parse nested foreach loops' do
+      @parser.parse '((1 2)@(3 4))@(5 6)'
+      @parser.parse '((1 $ 2 $$)@(3 4 $))@(5 6)'
+    end
+
+    it 'should parse variable assignments and usages' do
+      @parser.parse '$X=1 2 3 4; $X'
+      @parser.parse '$X=1 2 3 4; $Y=5; $X $Y'   
+    end
+
+    it 'should parse labels' do # DEPRECATED
+      @parser.parse '#label:5'
+      @parser.parse '#1:c:mf'
+      @parser.parse '#env:[1 250 1 500 0 250]'
+    end
+
+    it 'should parse parallel sequences' do
+      @parser.parse 'a == b'
+      @parser.parse 'a b c == c d e'
     end
   end
 
