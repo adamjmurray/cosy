@@ -35,6 +35,8 @@ module Cosy
     'ff' =>111, 'fortissimo'=>111,
     'fff'=>127    
   }
+  # define constants for intensities: P, PP, PPP, MP, etc
+  INTENSITY.each {|key,value| const_set(key.upcase, value) if key.length <= 3 }
 
   # Define standard number of MIDI ticks for note durations.
   DURATION = { 
@@ -46,6 +48,8 @@ module Cosy
     'r'=>60,   'thirtysecond'=>60, 'thirty-second'=>60,
     'x'=>30,   'sixtyfourth'=>30,  'sixty-fourth'=>30
   }
+  # define contstants for: W, H, Q, etc
+  DURATION.each {|key,value| const_set(key.upcase, value) if key.length <= 2 }
   
   DURATION_MODIFIER = {
     '.' => 1.5,

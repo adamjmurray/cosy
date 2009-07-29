@@ -29,48 +29,46 @@ describe Cosy::SequenceParser do
 
 
   describe 'Atomic Values' do
-
     it 'should parse integers' do
       [0, 2, 789, -1].each do |int|
-        @parser.parse(int).value.should == int
+        parsed_value(int).should == int
       end
     end
 
     it 'should parse floats' do
       [0.0, 2.5, 789.654321, -1.0001].each do |float|
-        @parser.parse(float).value.should == float
+        parsed_value(float).should == float
       end
     end
 
     it 'should parse ratios' do
       [[1,2], [3,100], [-55,232]].each do |numerator,denominator|
-        @parser.parse("#{numerator}/#{denominator}").value.should == numerator.to_f/denominator
+        parsed_value("#{numerator}/#{denominator}").should == numerator.to_f/denominator
       end
     end
 
     it 'should parse single-quoted strings' do
       ['a', 'a b c', '1'].each do |unquoted_string|
-        @parser.parse("'#{unquoted_string}'").value.should == unquoted_string
+        parsed_value("'#{unquoted_string}'").should == unquoted_string
       end
     end
 
     it 'should parse double-quoted strings' do
       ['a', 'a b c', '1'].each do |unquoted_string|
-        @parser.parse('"' + unquoted_string + '"').value.should == unquoted_string
+        parsed_value('"' + unquoted_string + '"').should == unquoted_string
       end
     end
 
     it 'should parse strings with escaped quotes' do
-      @parser.parse("'a b\\' c'").value.should == "a b' c"
-      @parser.parse('"a b\\" c"').value.should == 'a b" c'
-      # TODO: test this in sequenced values tests:
-      # '"a b c" "a b\\" c"'
-      # "'a b c' 'a b\\' c'"  
+      parsed_value("'\\''").should == "'"
+      parsed_value('"\""').should == '"'
+      parsed_value("'a b\\' c'").should == "a b' c"
+      parsed_value('"a b\\" c"').should == 'a b" c'
     end
 
-    it 'should parse labels' do
+    it 'should parse labels' do # DEPRECATED
       ['a', 'abc', '1'].each do |label|
-        @parser.parse('#' + label).value.should == label
+        parsed_value('#' + label).should == label
       end
       lambda{ @parser.parse('#') }.should raise_error
     end
@@ -80,14 +78,14 @@ describe Cosy::SequenceParser do
         for octave in -1..9 do
           for accidental in [nil, '#', 'b'] do
             pitch = Pitch.new(note_name, accidental, nil)
-            @parser.parse("#{note_name}#{accidental}").value.should == pitch
+            parsed_value("#{note_name}#{accidental}").should == pitch
 
             pitch = Pitch.new(note_name, accidental, octave)
-            @parser.parse("#{note_name}#{accidental}#{octave}").value.should == pitch
+            parsed_value("#{note_name}#{accidental}#{octave}").should == pitch
 
             note_name = note_name.downcase
             pitch = Pitch.new(note_name, accidental, octave)
-            @parser.parse("#{note_name}#{accidental}#{octave}").value.should == pitch
+            parsed_value("#{note_name}#{accidental}#{octave}").should == pitch
           end
         end
       end
@@ -97,32 +95,32 @@ describe Cosy::SequenceParser do
       for note_number in [0, 50, 100, 127] do
         expected = Pitch.new(note_number)
         for pitch_prefix in %w{pit PIT pitch} do
-          @parser.parse("#{pitch_prefix}#{note_number}").value.should == expected
+          parsed_value("#{pitch_prefix}#{note_number}").should == expected
         end
       end
     end
 
     it 'should parse pitch chords' do
-      @parser.parse('[C]').value.should == [Pitch.new('C')]
-      @parser.parse('[C E G]').value.should == [Pitch.new('C'), Pitch.new('E'), Pitch.new('G')]
-      @parser.parse('[C4 E4 G4]').value.should == [Pitch.new('C',4), Pitch.new('E',4), Pitch.new('G',4)]
-      @parser.parse('[C# Db4]').value.should == [Pitch.new('C#'), Pitch.new('C#',4)]
+      parsed_value('[C]').should == [Pitch.new('C')]
+      parsed_value('[C E G]').should == [Pitch.new('C'), Pitch.new('E'), Pitch.new('G')]
+      parsed_value('[C4 E4 G4]').should == [Pitch.new('C',4), Pitch.new('E',4), Pitch.new('G',4)]
+      parsed_value('[C# Db4]').should == [Pitch.new('C#'), Pitch.new('C#',4)]
     end
 
     it 'should parse numeric chords' do
-      @parser.parse('[1]').value.should == [1] 
-      @parser.parse('[1 2 3]').value.should == [1,2,3]
-      @parser.parse('[1.1]').value.should == [1.1]
-      @parser.parse('[1.1 2.2 3.3]').value.should == [1.1, 2.2, 3.3] 
-      @parser.parse('[-1]').value.should == [-1]
-      @parser.parse('[-1 -2 -3]').value.should == [-1,-2,-3]
-      @parser.parse('[-1.1]').value.should == [-1.1]
-      @parser.parse('[1.1 -2.2 3.33333]').value.should == [1.1, -2.2, 3.33333] 
-      @parser.parse('[1 2.2 -3 4/5]').value.should == [1, 2.2, -3, 4.0/5]
+      parsed_value('[1]').should == [1] 
+      parsed_value('[1 2 3]').should == [1,2,3]
+      parsed_value('[1.1]').should == [1.1]
+      parsed_value('[1.1 2.2 3.3]').should == [1.1, 2.2, 3.3] 
+      parsed_value('[-1]').should == [-1]
+      parsed_value('[-1 -2 -3]').should == [-1,-2,-3]
+      parsed_value('[-1.1]').should == [-1.1]
+      parsed_value('[1.1 -2.2 3.33333]').should == [1.1, -2.2, 3.33333] 
+      parsed_value('[1 2.2 -3 4/5]').should == [1, 2.2, -3, 4.0/5]
     end
 
     it 'should parser string chords' do
-      @parser.parse('["abc" \'foo\']').value.should == ['abc','foo'] 
+      parsed_value('["abc" \'foo\']').should == ['abc','foo'] 
     end
 
     it 'should parse interval symbols' do
@@ -136,7 +134,7 @@ describe Cosy::SequenceParser do
             else
               interval = Interval.new(quality,degree)
             end
-            @parser.parse("#{sign}#{quality}#{degree}").value.should == interval
+            parsed_value("#{sign}#{quality}#{degree}").should == interval
           end
         end
       end
@@ -145,8 +143,8 @@ describe Cosy::SequenceParser do
     it 'should parse numeric intervals' do
       for semitones in -12..12 do
         interval = Interval.new(semitones)
-        @parser.parse("i#{semitones}").value.should == interval
-        @parser.parse("I#{semitones}").value.should == interval
+        parsed_value("i#{semitones}").should == interval
+        parsed_value("I#{semitones}").should == interval
       end
     end
 
@@ -156,7 +154,7 @@ describe Cosy::SequenceParser do
       intensities += ['pianissimo','piano','mezzopiano','mezzo-piano']
       intensities += ['mezzoforte','mezzo-forte','forte','fortissimo']
       for intensity in intensities
-        @parser.parse(intensity).value.should == Velocity.new(intensity)
+        parsed_value(intensity).should == Velocity.new(intensity)
       end
     end
 
@@ -164,7 +162,7 @@ describe Cosy::SequenceParser do
       for velocity in [0, 50, 100, 127] do
         expected = Velocity.new(velocity)
         for velocity_prefix in %w{v V vel VEL velocity} do      
-          @parser.parse("#{velocity_prefix}#{velocity}").value.should == expected
+          parsed_value("#{velocity_prefix}#{velocity}").should == expected
         end
       end
     end
@@ -178,11 +176,11 @@ describe Cosy::SequenceParser do
         for multiplier in -2..2 do
           for modifier in [nil, 't', '.', '.t', 't.', '..', '...', 't.t.t'] do
             duration = Duration.new(multiplier, base_duration, modifier)
-            @parser.parse("#{multiplier}#{base_duration}#{modifier}").value.should == duration
+            parsed_value("#{multiplier}#{base_duration}#{modifier}").should == duration
             if multiplier == 1 then
-              @parser.parse("#{base_duration}#{modifier}").value.should == duration
+              parsed_value("#{base_duration}#{modifier}").should == duration
             elsif multiplier == -1 then
-              @parser.parse("-#{base_duration}#{modifier}").value.should == duration
+              parsed_value("-#{base_duration}#{modifier}").should == duration
             end
           end
         end
@@ -193,14 +191,14 @@ describe Cosy::SequenceParser do
       for duration in [0, 50, 100, 5000, -25] do
         expected = Duration.new(duration)
         for duration_prefix in %w{dur DUR duration} do
-          @parser.parse("#{duration_prefix}#{duration}").value.should == expected
+          parsed_value("#{duration_prefix}#{duration}").should == expected
         end
       end
     end
 
     it 'should parse ruby expressions' do
       ['1 + 2', "'}'", '"}"'].each do |ruby_expression|
-        @parser.parse('{' + ruby_expression + '}').value.should == eval(ruby_expression)
+        parsed_value('{' + ruby_expression + '}').should == eval(ruby_expression)
       end
     end
 
@@ -409,20 +407,20 @@ describe Cosy::SequenceParser do
 
     it 'should parse osc paths' do
       ['/basic', '/1', '/1/a', '/a/1', '/nested/path/to/somewhere'].each do |path|
-        osc_address = @parser.parse(path).value
+        osc_address = parsed_value(path)
         osc_address.path.should == path
       end
     end
 
     it 'should parse osc messages with a hostname' do
-      osc_address = @parser.parse('osc://hostname.com/path/a').value
+      osc_address = parsed_value('osc://hostname.com/path/a')
       osc_address.host.should == 'hostname.com'
       osc_address.port.should == nil
       osc_address.path.should == '/path/a'
     end
 
     it 'should parse osc messages with a hostname and port' do
-      osc_address = @parser.parse('osc://hostname.com:8080/path/a').value
+      osc_address = parsed_value('osc://hostname.com:8080/path/a')
       osc_address.host.should == 'hostname.com'
       osc_address.port.should == 8080
       osc_address.path.should == '/path/a'

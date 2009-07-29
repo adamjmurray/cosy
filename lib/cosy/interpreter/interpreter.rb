@@ -21,6 +21,10 @@ module Cosy
       @context = Context.new(self, symbol_table, @sequence)
     end
     
+    def input
+      @sequence
+    end
+    
     # Indicates whether the sequence has parsed succesfully.
     def parsed?
       not @sequence.nil?
@@ -34,7 +38,7 @@ module Cosy
 
     # Get the next value in the sequence, or nil if the end of
     # the sequence has been reached.
-    def next
+    def next_atom
       loop do
         if not @chained_sequencers
           node = @context.node
@@ -88,6 +92,8 @@ module Cosy
         end
       end
     end
+    
+    alias next next_atom
     
     ##############
     private
