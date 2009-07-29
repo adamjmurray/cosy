@@ -2,6 +2,7 @@ module Cosy
 
   class Sequencer
 
+    # Construct a new Sequencer. The only required option is :input
     def initialize(options={})
       @interpreter   = options.fetch :interpreter, Interpreter.new(options[:input])
       @timeline      = options.fetch :timeline, Timeline.new
@@ -18,7 +19,8 @@ module Cosy
       @parent        = options[:parent]
     end
 
-    def render
+    # Convert the input String to a Timeline
+    def timeline
       if not @rendered
         while event = next_event
           case event
@@ -54,7 +56,7 @@ module Cosy
             when :program
               program(value)
             when :channel
-              @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0
+              @channel = value-1 # I count channels starting from 1, but MIDIator starts from 0, TODO: let's not make this adjustment until the last moment in the renderer
             when :pitch_bend
               pitch_bend(value)
             when :cc
@@ -89,74 +91,50 @@ module Cosy
       return @timeline
     end
 
-    alias timeline render
+    alias render timeline
 
 
-    # converts sequencer states to events
+    # converts atoms emmitted by the interpreter into events
     def next_event
-      event = @interpreter.next
+      atom = @interpreter.next_atom
 
       pitches  = @pitches
       velocity = @velocity
       duration = @duration
 
-      if event.is_a? Interval
-        pitches = @pitches.map{|pitch| pitch+event}
+      case atom
+      when Pitch
+        pitches = [atom]
 
-      elsif event.is_a? Chord and event.all?{|e| e.is_a? Pitch}
-        pitches = event
+      when Chord
+        pitches = atom.find_all{|elem| elem.is_a? Pitch}
 
-      elsif event.is_a? Chain
-        event.each do |param|
-          case param
-          when Pitch    then pitches = [param]
-          when Chord    then pitches  = param
-          when Velocity then velocity = param.value
-          when Duration then duration = param.value
-          else      
-            first_value = event.first
-            if first_value.is_a? Label
-              label = first_value.value.downcase
-              if label == OCTAVE_MODE_LABEL # DEPRECATED
-                octave_mode = event[1]
-                octave_mode = octave_mode.value if octave_mode.respond_to? :value # allow for labels as values
-                octave_mode = octave_mode.downcase if octave_mode.respond_to? :downcase
-                octave_mode = OCTAVE_MODE_VALUES[octave_mode]
-                @octave_mode = octave_mode if octave_mode
-                return next_event
-              end
-            end
-            return event 
+      when Interval
+        pitches = @pitches.map{|pitch| pitch+atom}
+
+      when Velocity
+        velocity = atom.value
+
+      when Duration
+        duration = atom.value
+
+      when Chain
+        atom.each do |elem|
+          case elem
+          when Pitch    then pitches = [elem]
+          when Chord    then pitches  = elem
+          when Velocity then velocity = elem.value
+          when Duration then duration = elem.value
+          else return atom 
           end
         end
 
-      elsif event.is_a? Pitch
-        pitches = [event]
-
-      elsif event.is_a? Velocity
-        velocity = event.value
-
-      elsif event.is_a? Duration
-        duration = event.value  
-
-      else
-        return event 
+      else return atom 
       end
 
       pitch_values = []
       pitches.each do |pitch|
-        if not pitch.has_octave?
-          pitch.octave = @octave
-          if @octave_mode == :nearest
-            prevval = @pitches.first.value  # not sure what is reasonable for a chord, TODO match indexes?
-            interval = prevval - pitch.value
-            if interval >= 6
-              pitch.octave += 1
-            elsif interval < -6
-              pitch.octave -= 1
-            end
-          end
-        end
+        pitch.octave = @octave if not pitch.has_octave?
         @octave = pitch.octave
         pitch_values << pitch.value
       end
@@ -168,7 +146,6 @@ module Cosy
       return NoteEvent.new(pitch_values,velocity,duration)
     end
 
-    alias play render
 
     #################
     protected
@@ -176,27 +153,10 @@ module Cosy
     def time
       @time
     end
-
+    
 
     #################
     private
-
-    def clone(interpreter)
-      self.class.new({
-        :parent => self,
-        :interpreter => interpreter,
-        :timeline => @timeline,
-        :time => @time,
-        :pitches => @pitches,
-        :octave => @octave,
-        :velocity => @velocity,
-        :duration => @duration,
-        :channel => @channel,
-        :octave_mode => @octave_mode,
-        :osc_host => @osc_host,
-        :osc_port => @osc_port
-      })
-    end
 
     def add_event(event)
       @timeline[@time] << event
@@ -241,6 +201,23 @@ module Cosy
       add_event Event::OscMessage.new(host, port, address.path, *args)
     end
 
-  end
+    def clone(interpreter)
+      options = {
+        :parent => self,
+        :interpreter => interpreter,
+        :timeline => @timeline,
+        :time => @time,
+        :pitches => @pitches,
+        :octave => @octave,
+        :velocity => @velocity,
+        :duration => @duration,
+        :channel => @channel,
+        :octave_mode => @octave_mode,
+        :osc_host => @osc_host,
+        :osc_port => @osc_port
+      }
+      self.class.new(options)
+    end
 
+  end
 end
