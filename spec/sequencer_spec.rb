@@ -1,6 +1,6 @@
 require File.dirname(__FILE__)+'/spec_helper'
 
-describe Cosy::TimelineSequencer do
+describe Cosy::Sequencer do
       
   describe 'Implicit Values' do
     
@@ -36,11 +36,11 @@ describe Cosy::TimelineSequencer do
   
   
   def renderer(input)
-    TimelineSequencer.new({:input => input})
+    Sequencer.new({:input => input})
   end
   
   def render(input)
-    if input.is_a? TimelineSequencer
+    if input.is_a? Sequencer
       renderer = input
     else
       renderer = renderer(input)

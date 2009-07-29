@@ -14,6 +14,6 @@ require 'cosy/parser/parser'
 require 'cosy/interpreter/symbol_table'
 require 'cosy/interpreter/context'
 require 'cosy/interpreter/interpreter'
-require 'cosy/interpreter/timeline_sequencer'
+require 'cosy/interpreter/sequencer'
 
 require 'cosy/renderer/abstract_renderer'

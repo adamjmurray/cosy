@@ -11,7 +11,7 @@ module Cosy
     end
     
     def sequence(cosy_syntax)
-       @sequencer = TimelineSequencer.new(:input => cosy_syntax)
+       @sequencer = Sequencer.new(:input => cosy_syntax)
        @timeline = @sequencer.timeline
     end
    

@@ -2,10 +2,6 @@ require File.dirname(__FILE__)+'/spec_helper'
 
 describe Cosy::Timeline do
 
-  def renderer(input)
-    TimelineSequencer.new({:input => input})
-  end
-  
   before(:each) do
     @timeline = Timeline.new
   end

@@ -1,6 +1,6 @@
 module Cosy    
 
-  class TimelineSequencer
+  class Sequencer
 
     def initialize(options={})
       @interpreter   = options.fetch :interpreter, Interpreter.new(options[:input])
