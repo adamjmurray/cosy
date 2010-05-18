@@ -83,18 +83,18 @@ module Cosy
 
 
     rule pitch do
-      note_name:[A-Ga-g] ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
+      note_name:([A-Ga-g] '') ![A-Zac-z] accidentals:('#'/'b'/'+'/'_')* octave:(int)? <PitchNode>
       /
       pitch_keyword number:(number/ruby) <NumericPitchNode>
     end
 
 
     rule interval do
-      sign:[+-]? 
+      sign:([+-] '')? 
       quality:(
       'major' / 'maj' / 'minor' / 'min' / 'perfect' / 'per' / 'augmented' / 'aug' / 'diminished' / 'dim' /
       'MAJOR' / 'MAJ' / 'MINOR' / 'MIN' / 'PERFECT' / 'PER' / 'AUGMENTED' / 'AUG' / 'DIMINISHED' / 'DIM' /
-      [MmpP] )
+      [MmpP] '')
       degree:[0-9]+ <IntervalNode>
       /
       ('interval'/[Ii]) number:(number/ruby) <NumericIntervalNode>
@@ -121,7 +121,7 @@ module Cosy
     rule metrical_duration do
       'whole' / 'half' / 'quarter' / 'eighth' / 'ei' / 'EI' / 'sixteenth' /
       'thirty' '-'? 'second' / 'sixty' '-'? 'fourth' /
-      [WwHhQqIiSsRrXx] 
+      [WwHhQqIiSsRrXx] ''
     end
 
 
